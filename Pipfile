@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+cryptography = "*"
+pydantic = "*"
+pycryptodome = "*"
+numpy = "*"
+
+[dev-packages]
+pytest = "*"
+coverage = "*"
+flake8 = "*"
+pandas = "*"
+seaborn = "*"
+bump2version = "*"
+
+[requires]
+python_version = "3.9"
