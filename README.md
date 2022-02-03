@@ -7,12 +7,20 @@ This project contains all python code for the PHT-Medic Federated Learning proje
 - `trainer`: contains the code for the federated trainer
 
 # Installation
+Clone the repository and navigate into the root folder. Run
+```shell
+pip install -e .
+```
+
 ## Development
 
 If [Pipenv](https://pipenv.pypa.io/en/latest/) is not installed follow the instruction [here](https://pipenv.pypa.io/en/latest/).
 
 Open a shell at the root of the project and activate the virtual environment with `pipenv shell`.  
 Install the dependencies with `pipenv install --dev`.
+
+## Pytorch install
+
 
 
 ## Protocol
