@@ -1,3 +1,4 @@
+[![CI](https://github.com/PHT-Medic/federated/actions/workflows/main_ci.yml/badge.svg)](https://github.com/PHT-Medic/federated/actions/workflows/main_ci.yml)
 # PHT Medic Federated Learning
 
 This project contains all python code for the PHT-Medic Federated Learning project grouped into several modules.
