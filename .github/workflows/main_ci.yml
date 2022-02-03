@@ -17,13 +17,13 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - name: Install pipenv
-        run: pip install pipenv
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
           cache: "pipenv"
+      - name: Install pipenv
+        run: pip install pipenv
       - run: pipenv install --dev
       - name: Lint with flake8
         run: |
