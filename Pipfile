@@ -8,6 +8,8 @@ cryptography = "*"
 pydantic = "*"
 pycryptodome = "*"
 numpy = "*"
+pytorch-lightning = "*"
+lightning-bolts = "*"
 
 [dev-packages]
 pytest = "*"
