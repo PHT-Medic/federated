@@ -1,6 +1,7 @@
 import os
 
 import torch
+from dotenv import load_dotenv, find_dotenv
 from pytorch_lightning import Trainer
 from torch.nn import functional as F
 from torch import nn
@@ -9,6 +10,8 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import MNIST
 from torchvision import datasets, transforms
+
+from trainer.plugins import MinioCheckpointIO
 
 
 class LitMNIST(LightningModule):
@@ -63,6 +66,7 @@ class LitMNIST(LightningModule):
 
 
 if __name__ == '__main__':
+    load_dotenv(find_dotenv())
     model = LitMNIST()
-    trainer = Trainer()
+    trainer = Trainer(plugins=[MinioCheckpointIO()])
     trainer.fit(model)

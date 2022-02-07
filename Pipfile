@@ -12,6 +12,8 @@ pytorch-lightning = "*"
 lightning-bolts = "*"
 minio = "*"
 torchvision = "*"
+s3fs = "*"
+fsspec = {extras = ["s3"], version = "*"}
 
 [dev-packages]
 pytest = "*"
@@ -20,6 +22,7 @@ flake8 = "*"
 pandas = "*"
 seaborn = "*"
 bump2version = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.9"
