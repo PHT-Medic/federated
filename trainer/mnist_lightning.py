@@ -12,6 +12,7 @@ from torchvision.datasets import MNIST
 from torchvision import datasets, transforms
 
 from trainer.plugins import MinioCheckpointIO
+from trainer.callbacks import FederatedCallback
 
 
 class LitMNIST(LightningModule):
@@ -68,5 +69,5 @@ class LitMNIST(LightningModule):
 if __name__ == '__main__':
     load_dotenv(find_dotenv())
     model = LitMNIST()
-    trainer = Trainer(plugins=[MinioCheckpointIO()])
+    trainer = Trainer(plugins=[MinioCheckpointIO()], callbacks=[FederatedCallback()])
     trainer.fit(model)
