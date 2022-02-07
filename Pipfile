@@ -10,6 +10,8 @@ pycryptodome = "*"
 numpy = "*"
 pytorch-lightning = "*"
 lightning-bolts = "*"
+minio = "*"
+torchvision = "*"
 
 [dev-packages]
 pytest = "*"
