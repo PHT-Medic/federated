@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import aggregator.proto.aggregator_pb2 as aggregator__pb2
+import aggregator_pb2 as aggregator__pb2
 
 
 class AggregatorStub(object):
@@ -26,6 +26,11 @@ class AggregatorStub(object):
                 request_serializer=aggregator__pb2.AggregatedInputRequest.SerializeToString,
                 response_deserializer=aggregator__pb2.AggregatedInputResponse.FromString,
                 )
+        self.SubscribeForTrain = channel.unary_stream(
+                '/aggregator.Aggregator/SubscribeForTrain',
+                request_serializer=aggregator__pb2.SubscribeRequest.SerializeToString,
+                response_deserializer=aggregator__pb2.TrainEvent.FromString,
+                )
 
 
 class AggregatorServicer(object):
@@ -46,6 +51,12 @@ class AggregatorServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SubscribeForTrain(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AggregatorServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -58,6 +69,11 @@ def add_AggregatorServicer_to_server(servicer, server):
                     servicer.DistributeAggregatedInput,
                     request_deserializer=aggregator__pb2.AggregatedInputRequest.FromString,
                     response_serializer=aggregator__pb2.AggregatedInputResponse.SerializeToString,
+            ),
+            'SubscribeForTrain': grpc.unary_stream_rpc_method_handler(
+                    servicer.SubscribeForTrain,
+                    request_deserializer=aggregator__pb2.SubscribeRequest.FromString,
+                    response_serializer=aggregator__pb2.TrainEvent.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -102,5 +118,22 @@ class Aggregator(object):
         return grpc.experimental.unary_unary(request, target, '/aggregator.Aggregator/DistributeAggregatedInput',
             aggregator__pb2.AggregatedInputRequest.SerializeToString,
             aggregator__pb2.AggregatedInputResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SubscribeForTrain(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/aggregator.Aggregator/SubscribeForTrain',
+            aggregator__pb2.SubscribeRequest.SerializeToString,
+            aggregator__pb2.TrainEvent.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
