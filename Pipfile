@@ -14,6 +14,8 @@ minio = "*"
 torchvision = "*"
 s3fs = "*"
 fsspec = {extras = ["s3"], version = "*"}
+grpcio = "*"
+grpcio-tools = "*"
 
 [dev-packages]
 pytest = "*"

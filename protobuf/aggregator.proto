@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package aggregator;
+
+
+// Aggregator service interface
+
+service Aggregator {
+  // Process and store submitted masked input
+  rpc SubmitMaskedInput(MaskedInput) returns (MaskedInputResponse) {}
+
+  rpc DistributeAggregatedInput(AggregatedInputRequest) returns (AggregatedInputResponse) {}
+
+}
+
+
+message Parameters {
+  string id = 1;
+  optional string name = 2;
+  repeated float value = 3;
+}
+
+message MaskedInput {
+  string client_id = 1;
+  string train_id = 2;
+  repeated Parameters input = 3;
+}
+
+message MaskedInputResponse {
+  string train_id = 1;
+  bool success = 2;
+  bool aggregate_available = 3;
+}
+
+message AggregatedInputRequest {
+  string train_id = 1;
+  string client_id = 2;
+}
+
+message AggregatedInputResponse {
+  string train_id = 1;
+  bool success = 2;
+  repeated Parameters parameters = 3;
+}
+

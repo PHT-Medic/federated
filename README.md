@@ -29,3 +29,9 @@ Install the dependencies with `pipenv install --dev`.
 Mask based secure aggregation protocol. Implementation and extension of the paper 
 [Practical Secure Aggregation for Privacy-Preserving Machine Learning](https://dl.acm.org/doi/10.1145/3133956.3133982)
 
+## Protobuf GRPC code generation
+After activating the virtual environment with `pipenv shell` , run the following command to generate the protobuf code.
+
+```shell
+python -m grpc_tools.protoc -I./protobuf --python_out=./aggregator/proto --grpc_python_out=./aggregator/proto aggregator.proto
+```
