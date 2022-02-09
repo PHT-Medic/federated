@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import aggregator_pb2 as aggregator__pb2
+import aggregator.proto.aggregator_pb2 as aggregator__pb2
 
 
 class AggregatorStub(object):
