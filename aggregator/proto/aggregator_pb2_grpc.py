@@ -26,7 +26,7 @@ class AggregatorStub(object):
                 request_serializer=aggregator__pb2.AggregatedInputRequest.SerializeToString,
                 response_deserializer=aggregator__pb2.AggregatedInputResponse.FromString,
                 )
-        self.SubscribeForTrain = channel.unary_stream(
+        self.SubscribeForTrain = channel.stream_stream(
                 '/aggregator.Aggregator/SubscribeForTrain',
                 request_serializer=aggregator__pb2.SubscribeRequest.SerializeToString,
                 response_deserializer=aggregator__pb2.TrainEvent.FromString,
@@ -51,7 +51,7 @@ class AggregatorServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SubscribeForTrain(self, request, context):
+    def SubscribeForTrain(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -70,7 +70,7 @@ def add_AggregatorServicer_to_server(servicer, server):
                     request_deserializer=aggregator__pb2.AggregatedInputRequest.FromString,
                     response_serializer=aggregator__pb2.AggregatedInputResponse.SerializeToString,
             ),
-            'SubscribeForTrain': grpc.unary_stream_rpc_method_handler(
+            'SubscribeForTrain': grpc.stream_stream_rpc_method_handler(
                     servicer.SubscribeForTrain,
                     request_deserializer=aggregator__pb2.SubscribeRequest.FromString,
                     response_serializer=aggregator__pb2.TrainEvent.SerializeToString,
@@ -122,7 +122,7 @@ class Aggregator(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def SubscribeForTrain(request,
+    def SubscribeForTrain(request_iterator,
             target,
             options=(),
             channel_credentials=None,
@@ -132,7 +132,7 @@ class Aggregator(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/aggregator.Aggregator/SubscribeForTrain',
+        return grpc.experimental.stream_stream(request_iterator, target, '/aggregator.Aggregator/SubscribeForTrain',
             aggregator__pb2.SubscribeRequest.SerializeToString,
             aggregator__pb2.TrainEvent.FromString,
             options, channel_credentials,

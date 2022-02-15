@@ -2,7 +2,8 @@ from concurrent import futures
 import logging
 
 import grpc
-from aggregator.proto import aggregator_pb2_grpc, aggregator_pb2
+
+from proto import aggregator_pb2_grpc, aggregator_pb2
 
 
 class Aggregator(aggregator_pb2_grpc.AggregatorServicer):

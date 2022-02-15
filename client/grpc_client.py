@@ -6,9 +6,12 @@ import grpc
 from aggregator.proto import aggregator_pb2, aggregator_pb2_grpc
 
 
-def submit_masked_input(train_id: str, client_id: str = None):
-    pass
+def submit_masked_input(masked_input: aggregator_pb2.MaskedInput) -> aggregator_pb2.MaskedInputResponse:
+    with grpc.insecure_channel('localhost:50051') as channel:
+        stub = aggregator_pb2_grpc.AggregatorStub(channel)
+        response = stub.SubmitMaskedInput(masked_input)
 
+    return response
 
 
 def run():
@@ -26,8 +29,7 @@ def run():
 
     print("Aggregator response: ", response)
 
+
 if __name__ == '__main__':
     logging.basicConfig()
     run()
-
-

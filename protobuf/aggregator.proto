@@ -11,7 +11,7 @@ service Aggregator {
 
   rpc DistributeAggregatedInput(AggregatedInputRequest) returns (AggregatedInputResponse) {}
 
-  rpc SubscribeForTrain(SubscribeRequest) returns (stream TrainEvent) {}
+  rpc SubscribeForTrain(stream SubscribeRequest) returns (stream TrainEvent) {}
 
 
 }
