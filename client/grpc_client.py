@@ -4,6 +4,7 @@ import logging
 
 import grpc
 from aggregator.proto import aggregator_pb2, aggregator_pb2_grpc
+import asyncio
 
 
 def submit_masked_input(masked_input: aggregator_pb2.MaskedInput) -> aggregator_pb2.MaskedInputResponse:

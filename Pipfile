@@ -16,6 +16,8 @@ s3fs = "*"
 fsspec = {extras = ["s3"], version = "*"}
 grpcio = "*"
 grpcio-tools = "*"
+sqlmodel = ""
+psycopg2-binary = ""
 
 [dev-packages]
 pytest = "*"
