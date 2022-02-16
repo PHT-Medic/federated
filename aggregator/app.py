@@ -7,7 +7,7 @@ from loguru import logger
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 from aggregator.socket.connection_manager import ConnectionManager, TrainConnectionManager
-from aggregator.socket_app import socket_app
+from aggregator.socket.socket_app import socket_app
 
 app = FastAPI()
 

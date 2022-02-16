@@ -23,6 +23,12 @@ async def broadcast(sid, msg):
     await sio.emit("event_name", msg)  # or send to everyone
 
 
+@sio.on("join_train")
+async def join_train(sid, train_id):
+    sio.enter_room(sid, train_id)
+
+
 @sio.on("disconnect")
 async def disconnect(sid):
     print("on disconnect")
+
