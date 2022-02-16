@@ -18,6 +18,9 @@ grpcio = "*"
 grpcio-tools = "*"
 sqlmodel = ""
 psycopg2-binary = ""
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+loguru = "*"
 
 [dev-packages]
 pytest = "*"
