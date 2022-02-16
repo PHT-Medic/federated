@@ -23,6 +23,21 @@ Install the dependencies with `pipenv install --dev`.
 ## Pytorch install
 
 
+## Aggregator
+To run the aggregator first start the associated services via docker-compose: 
+
+```shell
+docker-compose -f ./aggregator/docker-compose.yml up -d
+```
+
+Start the [fastapi](https://fastapi.tiangolo.com/) aggregator service with hot reloading using [uvicorn](https://www.uvicorn.org/):
+
+```shell
+uvicorn aggregator.app:app --reload
+```
+
+
+
 
 ## Protocol
 

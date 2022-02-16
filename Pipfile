@@ -21,6 +21,7 @@ psycopg2-binary = ""
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 loguru = "*"
+python-socketio = {extras = ["asyncio_client"], version = "*"}
 
 [dev-packages]
 pytest = "*"
