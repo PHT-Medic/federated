@@ -36,7 +36,7 @@ async def disconnect():
 
 async def main():
     await sio.connect('http://localhost:8000')
-    await sio.call("join_train_room", "1")
+    await sio.emit("join_train_room", "1")
     await sio.wait()
 
 

@@ -2,7 +2,8 @@ from typing import Any
 
 import socketio
 
-sio: Any = socketio.AsyncServer(async_mode="asgi")
+mgr = socketio.AsyncRedisManager('redis://localhost:6379')
+sio: Any = socketio.AsyncServer(async_mode="asgi", logger=True, engineio_logger=True)
 socket_app = socketio.ASGIApp(sio)
 
 
@@ -25,7 +26,7 @@ async def broadcast(sid, msg):
 
 @sio.on("join_train")
 async def join_train(sid, train_id):
-    sio.enter_room(sid, train_id)
+    await sio.enter_room(sid, train_id)
 
 
 @sio.on("disconnect")
