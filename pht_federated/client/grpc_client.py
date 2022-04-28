@@ -3,7 +3,7 @@ from __future__ import print_function
 import logging
 
 import grpc
-from pht_federated.aggregator import aggregator_pb2, aggregator_pb2_grpc
+from pht_federated.aggregator.proto import aggregator_pb2, aggregator_pb2_grpc
 import asyncio
 
 

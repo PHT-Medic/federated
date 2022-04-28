@@ -19,8 +19,7 @@ setup(
         "cryptography",
         "numpy",
         "pycryptodome",
-        "sqlmodel",
-        ""
+        "sqlmodel"
     ],
     version="0.0.1",
     license="MIT license",

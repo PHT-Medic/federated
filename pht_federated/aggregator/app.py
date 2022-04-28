@@ -6,8 +6,8 @@ from loguru import logger
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-from pht_federated.aggregator import ConnectionManager, TrainConnectionManager
-from pht_federated.aggregator import socket_app
+from pht_federated.aggregator.socket.connection_manager import ConnectionManager, TrainConnectionManager
+from pht_federated.aggregator.socket.socket_app import socket_app
 
 app = FastAPI()
 
@@ -30,4 +30,4 @@ async def train_socket_endpoint(web_socket: WebSocket, train_id: str):
 
 
 if __name__ == '__main__':
-    uvicorn.run("aggregator.app:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("pht_federated.aggregator.app:app", host="127.0.0.1", port=8000, reload=True)
