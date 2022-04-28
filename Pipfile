@@ -23,6 +23,7 @@ uvicorn = {extras = ["standard"], version = "*"}
 loguru = "*"
 python-socketio = {extras = ["asyncio_client"], version = "*"}
 aioredis = "*"
+tenseal = "*"
 
 [dev-packages]
 pytest = "*"
