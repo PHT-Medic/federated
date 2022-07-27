@@ -4,6 +4,7 @@ from .base import CRUDBase, CreateSchemaType, ModelType, Optional
 from fastapi.encoders import jsonable_encoder
 from pht_federated.aggregator.api.models.discovery import DataSetSummary
 from pht_federated.aggregator.api.schemas.discovery import SummaryCreate, SummaryUpdate
+from .base import CRUDBase
 
 
 class CRUDDiscoveries(CRUDBase[DataSetSummary, SummaryCreate, SummaryUpdate]):
@@ -21,21 +22,31 @@ class CRUDDiscoveries(CRUDBase[DataSetSummary, SummaryCreate, SummaryUpdate]):
         discovery = db.query(DataSetSummary).filter(DataSetSummary.proposal_id == proposal_id).first()
         return discovery
 
-    def add_if_not_exists(self, db: Session, train_id: str, created_at: str = datetime.now(), updated_at: str = None):
-        db_train = self.get_by_train_id(db, train_id)
-        if not db_train:
-            if updated_at:
-                db_train = DockerTrain(train_id=train_id, created_at=parser.parse(created_at),
-                                       updated_at=parser.parse(updated_at))
-            else:
-                db_train = DockerTrain(train_id=train_id, created_at=parser.parse(created_at))
-            db.add(db_train)
-            db.commit()
-            db.refresh(db_train)
-            train_state = DockerTrainState(train_id=db_train.id)
-            db.add(train_state)
-            db.commit()
-            return db_train
+    def get_data(self, db: Session, proposal_id: int):
+        dataset = self.get_by_discovery_id(db, proposal_id)
+        if dataset.data_type == "image":
+            raise NotImplementedError
+        elif dataset.data_type == "csv":
+            path = dataset.access_path
+            file = get_file(path, dataset.storage_type)
+            with file as f:
+                csv_df = pd.read_csv(f)
+                return csv_df
+        elif dataset.data_type == "directory":
+            raise NotImplementedError
+        elif dataset.data_type == "fhir":
+            raise NotImplementedError
+        return dataset
+
+    def add_stats(self, db:Session, proposal_id, stats):
+        dataset = self.get(db, proposal_id)
+        stats = jsonable_encoder(stats)
+        stats_json = json.dumps(stats)
+        dataset.summary = stats_json
+        db.commit()
+        db.refresh(dataset)
+        return dataset
+
 
 
 discoveries = CRUDDiscoveries(DataSetSummary)
