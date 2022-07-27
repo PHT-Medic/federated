@@ -1,20 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException
+from pht_federated.aggregator.api.models.discovery import DataSetSummary
+from pht_federated.aggregator.api.schemas.discovery import DataSetSummary
+from pht_federated.aggregator.api.crud.crud_discovery import discoveries
 
 
 router = APIRouter()
 
 
-@router.post("/proposal_id/discovery", response_model=DataSet)
-def get_proposal(proposal_id: int) -> bool:
-    dataset = datasets.get_by_name(db, name=create_msg.name)
-    if dataset:
-        raise HTTPException(status_code=400, detail=f"Dataset with name {create_msg.name} already exists.")
-    try:
-        db_dataset = datasets.create(db, obj_in=create_msg)
-        if not db_dataset:
-            raise HTTPException(status_code=404, detail="Error while creating new dataset.")
-        return db_dataset
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Dataset file not found at {create_msg.access_path}.")
-    except NotImplementedError:
-        raise HTTPException(status_code=422, detail=f"Storage type {create_msg.storage_type} not possible yet.")
+@router.get("/{proposal_id}/discovery", response_model=DataSetSummary)
+def get_proposal(proposal_id: int, db: Session) -> DataSetSummary:
+    discovery = discoveries.get_by_discovery_id(proposal_id, db)
+    if not discovery:
+        raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
+    return discovery
+
+
+
+@router.post("/{proposal_id}/discovery", response_model=DataSetSummary)
+def post_proposal(proposal_id: int, db: Session) -> DataSetSummary:
+    discovery = discoveries.get_by_discovery_id(proposal_id, db)
+    if not discovery:
+        raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
+    return discovery
+
+
+@router.get("/{proposal_id}/discovery/figures", response_model=DataSetSummary)
+def plot_proposal(proposal_id: int, db: Session):
+    return None
