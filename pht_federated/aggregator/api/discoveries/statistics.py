@@ -6,7 +6,7 @@ import plotly.io
 from plotly.graph_objects import Figure
 import json
 
-from station.app.schemas.datasets import DataSetStatistics, DataSetFigure
+from pht_federated.aggregator.api.schemas.discovery import DataSetStatistics, DataSetFigure
 
 
 def get_dataset_statistics(dataframe: pd.DataFrame) -> Optional[DataSetStatistics]:

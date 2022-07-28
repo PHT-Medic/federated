@@ -58,6 +58,14 @@ class SummaryUpdate(DataSetSummary):
     pass
 
 
+class FigureData(BaseModel):
+    layout: dict
+    data: list
+
+
+class DataSetFigure(BaseModel):
+    fig_data: Optional[FigureData]
+
 
 
 '''

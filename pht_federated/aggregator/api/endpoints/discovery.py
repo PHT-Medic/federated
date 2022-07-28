@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pht_federated.aggregator.api.models.discovery import DataSetSummary
 from pht_federated.aggregator.api.schemas.discovery import DataSetSummary, SummaryCreate
 from pht_federated.aggregator.api.crud.crud_discovery import discoveries
+from pht_federated.aggregator.api.endpoints import dependencies
 
 
 
@@ -9,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/{proposal_id}/discovery", response_model=DataSetSummary)
-def get_proposal(proposal_id: int, db: Session) -> DataSetSummary:
+def get_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
@@ -17,7 +18,7 @@ def get_proposal(proposal_id: int, db: Session) -> DataSetSummary:
 
 
 @router.delete("/{proposal_id}/discovery", response_model=DataSetSummary)
-def delete_proposal(proposal_id: int, db: Session) -> DataSetSummary:
+def delete_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
@@ -27,7 +28,7 @@ def delete_proposal(proposal_id: int, db: Session) -> DataSetSummary:
 
 
 @router.post("/{proposal_id}/discovery", response_model=DataSetSummary)
-def post_proposal(create_msg: SummaryCreate, db: Session) -> DataSetSummary:
+def post_proposal(create_msg: SummaryCreate, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
     discovery = discoveries.create(db, obj_in=create_msg)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' could not be created.")
@@ -35,7 +36,7 @@ def post_proposal(create_msg: SummaryCreate, db: Session) -> DataSetSummary:
 
 
 @router.get("/{proposal_id}/discovery/figures", response_model=DataSetSummary)
-def plot_proposal(proposal_id: int, db: Session):
+def plot_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)):
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
@@ -43,7 +44,7 @@ def plot_proposal(proposal_id: int, db: Session):
 
 
 
-@router.get("/{proposal_id}/discovery/stats", response_model=DataSetStatistics)
+@router.get("/{proposal_id}/discovery", response_model=DataSetStatistics)
 def get_data_set_statistics(discovery: DataSetSummary):
     try:
         with file as f:

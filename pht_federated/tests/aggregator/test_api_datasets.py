@@ -1,10 +1,11 @@
 from fastapi.testclient import TestClient
 
 
-from station.app.main import app
-from station.app.api.dependencies import get_db
+from pht_federated.aggregator.main import app
+from pht_federated.aggregator.api.endpoints import dependencies
 
-from .test_db import override_get_db
+
+from .test_db__ import override_get_db
 
 app.dependency_overrides[get_db] = override_get_db
 
