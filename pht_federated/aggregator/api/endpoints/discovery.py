@@ -39,22 +39,22 @@ def plot_proposal(proposal_id: int, db: Session):
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
+    discovery_stats = get_data_set_statistics(discovery)
+
 
 
 @router.get("/{proposal_id}/discovery/stats", response_model=DataSetStatistics)
-def get_data_set_statistics(proposal_id: Any, db: Session = Depends(dependencies.get_db)):
+def get_data_set_statistics(discovery: DataSetSummary):
     try:
-        discovery_df = discoveries.get_data(db, data_set_id)
+        with file as f:
+            discovery_df = pd.read_csv(f)
     except NotImplementedError:
         raise HTTPException(status_code=422, detail="Method just specified for CSV-Data.")
     if discovery_df is None or discovery_df.empty:
         raise HTTPException(status_code=404, detail="Discovery not found.")
     try:
         stats = statistics.get_dataset_statistics(discover_df)
-        try:
-            dataset = datasets.add_stats(db, data_set_id, stats)
-        except:
-            raise HTTPException(status_code=500, detail="Upload to database did not work.")
+        print("Returned Discovery (DataSet) statistics : {}".format(stats))
         return stats
     except TypeError:
         raise HTTPException(status_code=400, detail="Discovery has to be given as a dataframe.")

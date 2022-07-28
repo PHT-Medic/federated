@@ -22,30 +22,6 @@ class CRUDDiscoveries(CRUDBase[DataSetSummary, SummaryCreate, SummaryUpdate]):
         discovery = db.query(DataSetSummary).filter(DataSetSummary.proposal_id == proposal_id).first()
         return discovery
 
-    def get_data(self, db: Session, proposal_id: int):
-        dataset = self.get_by_discovery_id(db, proposal_id)
-        if dataset.data_type == "image":
-            raise NotImplementedError
-        elif dataset.data_type == "csv":
-            path = dataset.access_path
-            file = get_file(path, dataset.storage_type)
-            with file as f:
-                csv_df = pd.read_csv(f)
-                return csv_df
-        elif dataset.data_type == "directory":
-            raise NotImplementedError
-        elif dataset.data_type == "fhir":
-            raise NotImplementedError
-        return dataset
-
-    def add_stats(self, db:Session, proposal_id, stats):
-        dataset = self.get(db, proposal_id)
-        stats = jsonable_encoder(stats)
-        stats_json = json.dumps(stats)
-        dataset.summary = stats_json
-        db.commit()
-        db.refresh(dataset)
-        return dataset
 
 
 
