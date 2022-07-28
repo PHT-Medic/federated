@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, JSON
 
-from station.app.db.base_class import Base
+from pht_federated.aggregator.db.base_class import Base
 
 
 class DataSetSummary(Base):

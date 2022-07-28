@@ -1,12 +1,11 @@
 import uuid
 
-from station.app.db.session import engine, SessionLocal
-from station.app.db.base import Base
+from pht_federated.aggregator.db.session import engine, SessionLocal
+from pht_federated.aggregator.db.base import Base
 
-from station.app.models import docker_trains
+from pht_federated.aggregator.api.models.discovery import DataSetSummary, DataSet
 
 
-# TODO use alembic
 def setup_db(dev=False):
     Base.metadata.create_all(bind=engine)
     if dev:

@@ -4,7 +4,6 @@ from .base import CRUDBase, CreateSchemaType, ModelType, Optional
 from fastapi.encoders import jsonable_encoder
 from pht_federated.aggregator.api.models.discovery import DataSetSummary
 from pht_federated.aggregator.api.schemas.discovery import SummaryCreate, SummaryUpdate
-from .base import CRUDBase
 
 
 class CRUDDiscoveries(CRUDBase[DataSetSummary, SummaryCreate, SummaryUpdate]):
