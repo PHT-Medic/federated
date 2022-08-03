@@ -5,6 +5,7 @@ from pht_federated.aggregator.api.discoveries import statistics
 from pht_federated.aggregator.api.crud.crud_discovery import discoveries
 from pht_federated.aggregator.api.endpoints import dependencies
 from sqlalchemy.orm import Session
+import pandas as pd
 
 
 

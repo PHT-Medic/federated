@@ -23,6 +23,8 @@ def test_data_set_create():
 
     stats = statistics.get_dataset_statistics(diabetes_dataset)
 
+    print("Resulting DataSetStatistics from diabetes_dataset : {}".format(stats))
+
     '''response = client.post("/api/datasets", json={
         "name": "test data set",
         "data_type": "tabular",
@@ -35,6 +37,9 @@ def test_data_set_create():
                             "count" : "10",
                             "data_information" : { "Color":"Red", "Size":"Big", "Shape":"Round" }
     })
+
+    response_json = response.json()
+    print("Response in json format : {}".format(response_json))
 
     assert response.status_code == 200, response.text
 

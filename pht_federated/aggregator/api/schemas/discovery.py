@@ -73,9 +73,6 @@ class DataSetFigure(BaseModel):
 
 
 
-'''
-
-
 class StorageType(Enum):
     """
     Enum for storage types
@@ -124,14 +121,6 @@ class DataSetFile(BaseModel):
     updated_at: Optional[datetime] = None
 
 
-class FigureData(BaseModel):
-    layout: dict
-    data: list
-
-
-class DataSetFigure(BaseModel):
-    fig_data: Optional[FigureData]
-
 
 class DataSetColumn(BaseModel):
     title: Optional[str]
@@ -163,6 +152,3 @@ class DataSetNumericalColumn(DataSetColumn):
     std: Optional[float]
     min: Optional[float]
     max: Optional[float]
-
-
-'''
