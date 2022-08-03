@@ -152,5 +152,5 @@ def create_figure(fig: Figure) -> DataSetFigure:
     fig_json = plotly.io.to_json(fig)
     obj = json.loads(fig_json)
     figure = DataSetFigure(fig_data=obj)
-    print("Figure  data : {}".format(figure.fig_data)
+    print("Figure  data : {}".format(figure.fig_data))
     return figure

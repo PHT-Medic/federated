@@ -3,7 +3,8 @@ import uuid
 from pht_federated.aggregator.db.session import engine, SessionLocal
 from pht_federated.aggregator.db.base import Base
 
-from pht_federated.aggregator.api.models.discovery import DataSetSummary, DataSet
+#from pht_federated.aggregator.api.models.discovery import DataSetSummary, DataSet
+from pht_federated.aggregator.api.models import discovery
 
 
 def setup_db(dev=False):
@@ -23,34 +24,16 @@ def reset_db(dev=False):
 def seed_db_for_testing():
     session = SessionLocal()
     # create docker trains
-    if not session.query(docker_trains.DockerTrain).all():
+    if not session.query(discovery.DataSet).all():
 
         dts = []
         for _ in range(3):
-            dt = docker_trains.DockerTrain(
-                train_id=str(uuid.uuid4()),
+            dt = discovery.DataSet(
+                proposal_id=str(uuid.uuid4()),
 
             )
             dts.append(dt)
         session.add_all(dts)
-        session.commit()
-
-        # Create states for the created trains
-        states = []
-        for dt in dts:
-            state = docker_trains.DockerTrainState(
-                train_id=dt.id,
-                status="inactive"
-            )
-            states.append(state)
-
-        session.add_all(states)
-
-        config = docker_trains.DockerTrainConfig(
-            name="default"
-        )
-
-        session.add(config)
         session.commit()
 
     session.close()

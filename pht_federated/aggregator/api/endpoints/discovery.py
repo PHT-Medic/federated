@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pht_federated.aggregator.api.models.discovery import DataSetSummary
-from pht_federated.aggregator.api.schemas.discovery import DataSetSummary, SummaryCreate
+#from pht_federated.aggregator.api.models.discovery import DataSetSummary
+from pht_federated.aggregator.api.schemas.discovery import DataSetSummary, SummaryCreate, DataSetStatistics
+from pht_federated.aggregator.api.discoveries import statistics
 from pht_federated.aggregator.api.crud.crud_discovery import discoveries
 from pht_federated.aggregator.api.endpoints import dependencies
+from sqlalchemy.orm import Session
 
 
 
@@ -28,7 +30,7 @@ def delete_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)
 
 
 @router.post("/{proposal_id}/discovery", response_model=DataSetSummary)
-def post_proposal(create_msg: SummaryCreate, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
+def post_proposal(proposal_id: int, create_msg: SummaryCreate, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
     discovery = discoveries.create(db, obj_in=create_msg)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' could not be created.")
@@ -44,17 +46,16 @@ def plot_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)):
 
 
 
-@router.get("/{proposal_id}/discovery", response_model=DataSetStatistics)
+@router.get("/{proposal_id}/discovery", response_model=DataSetSummary)
 def get_data_set_statistics(discovery: DataSetSummary):
     try:
-        with file as f:
-            discovery_df = pd.read_csv(f)
+        discovery_df = pd.read_csv(discovery)
     except NotImplementedError:
         raise HTTPException(status_code=422, detail="Method just specified for CSV-Data.")
     if discovery_df is None or discovery_df.empty:
         raise HTTPException(status_code=404, detail="Discovery not found.")
     try:
-        stats = statistics.get_dataset_statistics(discover_df)
+        stats = statistics.get_dataset_statistics(discovery_df)
         print("Returned Discovery (DataSet) statistics : {}".format(stats))
         return stats
     except TypeError:

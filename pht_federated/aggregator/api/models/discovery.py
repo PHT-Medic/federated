@@ -2,6 +2,13 @@ from sqlalchemy import Column, Integer, JSON
 
 from pht_federated.aggregator.db.base_class import Base
 
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
+from sqlalchemy.dialects.postgresql import UUID
+
+import uuid
+
+from datetime import datetime
+
 
 class DataSetSummary(Base):
     __tablename__ = "datasets_summary"
