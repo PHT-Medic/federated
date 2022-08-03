@@ -44,16 +44,6 @@ class DataSetSummary(BaseModel):
     information: Optional[Union[StructuredData, UnstructuredData]]
 
 
-class DataSetStatistics(BaseModel):
-    n_items: Optional[int] = 0
-    n_features: Optional[int] = 0
-    column_information: Optional[List[Annotated[Union[DataSetCategoricalColumn,
-                                                      DataSetNumericalColumn],
-                                                Field(discriminator='type')]]]
-
-    class Config:
-        orm_mode = True
-
 
 class SummaryCreate(DataSetSummary):
     pass
@@ -152,3 +142,14 @@ class DataSetNumericalColumn(DataSetColumn):
     std: Optional[float]
     min: Optional[float]
     max: Optional[float]
+
+
+class DataSetStatistics(BaseModel):
+    n_items: Optional[int] = 0
+    n_features: Optional[int] = 0
+    column_information: Optional[List[Annotated[Union[DataSetCategoricalColumn,
+                                                      DataSetNumericalColumn],
+                                                Field(discriminator='type')]]]
+
+    class Config:
+        orm_mode = True

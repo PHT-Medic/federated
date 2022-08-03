@@ -1,10 +1,10 @@
 import os
-
+from sqlmodel import SQLModel
 from dotenv import load_dotenv, find_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from pht_federated.aggregator.db import Base
+from pht_federated.aggregator.db.base_class import Base
 
 # Create new sqlite database for testing
 
@@ -22,8 +22,9 @@ else:
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base.metadata.drop_all(bind=engine)
-Base.metadata.create_all(bind=engine)
+#Base.metadata.drop_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
+SQLModel.metadata.create_all(engine)
 
 
 def override_get_db():
