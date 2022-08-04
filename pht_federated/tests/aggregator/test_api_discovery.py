@@ -1,6 +1,7 @@
 import sklearn
 from sklearn.datasets import load_diabetes
 import pandas as pd
+from tabulate import tabulate
 
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.main import app
@@ -20,17 +21,15 @@ def test_data_set_create():
 
     diabetes_dataset = sklearn.datasets.load_diabetes(return_X_y=False, as_frame=False)
 
-    diabetes_dataset_pandas = pd.DataFrame(diabetes_dataset.data, columns=diabetes_dataset.feature_names)
+    #print("Diabetes dataset sklearn : {} ".format(diabetes_dataset))
 
-    print("Diabetes dataset sklearn : {}".format(diabetes_dataset_pandas))
+    df = pd.DataFrame(diabetes_dataset['data'], columns=diabetes_dataset['feature_names'])
+    df['target'] = diabetes_dataset['target']
+    #print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
 
-    #stats_df = pd.DataFrame(diabetes_dataset)
+    #stats_df = statistics.get_dataset_statistics(df)
 
-    #print("Diabetes dataset pandas : {}".format(stats_df))
-
-    stats = statistics.get_dataset_statistics(diabetes_dataset_pandas)
-
-    #print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats, type(stats)))
+    #print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     '''response = client.post("/api/datasets", json={
         "name": "test data set",
@@ -41,7 +40,7 @@ def test_data_set_create():
 
 
 
-    response = client.post("/api/discoveries", json={
+    response = client.post("/api/discovery", json={
                             "proposal_id" : "1",
                             "count" : "10",
                             "data_information" : { "Color":"Red", "Size":"Big", "Shape":"Round" }
