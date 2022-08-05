@@ -16,7 +16,7 @@ router = APIRouter()
 def get_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
-        raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
+        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
     return discovery
 
 
@@ -24,7 +24,7 @@ def get_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)) -
 def delete_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
-        raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
+        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
     discovery_del = discoveries.remove(db=db, id=proposal_id)
     return discovery_del
 
@@ -34,7 +34,7 @@ def delete_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)
 def post_proposal(proposal_id: int, create_msg: SummaryCreate, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
     discovery = discoveries.create(db, obj_in=create_msg)
     if not discovery:
-        raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' could not be created.")
+        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' could not be created.")
     return discovery
 
 
@@ -42,7 +42,7 @@ def post_proposal(proposal_id: int, create_msg: SummaryCreate, db: Session = Dep
 def plot_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)):
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
-        raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
+        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
     discovery_stats = get_data_set_statistics(discovery)
 
 

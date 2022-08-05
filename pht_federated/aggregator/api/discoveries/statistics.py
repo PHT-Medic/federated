@@ -5,8 +5,9 @@ import plotly.express as px
 import plotly.io
 from plotly.graph_objects import Figure
 import json
+from fastapi.encoders import jsonable_encoder
 
-from pht_federated.aggregator.api.schemas.discovery import DataSetStatistics, DataSetFigure
+from pht_federated.aggregator.api.schemas.discovery import DataSetStatistics, DataSetFigure, DataSetSummary
 
 
 def get_dataset_statistics(dataframe: pd.DataFrame) -> Optional[DataSetStatistics]:
@@ -24,13 +25,17 @@ def get_dataset_statistics(dataframe: pd.DataFrame) -> Optional[DataSetStatistic
     n_features = shape[1]
     columns_inf = get_column_information(dataframe, description)
 
+    #columns_inf = jsonable_encoder(columns_inf)
+    #columns_inf = json.dumps(columns_inf)
+
     schema_data = {
-        'n_items': n_items,
-        'n_features': n_features,
-        'column_information': columns_inf
+        'proposal_id': 7,
+        'item_count': n_items,
+        'feature_count': n_features,
+        'data_information': columns_inf
     }
 
-    statistics = DataSetStatistics(**schema_data)
+    statistics = DataSetSummary(**schema_data)
     return statistics
 
 
@@ -61,9 +66,9 @@ def get_column_information(dataframe: pd.DataFrame, description: pd.DataFrame) -
             columns_inf[i]['not_na_elements'] = count - undefined_count
             columns_inf, chart_json = process_numerical_column(dataframe, columns_inf, i, description, title)
 
-        if chart_json is not None:
-            columns_inf[i]['figure'] = chart_json
 
+        #if chart_json is not None:
+        #    columns_inf[i]['figure'] = chart_json
     return columns_inf
 
 
@@ -152,5 +157,5 @@ def create_figure(fig: Figure) -> DataSetFigure:
     fig_json = plotly.io.to_json(fig)
     obj = json.loads(fig_json)
     figure = DataSetFigure(fig_data=obj)
-    print("Figure  data : {}".format(figure.fig_data))
+    #print("Figure  data : {}".format(figure.fig_data))
     return figure
