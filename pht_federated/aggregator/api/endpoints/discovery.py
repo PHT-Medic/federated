@@ -25,7 +25,7 @@ def delete_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery with id '{proposal_id}' not found.")
-    discovery_del = discoveries.remove(proposal_id, db)
+    discovery_del = discoveries.remove(db=db, id=proposal_id)
     return discovery_del
 
 

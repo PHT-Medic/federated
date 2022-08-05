@@ -31,41 +31,34 @@ def test_data_set_create():
 
     #print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
-    '''response = client.post("/api/datasets", json={
-        "name": "test data set",
-        "data_type": "tabular",
-        "storage_type": "fhir"
-
-    })'''
-
-
 
     response = client.post(f"/api/proposal/{1}/discovery", json={
                             "proposal_id" : 1,
                             "count" : 10,
-                            "data_information" : {}
+                            "data_information" : { "Color":"Red", "Size":"Big", "Shape":"Round" }
     })
 
-    data = {"data_information" : { "Color":"Red", "Size":"Big", "Shape":"Round" }}
 
     assert response.status_code == 200, response.text
 
     data = response.json()
-    discovery_id = data["id"]
+    discovery_id = data["proposal_id"]
+    print(discovery_id)
     assert discovery_id
 
 
 def test_discovery_get():
-    response = client.get(f"/api/discovery/proposal/{1}/discovery")
+    response = client.get(f"/api/proposal/{1}/discovery")
     assert response.status_code == 200, response.text
 
     data = response.json()
-    assert data["name"] == "test data set"
+    assert data["count"] == 10
 
 
-def test_get_all_discoveries():
-    response = client.get("/api/discovery")
+def test_delete_discovery():
+    response = client.delete(f"/api/proposal/{1}/discovery")
     assert response.status_code == 200, response.text
+
     data = response.json()
 
-    assert len(data) >= 1
+    assert data["count"] == 10

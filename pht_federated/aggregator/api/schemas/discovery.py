@@ -23,6 +23,9 @@ class CategoricalData(BaseModel):
     attribute_name: Optional[str]
     value_counts: Optional[List[CategoricalCount]]
 
+    class Config:
+        orm_mode = True
+
 
 class CategoricalDataLocal(CategoricalData):
     most_frequent_element: Optional[Union[str, int]]
@@ -32,16 +35,25 @@ class CategoricalDataLocal(CategoricalData):
 class StructuredData(BaseModel):
     data_summary: Optional[List[Union[NumericalData, CategoricalData]]]
 
+    class Config:
+        orm_mode = True
+
 
 class UnstructuredData(BaseModel):
     target_counts: Optional[CategoricalCount]
     mean_size: Optional[float]
+
+    class Config:
+        orm_mode = True
 
 
 class DataSetSummary(BaseModel):
     proposal_id: Optional[int]
     count: Optional[int]
     data_information: Optional[Union[StructuredData, UnstructuredData]]
+
+    class Config:
+        orm_mode = True
 
 
 
