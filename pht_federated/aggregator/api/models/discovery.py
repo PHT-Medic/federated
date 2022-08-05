@@ -18,7 +18,7 @@ class DataSetSummary(Base):
     data_information = Column(JSON, default={})
 
 
-class DataSet(Base):
+'''class DataSet(Base):
     __tablename__ = "discoveries"
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
     created_at = Column(DateTime, default=datetime.now())
@@ -30,5 +30,5 @@ class DataSet(Base):
     access_path = Column(String, nullable=True)
     fhir_server = Column(Integer, ForeignKey('fhir_servers.id'), nullable=True)
     summary = Column(JSON, nullable=True)
-    # trains = relationship("Train", back_populates="dataset")
+    # trains = relationship("Train", back_populates="dataset")'''
 

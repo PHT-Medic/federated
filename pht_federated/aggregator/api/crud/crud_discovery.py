@@ -9,8 +9,11 @@ from pht_federated.aggregator.api.schemas.discovery import SummaryCreate, Summar
 class CRUDDiscoveries(CRUDBase[DataSetSummary, SummaryCreate, SummaryUpdate]):
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> Optional[ModelType]:
+        print("OBJ IN : {}".format(obj_in))
         obj_in_data = jsonable_encoder(obj_in)
+        print("OBJ IN DATA : {}".format(obj_in_data))
         db_obj = self.model(**obj_in_data)
+        print("DB OBJ : {}".format(db_obj))
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

@@ -41,7 +41,7 @@ class UnstructuredData(BaseModel):
 class DataSetSummary(BaseModel):
     proposal_id: Optional[int]
     count: Optional[int]
-    information: Optional[Union[StructuredData, UnstructuredData]]
+    data_information: Optional[Union[StructuredData, UnstructuredData]]
 
 
 

@@ -5,5 +5,6 @@ api_router = APIRouter()
 
 # Include the routers defined in the endpoints file in the main api
 
-api_router.include_router(discovery.router, prefix="/discovery", tags=["Discovery"])
+api_router.include_router(discovery.router, prefix="/proposal", tags=["Proposal"])
+
 

@@ -4,7 +4,7 @@ import pandas as pd
 from tabulate import tabulate
 
 from fastapi.testclient import TestClient
-from pht_federated.aggregator.main import app
+from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.endpoints.dependencies import get_db
 from pht_federated.aggregator.api.discoveries import statistics
 
@@ -40,12 +40,13 @@ def test_data_set_create():
 
 
 
-    response = client.post("/api/discovery", json={
-                            "proposal_id" : "1",
-                            "count" : "10",
-                            "data_information" : { "Color":"Red", "Size":"Big", "Shape":"Round" }
+    response = client.post(f"/api/proposal/{1}/discovery", json={
+                            "proposal_id" : 1,
+                            "count" : 10,
+                            "data_information" : {}
     })
 
+    data = {"data_information" : { "Color":"Red", "Size":"Big", "Shape":"Round" }}
 
     assert response.status_code == 200, response.text
 
@@ -55,7 +56,7 @@ def test_data_set_create():
 
 
 def test_discovery_get():
-    response = client.get(f"/api/discovery/{1}")
+    response = client.get(f"/api/discovery/proposal/{1}/discovery")
     assert response.status_code == 200, response.text
 
     data = response.json()

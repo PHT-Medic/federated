@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from pht_federated.aggregator.main import app
+from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.endpoints import dependencies
 
 
