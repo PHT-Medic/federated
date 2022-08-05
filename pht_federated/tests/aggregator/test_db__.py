@@ -24,12 +24,6 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
-'''SQLModel.metadata.create_all(engine)
-engine.execute('CREATE TABLE "datasets_summary" ('
-               'PRIMARY KEY (id)'
-               'proposal_id INTEGER,'
-               'name VARCHAR, '
-               'data_information JSON);')'''
 
 
 def override_get_db():
