@@ -22,7 +22,7 @@ else:
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-#Base.metadata.drop_all(bind=engine)
+Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 '''SQLModel.metadata.create_all(engine)
 engine.execute('CREATE TABLE "datasets_summary" ('
