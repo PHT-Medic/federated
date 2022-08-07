@@ -24,12 +24,14 @@ def get_dataset_statistics(dataframe: pd.DataFrame) -> Optional[DataSetStatistic
     n_items = shape[0]
     n_features = shape[1]
     columns_inf = get_column_information(dataframe, description)
+    print("COLUMN INFORMATION : {}".format(columns_inf))
 
-    #columns_inf = jsonable_encoder(columns_inf)
-    #columns_inf = json.dumps(columns_inf)
+    for i in columns_inf:
+        print("FIGURE DATA : {} with step {}".format(columns_inf[i]['figure'], i))
+
 
     schema_data = {
-        'proposal_id': 7,
+        'proposal_id': 1,
         'item_count': n_items,
         'feature_count': n_features,
         'data_information': columns_inf
@@ -67,8 +69,9 @@ def get_column_information(dataframe: pd.DataFrame, description: pd.DataFrame) -
             columns_inf, chart_json = process_numerical_column(dataframe, columns_inf, i, description, title)
 
 
-        #if chart_json is not None:
-        #    columns_inf[i]['figure'] = chart_json
+        if chart_json is not None:
+            columns_inf[i]['figure'] = chart_json
+
     return columns_inf
 
 
