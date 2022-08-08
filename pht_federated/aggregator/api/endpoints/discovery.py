@@ -6,6 +6,7 @@ from pht_federated.aggregator.api.crud.crud_discovery import discoveries
 from pht_federated.aggregator.api.endpoints import dependencies
 from sqlalchemy.orm import Session
 import pandas as pd
+import plotly, json
 
 
 
@@ -38,26 +39,19 @@ def post_proposal(proposal_id: int, create_msg: SummaryCreate, db: Session = Dep
     return discovery
 
 
-@router.get("/{proposal_id}/discovery/figures", response_model=DataSetSummary)
-def plot_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)):
+@router.get("/{proposal_id}/discovery", response_model=DataSetSummary)
+def plot_proposal(proposal_id: int, feature_name: str = "age", db: Session = Depends(dependencies.get_db)):
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
-    discovery_stats = get_data_set_statistics(discovery)
+
+    data = discovery.json()
+
+    for feature in data['data_information']:
+        if feature['title'] == feature_name:
+            data = feature['figure']['fig_data']
+
+    fig_plotly = plotly.io.from_json(json.dumps(data))
+    fig_plotly.show()
 
 
-
-@router.get("/{proposal_id}/discovery", response_model=DataSetSummary)
-def get_data_set_statistics(discovery: DataSetSummary):
-    try:
-        discovery_df = pd.read_csv(discovery)
-    except NotImplementedError:
-        raise HTTPException(status_code=422, detail="Method just specified for CSV-Data.")
-    if discovery_df is None or discovery_df.empty:
-        raise HTTPException(status_code=404, detail="Discovery not found.")
-    try:
-        stats = statistics.get_dataset_statistics(discovery_df)
-        print("Returned Discovery (DataSet) statistics : {}".format(stats))
-        return stats
-    except TypeError:
-        raise HTTPException(status_code=400, detail="Discovery has to be given as a dataframe.")

@@ -10,7 +10,7 @@ from fastapi.encoders import jsonable_encoder
 from pht_federated.aggregator.api.schemas.discovery import DataSetStatistics, DataSetFigure, DataSetSummary
 
 
-def get_dataset_statistics(dataframe: pd.DataFrame) -> Optional[DataSetStatistics]:
+def get_dataset_statistics(dataframe: pd.DataFrame, proposal_id: int) -> Optional[DataSetStatistics]:
     """
     Computes statistical information of a dataset
     :param dataframe: Dataset as dataframe object
@@ -27,7 +27,7 @@ def get_dataset_statistics(dataframe: pd.DataFrame) -> Optional[DataSetStatistic
 
 
     schema_data = {
-        'proposal_id': 1,
+        'proposal_id': proposal_id,
         'item_count': n_items,
         'feature_count': n_features,
         'data_information': columns_inf
@@ -67,9 +67,6 @@ def get_column_information(dataframe: pd.DataFrame, description: pd.DataFrame) -
 
         if chart_json is not None:
             columns_inf[i]['figure'] = chart_json
-    print("COLUMNS INF (statistics) all : {}".format(columns_inf))
-    print("COLUMNS INF (statistics) [0] : {}".format(columns_inf[0]))
-    print("COLUMNS INF (statistics) [0][figure]: {}".format(columns_inf[0]['figure']))
 
 
     return columns_inf

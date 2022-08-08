@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
-from dotenv import load_dotenv, find_dotenv
+#from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv())
+#load_dotenv(find_dotenv())
 
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./app.db"
 
