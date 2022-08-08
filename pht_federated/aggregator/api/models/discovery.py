@@ -19,3 +19,10 @@ class DataSetSummary(Base):
     data_information = Column(JSON, default={})
 
 
+class DataSetFigure(Base):
+    __tablename__ = "datasets_plot"
+    id = Column(Integer, primary_key=True, index=True)
+    plot_id = Column(Integer, default=0)
+    fig_data = Column(JSON, default={})
+
+

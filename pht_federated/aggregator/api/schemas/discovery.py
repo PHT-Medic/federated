@@ -148,3 +148,11 @@ class SummaryCreate(DataSetSummary):
 
 class SummaryUpdate(DataSetSummary):
     pass
+
+
+class FigureCreate(DataSetFigure):
+    pass
+
+
+class FigureUpdate(DataSetFigure):
+    pass

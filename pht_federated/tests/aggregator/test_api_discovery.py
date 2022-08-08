@@ -50,7 +50,6 @@ def test_data_set_create():
     assert response.status_code == 200, response.text
 
     data = response.json()
-    print(data['proposal_id'])
     discovery_id = data["proposal_id"]
     assert discovery_id
 
@@ -62,7 +61,7 @@ def test_discovery_get():
     data = response.json()
     assert data["feature_count"] == 11
 
-
+'''
 def test_delete_discovery():
     response = client.delete(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
@@ -81,6 +80,8 @@ def test_plot_discovery():
 
     fig_plotly = plotly.io.from_json(json.dumps(data))
     fig_plotly.show()
+    
+'''
 
 def test_create_plot():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
@@ -91,12 +92,19 @@ def test_create_plot():
         if feature['title'] == FEATURE_NAME:
             data = feature['figure']['fig_data']
 
-    obj = json.loads(data)
-    figure = DataSetFigure(fig_data=obj)
+    figure = DataSetFigure(fig_data=data)
 
-    print("FIGURE : {}".format(figure))
+    #print("FIGURE : {}".format(figure))
+    data = jsonable_encoder(figure)
 
-    discoveries.create_plot(Depends(dependencies.get_db),figure)
+    response_plot = client.post(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_{FEATURE_NAME}", json={
+        "proposal_id": 42,
+        "feature_name":"bmi"})
+    print("RESPONSE PLOT : {}".format(response_plot))
+
+    #db = Depends(dependencies.get_db)
+
+    #discoveries.create_plot(db,figure)
 
 
 
