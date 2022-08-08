@@ -3,7 +3,7 @@ from sklearn.datasets import load_diabetes
 import pandas as pd
 from tabulate import tabulate
 from fastapi.encoders import jsonable_encoder
-import json
+import json, plotly
 
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.app import app
@@ -29,7 +29,7 @@ def test_data_set_create():
     #print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
 
     stats_df = statistics.get_dataset_statistics(df)
-    print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
+    #print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     stats_dict = jsonable_encoder(stats_df)
     stats_json = json.dumps(stats_dict)
@@ -44,9 +44,9 @@ def test_data_set_create():
                             "data_information" : stats_json_load['data_information']
     })
 
-    print("Figure data from column information : {}".format(stats_json_load["figure"]))
-    fig_plotly = plotly.io.from_json(stats_json_load["figure"])
-    fig_plotly.show()
+    #print("Figure data from column information : {}".format(stats_json_load["figure"]))
+    #fig_plotly = plotly.io.from_json(stats_json_load["figure"])
+    #fig_plotly.show()
 
     assert response.status_code == 200, response.text
 
