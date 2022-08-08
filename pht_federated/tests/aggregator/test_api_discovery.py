@@ -34,7 +34,8 @@ def test_data_set_create():
     stats_dict = jsonable_encoder(stats_df)
     stats_json = json.dumps(stats_dict)
     stats_json_load = json.loads(stats_json)
-    print(stats_json_load['data_information'])
+    print("STATS DATA : {}".format(stats_json_load))
+    print("STATS DATA [data_information] : {}".format(stats_json_load['data_information']))
 
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID}/discovery", json={

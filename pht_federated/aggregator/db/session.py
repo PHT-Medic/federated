@@ -7,8 +7,8 @@ load_dotenv(find_dotenv())
 
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./app.db"
 
-if os.getenv("STATION_DB"):
-    SQLALCHEMY_DATABASE_URL = os.getenv('STATION_DB')
+if os.getenv("FEDERATED_DB"):
+    SQLALCHEMY_DATABASE_URL = os.getenv('FEDERATED_DB')
 else:
     SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://admin:admin@localhost/pht_station"
 
