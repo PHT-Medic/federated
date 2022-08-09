@@ -23,15 +23,9 @@ class CRUDDiscoveries(CRUDBase[DataSetSummary, SummaryCreate, SummaryUpdate]):
         discovery = db.query(DataSetSummary).filter(DataSetSummary.proposal_id == proposal_id).first()
         return discovery
 
-    def create_plot(self, db: Session = Depends(dependencies.get_db), *, obj_in: DataSetFigure) -> Optional[ModelType]:
-        obj_in_data = jsonable_encoder(obj_in)
-        db_obj_plot = self.model(**obj_in_data)
-        print("DB OBJ PLOT : {}".format(db_obj_plot))
-        db.add(db_obj_plot)
-        db.commit()
-        db.refresh(db_obj_plot)
-
-        return db_obj_plot
+    def delete_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
+        discovery_del = db.query(DataSetSummary).filter(DataSetSummary.proposal_id == proposal_id).delete()
+        return discovery_del
 
 
 discoveries = CRUDDiscoveries(DataSetSummary)

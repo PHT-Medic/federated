@@ -160,8 +160,6 @@ def create_figure(fig: Figure) -> DataSetFigure:
     #print("Figure  data : {}".format(figure.fig_data))
     return figure
 
-def plot_figure(fig: DataSetFigure):
-
-    data = fig.json()
-    fig_plotly = plotly.io.from_json(json.dumps(data))
+def plot_figure(json_data: dict):
+    fig_plotly = plotly.io.from_json(json.dumps(json_data))
     fig_plotly.show()

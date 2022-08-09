@@ -1,10 +1,5 @@
 import sklearn
 from sklearn.datasets import load_diabetes
-import pandas as pd
-from tabulate import tabulate
-from fastapi.encoders import jsonable_encoder
-from fastapi import APIRouter, Depends, HTTPException
-import json, plotly
 
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.app import app
@@ -61,7 +56,7 @@ def test_discovery_get():
     data = response.json()
     assert data["feature_count"] == 11
 
-'''
+
 def test_delete_discovery():
     response = client.delete(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
@@ -80,33 +75,12 @@ def test_plot_discovery():
 
     fig_plotly = plotly.io.from_json(json.dumps(data))
     fig_plotly.show()
-    
-'''
+
 
 def test_create_plot():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
+
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_{FEATURE_NAME}")
     assert response.status_code == 200, response.text
-
-    data = response.json()
-    for feature in data['data_information']:
-        if feature['title'] == FEATURE_NAME:
-            data = feature['figure']['fig_data']
-
-    figure = DataSetFigure(fig_data=data)
-
-    #print("FIGURE : {}".format(figure))
-    data = jsonable_encoder(figure)
-
-    response_plot = client.post(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_{FEATURE_NAME}", json={
-        "proposal_id": 42,
-        "feature_name":"bmi"})
-    print("RESPONSE PLOT : {}".format(response_plot))
-
-    #db = Depends(dependencies.get_db)
-
-    #discoveries.create_plot(db,figure)
-
-
 
 
 

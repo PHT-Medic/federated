@@ -5,12 +5,10 @@ from fastapi.encoders import jsonable_encoder
 from pht_federated.aggregator.api.schemas.discovery import DataSetSummary, SummaryCreate, DataSetStatistics, DataSetFigure
 from pht_federated.aggregator.api.discoveries import statistics
 from pht_federated.aggregator.api.crud.crud_discovery import discoveries
-from pht_federated.aggregator.api.crud.crud_figures import figures
+from pht_federated.aggregator.api.discoveries.statistics import *
 
 from pht_federated.aggregator.api.endpoints import dependencies
 from sqlalchemy.orm import Session
-import pandas as pd
-import plotly, json
 
 
 
@@ -29,10 +27,9 @@ def get_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)) -
 @router.delete("/{proposal_id}/discovery", response_model=DataSetSummary)
 def delete_proposal(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
     #discovery = discoveries.get(db, proposal_id)
-    discovery = discoveries.get_by_discovery_id(proposal_id, db)
-    if not discovery:
+    discovery_del = discoveries.delete_by_discovery_id(proposal_id, db)
+    if not discovery_del:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
-    discovery_del = discoveries.remove(db=db, id=proposal_id)
     return discovery_del
 
 
@@ -45,7 +42,7 @@ def post_proposal(proposal_id: int, create_msg: SummaryCreate, db: Session = Dep
     return discovery
 
 
-@router.post("/{proposal_id}/discovery/plot_{feature_name}", response_model=DataSetFigure)
+@router.get("/{proposal_id}/discovery/plot_{feature_name}", response_model=DataSetFigure)
 def post_plot_proposal(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
     #discovery = discoveries.get(db, proposal_id)
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
@@ -54,17 +51,11 @@ def post_plot_proposal(proposal_id: int, feature_name: str, db: Session = Depend
 
     data = jsonable_encoder(discovery)
 
-    #print("DATA : {}".format(data))
     for feature in data['data_information']:
         if feature['title'] == feature_name:
             data = feature['figure']['fig_data']
-    #obj = json.loads(data)
-    figure = DataSetFigure(fig_data=data)
-    data = jsonable_encoder(figure)
 
-    print("FIGURE-DATA : {}".format(data))
-
-    figures.create_plot(db, obj_in=figure)
+    plot_figure(data)
 
 
 
