@@ -7,7 +7,7 @@ import s3fs
 
 class MinioBuckets(enum.Enum):
     MODELS = 'models'
-    DATASETS = 'datasets'
+    DATASETS = 'discoveries'
 
 
 def get_minio_fs(minio_url: str = None, access_key: str = None, secret_key: str = None) -> s3fs.S3FileSystem:
