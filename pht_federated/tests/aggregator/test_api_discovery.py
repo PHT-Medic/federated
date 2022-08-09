@@ -27,7 +27,7 @@ def test_data_set_create():
     df['target'] = diabetes_dataset['target']
     #print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
 
-    stats_df = statistics.get_dataset_statistics(df, PROPOSAL_ID)
+    stats_df = statistics.get_discovery_statistics(df, PROPOSAL_ID)
     #print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     stats_dict = jsonable_encoder(stats_df)

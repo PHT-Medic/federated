@@ -70,10 +70,10 @@ def get_column_information(dataframe: pd.DataFrame, description: pd.DataFrame) -
     return columns_inf
 
 
-def process_numerical_column(dataframe: pd.DataFrame, columns_inf: dict, i: int, description: pd.DataFrame, title: str) -> tuple[dict, DataSetFigure]:
+def process_numerical_column(dataframe: pd.DataFrame, columns_inf: dict, i: int, description: pd.DataFrame, title: str) -> tuple[dict, DiscoveryFigure]:
     """
     Extract information from numerical column and create plot of column data
-    :param dataframe: dataset as dataframe object
+    :param dataframe: discovery as dataframe object
     :param columns_inf: array containing all information of different columns
     :param i: current column index
     :param description: description of all dataset columns
@@ -91,10 +91,10 @@ def process_numerical_column(dataframe: pd.DataFrame, columns_inf: dict, i: int,
     return columns_inf, chart_json
 
 
-def process_categorical_column(dataframe: pd.DataFrame, columns_inf:dict, i: int, description: pd.DataFrame, title: str) -> tuple[dict, DataSetFigure]:
+def process_categorical_column(dataframe: pd.DataFrame, columns_inf:dict, i: int, description: pd.DataFrame, title: str) -> tuple[dict, DiscoveryFigure]:
     """
     Extract information from categorical column and create plot of column data
-    :param dataframe: dataset as dataframe object
+    :param dataframe: discovery as dataframe object
     :param columns_inf: array containing all information of different columns
     :param i: current column index
     :param description: description of all dataset columns
