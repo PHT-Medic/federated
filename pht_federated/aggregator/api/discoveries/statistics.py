@@ -5,12 +5,10 @@ import plotly.express as px
 import plotly.io
 from plotly.graph_objects import Figure
 import json
-from fastapi.encoders import jsonable_encoder
-
-from pht_federated.aggregator.api.schemas.discovery import DataSetStatistics, DataSetFigure, DataSetSummary
+from pht_federated.aggregator.api.schemas.discovery import DiscoveryStatistics, DiscoverySummary, DiscoveryFigure
 
 
-def get_dataset_statistics(dataframe: pd.DataFrame, proposal_id: int) -> Optional[DataSetStatistics]:
+def get_discovery_statistics(dataframe: pd.DataFrame, proposal_id: int) -> Optional[DiscoveryStatistics]:
     """
     Computes statistical information of a dataset
     :param dataframe: Dataset as dataframe object
@@ -33,7 +31,7 @@ def get_dataset_statistics(dataframe: pd.DataFrame, proposal_id: int) -> Optiona
         'data_information': columns_inf
     }
 
-    statistics = DataSetSummary(**schema_data)
+    statistics = DiscoverySummary(**schema_data)
     return statistics
 
 
@@ -148,7 +146,7 @@ def process_categorical_column(dataframe: pd.DataFrame, columns_inf:dict, i: int
     return columns_inf, chart_json
 
 
-def create_figure(fig: Figure) -> DataSetFigure:
+def create_figure(fig: Figure) -> DiscoveryFigure:
     """
     Create DataSetFigure-Object of a plotly figure
     :param fig: Plotly figure
@@ -156,7 +154,7 @@ def create_figure(fig: Figure) -> DataSetFigure:
     """
     fig_json = plotly.io.to_json(fig)
     obj = json.loads(fig_json)
-    figure = DataSetFigure(fig_data=obj)
+    figure = DiscoveryFigure(fig_data=obj)
     #print("Figure  data : {}".format(figure.fig_data))
     return figure
 

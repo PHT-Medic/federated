@@ -2,13 +2,13 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException
 from .base import CRUDBase, CreateSchemaType, ModelType, Optional
 from fastapi.encoders import jsonable_encoder
-from pht_federated.aggregator.api.models.discovery import DataSetSummary
-from pht_federated.aggregator.api.schemas.discovery import SummaryCreate, SummaryUpdate, FigureData, DataSetFigure
+from pht_federated.aggregator.api.models.discovery import DiscoverySummary
+from pht_federated.aggregator.api.schemas.discovery import SummaryCreate, SummaryUpdate, FigureData, DiscoveryFigure
 from pht_federated.aggregator.api.endpoints import dependencies
 import plotly, json
 
 
-class CRUDDiscoveries(CRUDBase[DataSetSummary, SummaryCreate, SummaryUpdate]):
+class CRUDDiscoveries(CRUDBase[DiscoverySummary, SummaryCreate, SummaryUpdate]):
 
     def create(self, db: Session = Depends(dependencies.get_db), *, obj_in: CreateSchemaType) -> Optional[ModelType]:
         obj_in_data = jsonable_encoder(obj_in)
@@ -19,13 +19,13 @@ class CRUDDiscoveries(CRUDBase[DataSetSummary, SummaryCreate, SummaryUpdate]):
 
         return db_obj
 
-    def get_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
-        discovery = db.query(DataSetSummary).filter(DataSetSummary.proposal_id == proposal_id).first()
+    def get_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
+        discovery = db.query(DiscoverySummary).filter(DiscoverySummary.proposal_id == proposal_id).first()
         return discovery
 
-    def delete_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DataSetSummary:
-        discovery_del = db.query(DataSetSummary).filter(DataSetSummary.proposal_id == proposal_id).delete()
+    def delete_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
+        discovery_del = db.query(DiscoverySummary).filter(DiscoverySummary.proposal_id == proposal_id).delete()
         return discovery_del
 
 
-discoveries = CRUDDiscoveries(DataSetSummary)
+discoveries = CRUDDiscoveries(DiscoverySummary)

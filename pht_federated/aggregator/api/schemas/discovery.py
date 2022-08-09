@@ -1,8 +1,3 @@
-from pydantic import BaseModel
-from typing import Optional
-from pydantic import BaseModel, Field
-from datetime import datetime
-from typing import Optional, Any, List, Union, Dict, Literal
 from typing_extensions import Annotated
 from enum import Enum
 
@@ -12,82 +7,27 @@ from datetime import datetime
 from typing import Optional, Any, List, Union, Dict, Literal
 from typing_extensions import Annotated
 from enum import Enum
+from pht_federated.aggregator.api.schemas.figures import *
 
 
-class StorageType(Enum):
-    """
-    Enum for storage types
-    """
-    LOCAL = "local"
-    MINIO = "minio"
-    DB = "db"
 
-
-class DataType(Enum):
-    """
-    Enum for data types
-    """
-    IMAGE = "image"
-    GENOME = "genome"
-    FHIR = "fhir"
-    CSV = "csv"
-    STRUCTURED = "structured"
-    UNSTRUCTURED = "unstructured"
-    HYBRID = "hybrid"
-
-
-class DataSetBase(BaseModel):
-    name: str
-    data_type: Optional[DataType] = None
-    storage_type: Optional[StorageType] = None
-    proposal_id: Optional[str] = None
-    access_path: Optional[str] = None
-
-    class Config:
-        use_enum_values = True
-
-
-class DataSetCreate(DataSetBase):
-    pass
-
-
-class DataSetUpdate(DataSetBase):
-    pass
-
-
-class DataSetFile(BaseModel):
-    file_name: str
-    full_path: Optional[str] = None
-    size: Optional[int] = None
-    updated_at: Optional[datetime] = None
-
-
-class FigureData(BaseModel):
-    layout: dict
-    data: list
-
-
-class DataSetFigure(BaseModel):
-    fig_data: Optional[FigureData]
-
-
-class DataSetColumn(BaseModel):
+class DiscoveryColumn(BaseModel):
     title: Optional[str]
     not_na_elements: Optional[int]
-    figure: Optional[DataSetFigure]
+    figure: Optional[DiscoveryFigure]
 
 
-class DataSetUniqueColumn(DataSetColumn):
+class DiscoveryUniqueColumn(DiscoveryColumn):
     type: Literal['unique']
     number_of_duplicates: Optional[int]
 
 
-class DataSetEqualColumn(DataSetColumn):
+class DiscoveryEqualColumn(DiscoveryColumn):
     type: Literal['equal']
     value: Optional[str]
 
 
-class DataSetCategoricalColumn(DataSetColumn):
+class DiscoveryCategoricalColumn(DiscoveryColumn):
     type: Literal['categorical']
     number_categories: Optional[int]
     value_counts: Optional[Dict[str, int]]
@@ -95,7 +35,7 @@ class DataSetCategoricalColumn(DataSetColumn):
     frequency: Optional[int]
 
 
-class DataSetNumericalColumn(DataSetColumn):
+class DiscoveryNumericalColumn(DiscoveryColumn):
     type: Literal['numeric']
     mean: Optional[float]
     std: Optional[float]
@@ -103,56 +43,38 @@ class DataSetNumericalColumn(DataSetColumn):
     max: Optional[float]
 
 
-class DataSetStatistics(BaseModel):
+class DiscoveryStatistics(BaseModel):
     n_items: Optional[int] = 0
     n_features: Optional[int] = 0
-    column_information: Optional[List[Annotated[Union[DataSetCategoricalColumn,
-                                                      DataSetNumericalColumn,
-                                                      DataSetEqualColumn,
-                                                      DataSetUniqueColumn],
+    column_information: Optional[List[Annotated[Union[DiscoveryCategoricalColumn,
+                                                      DiscoveryNumericalColumn,
+                                                      DiscoveryEqualColumn,
+                                                      DiscoveryUniqueColumn],
                                                 Field(discriminator='type')]]]
 
     class Config:
         orm_mode = True
 
 
-class DataSet(DataSetBase):
-    id: Any
-    created_at: datetime
-    updated_at: Optional[datetime] = None
 
-    class Config:
-        orm_mode = True
-
-
-
-
-
-class DataSetSummary(BaseModel):
+class DiscoverySummary(BaseModel):
     proposal_id: Optional[int]
     item_count: Optional[int]
     feature_count: Optional[int]
-    data_information: Optional[List[Annotated[Union[DataSetCategoricalColumn,
-                                                    DataSetNumericalColumn],
+    data_information: Optional[List[Annotated[Union[DiscoveryCategoricalColumn,
+                                                    DiscoveryNumericalColumn],
                                               Field(discriminator='type')]]]
 
     class Config:
         orm_mode = True
 
 
-
-
-class SummaryCreate(DataSetSummary):
+class SummaryCreate(DiscoverySummary):
     pass
 
 
-class SummaryUpdate(DataSetSummary):
+class SummaryUpdate(DiscoverySummary):
     pass
 
 
-class FigureCreate(DataSetFigure):
-    pass
 
-
-class FigureUpdate(DataSetFigure):
-    pass
