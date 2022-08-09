@@ -3,11 +3,9 @@ from sklearn.datasets import load_diabetes
 
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.app import app
-from pht_federated.aggregator.api.endpoints.dependencies import get_db
-from pht_federated.aggregator.api.crud.crud_discovery import *
+from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.aggregator.api.endpoints.discovery import *
 from pht_federated.aggregator.api.discoveries import statistics
-from pht_federated.aggregator.api.endpoints import dependencies
 
 from pht_federated.tests.aggregator.test_db import override_get_db
 
