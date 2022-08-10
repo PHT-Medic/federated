@@ -38,7 +38,7 @@ def post_proposal(proposal_id: int, create_msg: SummaryCreate, db: Session = Dep
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' could not be created.")
     return discovery
 
-
+'''
 @router.get("/{proposal_id}/discovery/plot", response_model=DiscoveryFigure)
 def get_plot_proposal(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
@@ -50,6 +50,30 @@ def get_plot_proposal(proposal_id: int, feature_name: str, db: Session = Depends
     for feature in data['data_information']:
         if feature['title'] == feature_name:
             data = feature['figure']['fig_data']
+
+    plot_figure(data)
+    discovery_figure = DiscoveryFigure(**data)
+
+    return discovery_figure
+'''
+
+@router.get("/{proposal_id}/discovery/plot", response_model=DiscoveryFigure)
+def get_plot_proposal_aggregated(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
+    discovery = discoveries.get_by_discovery_id(proposal_id, db)
+    if not discovery:
+        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
+
+    data_ = jsonable_encoder(discovery)
+
+    print("DISCOVERY DATA : {}".format(data_))
+
+    for feature in data_['data_information']:
+        if feature['title'] == feature_name:
+            data_ = feature['title']
+            data = feature['figure']['fig_data']
+
+    #print("RESULTING FIGURE DATA : {}".format(data))
+    print("MEAN VALUE BMI : {}".format(data_['mean']))
 
     plot_figure(data)
     discovery_figure = DiscoveryFigure(**data)

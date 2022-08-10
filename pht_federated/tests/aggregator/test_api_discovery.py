@@ -46,7 +46,7 @@ def test_data_set_create():
     discovery_id = data["proposal_id"]
     assert discovery_id
 
-
+'''
 def test_discovery_get():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
@@ -73,11 +73,11 @@ def test_plot_discovery():
 
     fig_plotly = plotly.io.from_json(json.dumps(data))
     fig_plotly.show()
-
+'''
 
 def test_create_plot():
 
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_{FEATURE_NAME}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot?feature_name={FEATURE_NAME}")
     assert response.status_code == 200, response.text
 
 
