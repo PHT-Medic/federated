@@ -1,3 +1,4 @@
+import pandas as pd
 import sklearn
 from sklearn.datasets import load_diabetes
 
@@ -6,6 +7,7 @@ from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.aggregator.api.endpoints.discovery import *
 from pht_federated.aggregator.api.discoveries import statistics
+import plotly.graph_objects as go
 
 from pht_federated.tests.aggregator.test_db import override_get_db
 
@@ -39,6 +41,13 @@ def test_data_set_create():
                             "data_information" : stats_json_load['data_information']
     })
 
+    response = client.post(f"/api/proposal/{stats_json_load['proposal_id']}/discovery", json={
+                            "proposal_id" : stats_json_load['proposal_id'],
+                            "item_count" : int(stats_json_load['item_count']) + 1,
+                            "feature_count" : int(stats_json_load['feature_count']) + 1,
+                            "data_information" : stats_json_load['data_information']
+    })
+
 
     assert response.status_code == 200, response.text
 
@@ -46,41 +55,53 @@ def test_data_set_create():
     discovery_id = data["proposal_id"]
     assert discovery_id
 
-'''
+
 def test_discovery_get():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
 
     data = response.json()
-    assert data["feature_count"] == 11
 
 
+'''
 def test_delete_discovery():
     response = client.delete(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
 
+'''
 
 
 def test_plot_discovery():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
 
-    data = response.json()
-    for feature in data['data_information']:
-        if feature['title'] == FEATURE_NAME:
-            data = feature['figure']['fig_data']
+    print("RESPONSE : {}".format(response.data()))
+
+    for discovery in response:
+        data = discovery.json()
+
+        for feature in data['data_information']:
+            if feature['title'] == FEATURE_NAME:
+                data = feature
+
+        discovery_summary_json = {
+            "feature_name": FEATURE_NAME,
+            "discovery_mean" : data['mean'],
+            "discovery_std" : data['std'],
+            "discovery_min" : data['min'],
+            "discovery_max" : data['max']
+        }
+
+        plot_errorbar(discovery_summary_json)
 
 
-    fig_plotly = plotly.io.from_json(json.dumps(data))
-    fig_plotly.show()
 '''
-
 def test_create_plot():
 
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot?feature_name={FEATURE_NAME}")
     assert response.status_code == 200, response.text
 
-
+'''
 
 
 

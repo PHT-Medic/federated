@@ -6,7 +6,7 @@ import plotly.io
 from plotly.graph_objects import Figure
 import json
 from pht_federated.aggregator.api.schemas.discovery import DiscoveryStatistics, DiscoverySummary, DiscoveryFigure
-
+import plotly.graph_objects as go
 
 def get_discovery_statistics(dataframe: pd.DataFrame, proposal_id: int) -> Optional[DiscoveryStatistics]:
     """
@@ -54,23 +54,19 @@ def get_column_information(dataframe: pd.DataFrame, description: pd.DataFrame) -
         if not(is_numeric_dtype(dataframe[title])) or is_bool_dtype(dataframe[title]):
             # extract information from categorical column
             columns_inf[i]['not_na_elements'] = count - nan_count
-            columns_inf, chart_json = process_categorical_column(dataframe, columns_inf, i, description, title)
+            columns_inf = process_categorical_column(columns_inf, i, description, title)
         else:
             # extract information from numerical column
             zero_count = dataframe[title][dataframe[title]==0].count()
             undefined_count = nan_count + zero_count
             columns_inf[i]['not_na_elements'] = count - undefined_count
-            columns_inf, chart_json = process_numerical_column(dataframe, columns_inf, i, description, title)
-
-
-        if chart_json is not None:
-            columns_inf[i]['figure'] = chart_json
+            columns_inf = process_numerical_column(columns_inf, i, description, title)
 
 
     return columns_inf
 
 
-def process_numerical_column(dataframe: pd.DataFrame, columns_inf: dict, i: int, description: pd.DataFrame, title: str) -> tuple[dict, DiscoveryFigure]:
+def process_numerical_column(columns_inf: dict, i: int, description: pd.DataFrame, title: str) -> dict:
     """
     Extract information from numerical column and create plot of column data
     :param dataframe: discovery as dataframe object
@@ -85,13 +81,10 @@ def process_numerical_column(dataframe: pd.DataFrame, columns_inf: dict, i: int,
     columns_inf[i]['std'] = description[title]["std"]
     columns_inf[i]['min'] = description[title]["min"]
     columns_inf[i]['max'] = description[title]["max"]
-    # create boxplot for numerical data
-    fig = px.box(dataframe, y=title)
-    chart_json = create_figure(fig)
-    return columns_inf, chart_json
+    return columns_inf
 
 
-def process_categorical_column(dataframe: pd.DataFrame, columns_inf:dict, i: int, description: pd.DataFrame, title: str) -> tuple[dict, DiscoveryFigure]:
+def process_categorical_column(columns_inf: dict, i: int, description: pd.DataFrame, title: str) -> dict:
     """
     Extract information from categorical column and create plot of column data
     :param dataframe: discovery as dataframe object
@@ -105,7 +98,6 @@ def process_categorical_column(dataframe: pd.DataFrame, columns_inf:dict, i: int
     unique = description[title]["unique"]
     top = description[title]["top"]
     freq = description[title]["freq"]
-    chart_json = None
 
     # if every entry has an unique value (or at most 50 values are given multiple times)
     if count - 50 < unique <= count:
@@ -126,24 +118,9 @@ def process_categorical_column(dataframe: pd.DataFrame, columns_inf:dict, i: int
             columns_inf[i]['most_frequent_element'] = top
             columns_inf[i]['frequency'] = freq
 
-            # pie chart if number of classes is below 6
-            # value counts are provided if there are less then 6 classes
-            if unique < 6:
-                columns_inf[i]['value_counts'] = dict(dataframe[title].value_counts())
-                fig = px.pie(dataframe, names=title, title=title)
-
-
-            # histogram if number of classes is greater than 10
-            elif unique >= 6:
-                fig = px.histogram(dataframe, x=title, title=title)
-                fig.update_layout(yaxis_title="Anzahl")
-
-            if fig is not None:
-                chart_json = create_figure(fig)
-
         columns_inf[i]['type'] = column_type
 
-    return columns_inf, chart_json
+    return columns_inf
 
 
 def create_figure(fig: Figure) -> DiscoveryFigure:
@@ -161,3 +138,16 @@ def create_figure(fig: Figure) -> DiscoveryFigure:
 def plot_figure(json_data: dict):
     fig_plotly = plotly.io.from_json(json.dumps(json_data))
     fig_plotly.show()
+
+
+def plot_errorbar(json_data: dict):
+
+    fig = go.Figure(data=go.Scatter(
+        x=[json_data['feature_name']],
+        y=[json_data['discovery_mean']],
+        error_y=dict(
+            type='data',  # value of error bar given in data coordinates
+            array=[json_data['discovery_std']],
+            visible=True)
+    ))
+    fig.show()
