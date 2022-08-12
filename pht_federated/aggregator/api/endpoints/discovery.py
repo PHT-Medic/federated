@@ -16,20 +16,15 @@ router = APIRouter()
 
 
 @router.get("/{proposal_id}/discovery", response_model=List[DiscoverySummary])
-def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_db)):
-    discovery = discoveries.get_all_by_discovery_id(proposal_id, db)
+def get_discovery_all(proposal_id: int, single_query: bool, db: Session = Depends(dependencies.get_db)):
+    if single_query == False:
+        discovery = discoveries.get_all_by_discovery_id(proposal_id, db)
+    else:
+        discovery = list(discoveries.get_by_discovery_id(proposal_id, db))
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
     return discovery
 
-'''
-@router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
-def get_discovery_by_id(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
-    discovery = discoveries.get_by_discovery_id(proposal_id, db)
-    if not discovery:
-        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
-    return discovery
-'''
 
 @router.delete("/{proposal_id}/discovery", response_model=DiscoverySummary)
 def delete_discovery(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:

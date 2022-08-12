@@ -150,4 +150,14 @@ def plot_errorbar(json_data: dict):
             array=[json_data['discovery_std']],
             visible=True)
     ))
+    fig.add_scatter(
+        x=[json_data['feature_name']],
+        y=[json_data['discovery_mean']],
+        error_y=dict(
+            type='data',  # value of error bar given in data coordinates
+            symmetric=False,
+            value=abs(json_data['discovery_max']),
+            valueminus=abs(json_data['discovery_min']),
+            visible=True)
+    )
     fig.show()
