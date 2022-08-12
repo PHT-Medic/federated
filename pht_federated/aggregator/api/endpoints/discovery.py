@@ -16,8 +16,8 @@ router = APIRouter()
 
 
 @router.get("/{proposal_id}/discovery", response_model=List[DiscoverySummary])
-def get_discovery_all(proposal_id: int, single_query: bool, db: Session = Depends(dependencies.get_db)):
-    if single_query == False:
+def get_discovery_all(proposal_id: int, query_all: bool, db: Session = Depends(dependencies.get_db)):
+    if query_all:
         discovery = discoveries.get_all_by_discovery_id(proposal_id, db)
     else:
         discovery = list(discoveries.get_by_discovery_id(proposal_id, db))
@@ -99,6 +99,8 @@ def get_plot_discovery_aggregated(proposal_id: int, feature_name: str, db: Sessi
         "discovery_min": discovery_min,
         "discovery_max": discovery_max
     }
+
+    print("DISCOVERY SUMMARY JSON : {}".format(discovery_summary_json))
 
 
     plot_errorbar(discovery_summary_json)

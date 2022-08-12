@@ -7,6 +7,7 @@ from plotly.graph_objects import Figure
 import json
 from pht_federated.aggregator.api.schemas.discovery import DiscoveryStatistics, DiscoverySummary, DiscoveryFigure
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 def get_discovery_statistics(dataframe: pd.DataFrame, proposal_id: int) -> Optional[DiscoveryStatistics]:
     """
@@ -142,17 +143,20 @@ def plot_figure(json_data: dict):
 
 def plot_errorbar(json_data: dict):
 
-    fig = go.Figure(data=go.Scatter(
+    fig = go.Figure()
+
+    trace1 = go.Scatter(
         x=[json_data['feature_name']],
         y=[json_data['discovery_mean']],
         error_y=dict(
             type='data',  # value of error bar given in data coordinates
             array=[json_data['discovery_std']],
             visible=True)
-    ))
-    fig.add_scatter(
+    )
+    trace2 = go.Scatter(
         x=[json_data['feature_name']],
         y=[json_data['discovery_mean']],
+        #line=dict(color="#ffe476"),
         error_y=dict(
             type='data',  # value of error bar given in data coordinates
             symmetric=False,
@@ -160,4 +164,10 @@ def plot_errorbar(json_data: dict):
             valueminus=abs(json_data['discovery_min']),
             visible=True)
     )
+
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+
+    print("DISCOVERY MAX : {}".format(abs(json_data['discovery_max'])))
+    print("DISCOVERY MIN : {}".format(abs(json_data['discovery_min'])))
     fig.show()

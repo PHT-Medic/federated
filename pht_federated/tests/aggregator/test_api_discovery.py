@@ -43,6 +43,8 @@ def test_data_set_create():
                             "data_information" : stats_json_load['data_information']
     })
 
+    assert response.status_code == 200, response.text
+
     response = client.post(f"/api/proposal/{stats_json_load['proposal_id']}/discovery", json={
                             "proposal_id" : stats_json_load['proposal_id'],
                             "item_count" : int(stats_json_load['item_count']) + 1,
@@ -59,7 +61,7 @@ def test_data_set_create():
 
 
 def test_discovery_get():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?query_all=True")
     assert response.status_code == 200, response.text
 
 
@@ -67,10 +69,10 @@ def test_discovery_get():
 def test_delete_discovery():
     response = client.delete(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
-
+'''
 
 def test_plot_discovery():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?query_all=True")
     assert response.status_code == 200, response.text
 
     #print("RESPONSE : {} and type : {}".format(response.json(), type(response.json())))
@@ -80,15 +82,15 @@ def test_plot_discovery():
             if feature['title'] == FEATURE_NAME:
                 data = feature
 
-        discovery_summary_json = {
-            "feature_name": FEATURE_NAME,
-            "discovery_mean" : data['mean'],
-            "discovery_std" : data['std'],
-            "discovery_min" : data['min'],
-            "discovery_max" : data['max']
-        }
+    discovery_summary_json = {
+        "feature_name": FEATURE_NAME,
+        "discovery_mean" : data['mean'],
+        "discovery_std" : data['std'],
+        "discovery_min" : data['min'],
+        "discovery_max" : data['max']
+    }
 
-        plot_errorbar(discovery_summary_json)
+    plot_errorbar(discovery_summary_json)
 
 '''
 
@@ -96,7 +98,7 @@ def test_plot_discovery_aggregated():
 
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot?feature_name={FEATURE_NAME}")
     assert response.status_code == 200, response.text
-
+'''
 
 
 
