@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 import sklearn
 from sklearn.datasets import load_diabetes
@@ -60,27 +62,21 @@ def test_discovery_get():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
 
-    data = response.json()
-
 
 '''
 def test_delete_discovery():
     response = client.delete(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
 
-'''
-
 
 def test_plot_discovery():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
 
-    print("RESPONSE : {}".format(response.data()))
+    #print("RESPONSE : {} and type : {}".format(response.json(), type(response.json())))
 
-    for discovery in response:
-        data = discovery.json()
-
-        for feature in data['data_information']:
+    for discovery in response.json():
+        for feature in discovery['data_information']:
             if feature['title'] == FEATURE_NAME:
                 data = feature
 
@@ -94,14 +90,14 @@ def test_plot_discovery():
 
         plot_errorbar(discovery_summary_json)
 
-
 '''
-def test_create_plot():
+
+def test_plot_discovery_aggregated():
 
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot?feature_name={FEATURE_NAME}")
     assert response.status_code == 200, response.text
 
-'''
+
 
 
 

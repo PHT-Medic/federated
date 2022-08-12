@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import Depends
+from typing import Any, List
 from .base import CRUDBase, CreateSchemaType, ModelType, Optional
 from fastapi.encoders import jsonable_encoder
 from pht_federated.aggregator.api.models.discovery import DiscoverySummary
@@ -13,7 +14,7 @@ class CRUDDiscoveries(CRUDBase[DiscoverySummary, SummaryCreate, SummaryUpdate]):
         discovery = db.query(DiscoverySummary).filter(DiscoverySummary.proposal_id == proposal_id).first()
         return discovery
 
-    def get_all_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> list[DiscoverySummary]:
+    def get_all_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> List[DiscoverySummary]:
         discovery = db.query(DiscoverySummary).filter(DiscoverySummary.proposal_id == proposal_id).all()
         return discovery
 

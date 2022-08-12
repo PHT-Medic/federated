@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 #from pht_federated.aggregator.api.models.discovery import DataSetSummary
 from fastapi.encoders import jsonable_encoder
+from typing import Any, List
 
 from pht_federated.aggregator.api.schemas.discovery import SummaryCreate
 from pht_federated.aggregator.api.crud.crud_discovery import discoveries
@@ -14,8 +15,8 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 
-@router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
-def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> list[DiscoverySummary]:
+@router.get("/{proposal_id}/discovery", response_model=List[DiscoverySummary])
+def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_db)):
     discovery = discoveries.get_all_by_discovery_id(proposal_id, db)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
@@ -23,7 +24,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
 '''
 @router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
-def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
+def get_discovery_by_id(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
     discovery = discoveries.get_by_discovery_id(proposal_id, db)
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
@@ -79,10 +80,8 @@ def get_plot_discovery_aggregated(proposal_id: int, feature_name: str, db: Sessi
                             detail=f"Discovery of proposal with proposal_id '{proposal_id}'  not found.")
 
     for discovery in response:
-
-        data_ = jsonable_encoder(discovery)
-
-        for feature in data_['data_information']:
+        discovery = jsonable_encoder(discovery)
+        for feature in discovery['data_information']:
             if feature['title'] == feature_name:
                 data = feature
 
