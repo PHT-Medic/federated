@@ -100,7 +100,7 @@ def process_categorical_column(columns_inf: dict, i: int, description: pd.DataFr
     top = description[title]["top"]
     freq = description[title]["freq"]
 
-    # if every entry has an unique value (or at most 50 values are given multiple times)
+    # if every entry has a unique value (or at most 50 values are given multiple times)
     if count - 50 < unique <= count:
         column_type = "unique"
         columns_inf[i]['type'] = column_type

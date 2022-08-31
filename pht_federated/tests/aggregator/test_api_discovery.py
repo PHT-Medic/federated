@@ -1,9 +1,7 @@
 import json
-
 import pandas as pd
 import sklearn
 from sklearn.datasets import load_diabetes
-
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.dependencies import get_db
@@ -62,6 +60,7 @@ def test_data_set_create():
 
 def test_discovery_get():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?query_all=True")
+    #print("Resulting Response : {}".format(response.json()))
     assert response.status_code == 200, response.text
 
 
@@ -71,6 +70,7 @@ def test_delete_discovery():
     assert response.status_code == 200, response.text
 '''
 
+'''
 def test_plot_discovery():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?query_all=True")
     assert response.status_code == 200, response.text
@@ -96,9 +96,15 @@ def test_plot_discovery():
 
 def test_plot_discovery_aggregated():
 
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot?feature_name={FEATURE_NAME}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_single?feature_name={FEATURE_NAME}")
     assert response.status_code == 200, response.text
-'''
+
+
+def test_plot_discovery_aggregated_all_features():
+
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot")
+    assert response.status_code == 200, response.text
+
 
 
 

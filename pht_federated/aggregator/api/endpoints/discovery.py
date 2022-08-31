@@ -61,8 +61,8 @@ def get_plot_discovery(proposal_id: int, feature_name: str, db: Session = Depend
     return discovery_figure
 '''
 
-@router.get("/{proposal_id}/discovery/plot", response_model=DiscoveryFigure)
-def get_plot_discovery_aggregated(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
+@router.get("/{proposal_id}/discovery/plot_single", response_model=DiscoveryFigure)
+def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
 
     discovery_mean = 0
     discovery_std = 0
@@ -100,14 +100,80 @@ def get_plot_discovery_aggregated(proposal_id: int, feature_name: str, db: Sessi
         "discovery_max": discovery_max
     }
 
-    print("DISCOVERY SUMMARY JSON : {}".format(discovery_summary_json))
-
-
     plot_errorbar(discovery_summary_json)
     discovery_figure = DiscoveryFigure(**data)
 
     return discovery_figure
 
+
+@router.get("/{proposal_id}/discovery/plot", response_model=DiscoveryFigure)
+def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = Depends(dependencies.get_db)):
+
+    feature_lst = []
+    aggregated_feature_lst = []
+
+    response = discoveries.get_all_by_discovery_id(proposal_id, db)
+    if not response:
+        raise HTTPException(status_code=404,
+                            detail=f"Discovery of proposal with proposal_id '{proposal_id}'  not found.")
+
+    for discovery in response:
+        discovery = jsonable_encoder(discovery)
+        for feature in discovery['data_information']:
+            feature_lst.append(feature)
+
+
+    for feature in feature_lst:
+        value = feature
+
+        discovery_title = ""
+        discovery_mean = 0
+        discovery_std = 0
+        discovery_min = 0
+        discovery_max = 0
+
+        for feature2 in feature_lst:
+            if feature2['title'] == value['title']:
+                data = feature2
+                #print("DATA : {}".format(data))
+                discovery_title = data['title']
+                discovery_mean += data['mean']
+                discovery_std += data['std']
+                discovery_min += data['min']
+                discovery_max += data['max']
+                #print("DISCOVERY MEAN : {}".format(discovery_mean))
+
+        #print("FEATURE LIST BEFORE : {}".format(feature_lst))
+        feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
+        #print("FEATURE LIST AFTER : {}".format(feature_lst))
+
+
+
+        discovery_mean /= len(response)
+        discovery_std /= len(response)
+        discovery_min /= len(response)
+        discovery_max /= len(response)
+
+        discovery_summary_json = {
+            "feature_name": discovery_title,
+            "discovery_mean": discovery_mean,
+            "discovery_std": discovery_std,
+            "discovery_min": discovery_min,
+            "discovery_max": discovery_max
+        }
+        aggregated_feature_lst.append(discovery_summary_json)
+
+        if len(feature_lst) == 0:
+            break
+
+    print("AGGREGATED FEATURE LST : {}".format(aggregated_feature_lst))
+
+    #for feature in aggregated_feature_lst:
+    #    plot_errorbar(feature)
+
+    discovery_figure = DiscoveryFigure(**aggregated_feature_lst[0])
+
+    return discovery_figure
 
 
 
