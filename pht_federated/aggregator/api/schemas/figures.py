@@ -3,13 +3,15 @@ from typing import Optional, List
 
 
 class FigureData(BaseModel):
-    feature_name: str
     layout: dict
     data: list
 
+class FeatureData(BaseModel):
+    feature_name: str
+    figure: Optional[FigureData]
 
 class DiscoveryFigure(BaseModel):
-    fig_data: Optional[FigureData]
+    fig_data: Optional[FeatureData]
 
     class Config:
         orm_mode = True

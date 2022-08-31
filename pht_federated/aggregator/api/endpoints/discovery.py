@@ -117,7 +117,7 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
     }
 
     print("FIGURE SCHEMA : {}".format(figure_schema))
-    discovery_figure = DiscoveryFigures(**figure_schema)
+    discovery_figure = DiscoveryFigures(fig_data_all=figure_lst)
 
     print("DISCOVERY FIGURE : {}".format(discovery_figure))
 
