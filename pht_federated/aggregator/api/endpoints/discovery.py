@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from typing import Any, List
 
 from pht_federated.aggregator.api.schemas.discovery import SummaryCreate
+from pht_federated.aggregator.api.schemas.figures import DiscoveryFigure, DiscoveryFigures
 from pht_federated.aggregator.api.crud.crud_discovery import discoveries
 from pht_federated.aggregator.api.discoveries.statistics import *
 
@@ -99,18 +100,36 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
         "discovery_min": discovery_min,
         "discovery_max": discovery_max
     }
+    figure_lst = []
 
-    plot_errorbar(discovery_summary_json)
-    discovery_figure = DiscoveryFigure(**data)
+    figure_lst.append({
+        'feature_name': feature_name
+    })
+
+    figure = create_errorbar(discovery_summary_json)
+    fig_json = plotly.io.to_json(figure)
+    obj = json.loads(fig_json)
+    figure_lst[0]['figure'] = obj
+
+
+    figure_schema = {
+        'fig_data_all': figure_lst
+    }
+
+    print("FIGURE SCHEMA : {}".format(figure_schema))
+    discovery_figure = DiscoveryFigures(**figure_schema)
+
+    print("DISCOVERY FIGURE : {}".format(discovery_figure))
 
     return discovery_figure
 
 
-@router.get("/{proposal_id}/discovery/plot", response_model=DiscoveryFigure)
+@router.get("/{proposal_id}/discovery/plot", response_model=DiscoveryFigures)
 def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = Depends(dependencies.get_db)):
 
     feature_lst = []
     aggregated_feature_lst = []
+    figure_lst = []
 
     response = discoveries.get_all_by_discovery_id(proposal_id, db)
     if not response:
@@ -168,12 +187,29 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
 
     print("AGGREGATED FEATURE LST : {}".format(aggregated_feature_lst))
 
-    #for feature in aggregated_feature_lst:
-    #    plot_errorbar(feature)
 
-    discovery_figure = DiscoveryFigure(**aggregated_feature_lst[0])
+    for i in range(len(aggregated_feature_lst)):
+        figure_lst.append({
+            'feature_name': aggregated_feature_lst[i]['feature_name']
+        })
 
-    return discovery_figure
+        figure = create_errorbar(aggregated_feature_lst[i])
+        fig_json = plotly.io.to_json(figure)
+        obj = json.loads(fig_json)
+        figure_lst[i]['figure'] = obj
+
+
+    figure_schema = {
+        'fig_data_all': figure_lst
+    }
+
+    print("FIGURE SCHEMA : {}".format(figure_schema))
+
+    discovery_figures = DiscoveryFigures(**figure_schema)
+
+    print("DISCOVERY FIGURES : {}".format(discovery_figures))
+
+    return discovery_figures
 
 
 

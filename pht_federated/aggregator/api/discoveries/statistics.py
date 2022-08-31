@@ -136,12 +136,15 @@ def create_figure(fig: Figure) -> DiscoveryFigure:
     #print("Figure  data : {}".format(figure.fig_data))
     return figure
 
-def plot_figure(json_data: dict):
+def plot_figure_json(json_data: dict):
     fig_plotly = plotly.io.from_json(json.dumps(json_data))
     fig_plotly.show()
 
+def plot_figure(fig: Figure):
+    fig.show()
 
-def plot_errorbar(json_data: dict):
+
+def create_errorbar(json_data: dict) -> Figure:
 
     fig = go.Figure()
 
@@ -168,6 +171,8 @@ def plot_errorbar(json_data: dict):
     fig.add_trace(trace1)
     fig.add_trace(trace2)
 
-    print("DISCOVERY MAX : {}".format(abs(json_data['discovery_max'])))
-    print("DISCOVERY MIN : {}".format(abs(json_data['discovery_min'])))
-    fig.show()
+    #print("DISCOVERY MAX : {}".format(abs(json_data['discovery_max'])))
+    #print("DISCOVERY MIN : {}".format(abs(json_data['discovery_min'])))
+    #fig.show()
+
+    return fig
