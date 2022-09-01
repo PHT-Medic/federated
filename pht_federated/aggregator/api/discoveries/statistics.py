@@ -149,22 +149,22 @@ def create_errorbar(json_data: dict) -> Figure:
     fig = go.Figure()
 
     trace1 = go.Scatter(
-        x=[json_data['feature_name']],
-        y=[json_data['discovery_mean']],
+        x=[json_data['title']],
+        y=[json_data['mean']],
         error_y=dict(
             type='data',  # value of error bar given in data coordinates
-            array=[json_data['discovery_std']],
+            array=[json_data['std']],
             visible=True)
     )
     trace2 = go.Scatter(
-        x=[json_data['feature_name']],
-        y=[json_data['discovery_mean']],
+        x=[json_data['title']],
+        y=[json_data['mean']],
         #line=dict(color="#ffe476"),
         error_y=dict(
             type='data',  # value of error bar given in data coordinates
             symmetric=False,
-            value=abs(json_data['discovery_max']),
-            valueminus=abs(json_data['discovery_min']),
+            value=abs(json_data['max']),
+            valueminus=abs(json_data['min']),
             visible=True)
     )
 

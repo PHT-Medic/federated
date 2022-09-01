@@ -1,12 +1,5 @@
-from typing_extensions import Annotated
-from enum import Enum
-
-
-from pydantic import BaseModel, Field
-from datetime import datetime
 from typing import Optional, Any, List, Union, Dict, Literal
 from typing_extensions import Annotated
-from enum import Enum
 from pht_federated.aggregator.api.schemas.figures import *
 
 
@@ -28,6 +21,7 @@ class DiscoveryCategoricalColumn(BaseModel):
     value_counts: Optional[Dict[str, int]]
     most_frequent_element: Optional[Union[int, str]]
     frequency: Optional[int]
+    figure_data: Optional[DiscoveryFigure]
 
 
 class DiscoveryNumericalColumn(BaseModel):
@@ -38,6 +32,7 @@ class DiscoveryNumericalColumn(BaseModel):
     std: Optional[float]
     min: Optional[float]
     max: Optional[float]
+    figure_data: Optional[DiscoveryFigure]
 
 
 class DiscoveryStatistics(BaseModel):

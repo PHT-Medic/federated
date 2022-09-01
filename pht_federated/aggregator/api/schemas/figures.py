@@ -3,8 +3,8 @@ from typing import Optional, List
 
 
 class FigureData(BaseModel):
-    layout: dict
     data: list
+    layout: dict
 
 class DiscoveryFigure(BaseModel):
     feature_name: Optional[str]

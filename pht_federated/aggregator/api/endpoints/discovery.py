@@ -17,6 +17,7 @@ router = APIRouter()
 
 @router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
 def get_discovery_single_aggregated(proposal_id: int,  feature_name: str, db: Session = Depends(dependencies.get_db)):
+
     response = discoveries.get_all_by_discovery_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
@@ -70,43 +71,72 @@ def get_discovery_single_aggregated(proposal_id: int,  feature_name: str, db: Se
 
         discovery_feature_count /= len(response)
 
-        if discovery_most_frequent_element != "":
-            discovery_summary_json_categorical = {
-                "type": "categorical",
-                "title": feature_name,
-                "not_na_elements": discovery_item_count_not_na,
-                "number_categories": discovery_number_categories,
-                "most_frequent_element": discovery_most_frequent_element,
-                "frequency": discovery_frequency
-            }
-        else:
-            discovery_summary_json_numerical = {
-                "type": "numeric",
-                "title": feature_name,
-                "not_na_elements": discovery_item_count_not_na,
-                "mean": discovery_mean,
-                "std": discovery_std,
-                "min": discovery_min,
-                "max": discovery_max
-            }
+    if feature_type == "categorical":
+        discovery_summary_json_categorical = {
+            "type": "categorical",
+            "title": feature_name,
+            "not_na_elements": discovery_item_count_not_na,
+            "number_categories": discovery_number_categories,
+            "most_frequent_element": discovery_most_frequent_element,
+            "frequency": discovery_frequency
+        }
+    else:
+        discovery_summary_json_numeric = {
+            "type": "numeric",
+            "title": feature_name,
+            "not_na_elements": discovery_item_count_not_na,
+            "mean": discovery_mean,
+            "std": discovery_std,
+            "min": discovery_min,
+            "max": discovery_max
+        }
 
-    discovery_summary_schema = {
-        "proposal_id": proposal_id,
-        "item_count": discovery_item_count,
-        "feature_count": discovery_feature_count,
-        "data_information": [discovery_summary_json_numerical]
+
+    if feature_type == 'categorical':
+        figure = create_errorbar(discovery_summary_json_categorical)
+    else:
+        figure = create_errorbar(discovery_summary_json_numeric)
+
+    fig_json = plotly.io.to_json(figure)
+    obj = json.loads(fig_json)
+
+    figure_schema = {
+        'feature_name': feature_name,
+        'feature_type': feature_type,
+        'figure': obj
     }
 
-    #print("DISCOVERY SUMMARY SCHEMA : {}".format(discovery_summary_schema))
+    discovery_figure = DiscoveryFigure(**figure_schema)
+
+    try:
+        discovery_summary_json_categorical['figure_data'] = discovery_figure
+    except:
+        discovery_summary_json_numeric['figure_data'] = discovery_figure
+
+    if feature_type == 'categorical':
+        discovery_summary_schema = {
+            "proposal_id": proposal_id,
+            "item_count": discovery_item_count,
+            "feature_count": discovery_feature_count,
+            "data_information": [discovery_summary_json_categorical]
+        }
+    else:
+        discovery_summary_schema = {
+            "proposal_id": proposal_id,
+            "item_count": discovery_item_count,
+            "feature_count": discovery_feature_count,
+            "data_information": [discovery_summary_json_numeric]
+        }
 
     discovery_summary = DiscoverySummary(**discovery_summary_schema)
 
-    #print("DISCOVERY SUMMARY : {}".format(discovery_summary))
+    print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 
     return discovery_summary
 
 @router.get("/{proposal_id}/discovery_aggregated", response_model=DiscoverySummary)
 def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(dependencies.get_db)):
+
     response = discoveries.get_all_by_discovery_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
@@ -161,6 +191,19 @@ def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(depende
                 "min": discovery_min,
                 "max": discovery_max
             }
+
+            figure = create_errorbar(discovery_summary_json)
+            fig_json = plotly.io.to_json(figure)
+            obj = json.loads(fig_json)
+
+            figure_schema = {
+                'feature_name': discovery_title,
+                'feature_type': "numeric",
+                'figure': obj
+            }
+
+            discovery_figure = DiscoveryFigure(**figure_schema)
+            discovery_summary_json['figure_data'] = discovery_figure
             aggregated_feature_lst.append(discovery_summary_json)
 
             if len(feature_lst) == 0:
@@ -199,6 +242,19 @@ def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(depende
                 "most_frequent_element": discovery_most_frequent_element,
                 "frequency": discovery_frequency
             }
+
+            figure = create_errorbar(discovery_summary_json)
+            fig_json = plotly.io.to_json(figure)
+            obj = json.loads(fig_json)
+
+            figure_schema = {
+                'feature_name': discovery_title,
+                'feature_type': "numeric",
+                'figure': obj
+            }
+
+            discovery_figure = DiscoveryFigure(**figure_schema)
+            discovery_summary_json['figure_data'] = discovery_figure
             aggregated_feature_lst.append(discovery_summary_json)
 
             if len(feature_lst) == 0:
@@ -215,7 +271,7 @@ def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(depende
 
     discovery_summary = DiscoverySummary(**discovery_summary_schema)
 
-    #print("DISCOVERY SUMMARY : {}".format(discovery_summary))
+    print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 
     return discovery_summary
 
@@ -235,25 +291,6 @@ def post_discovery(proposal_id: int, create_msg: SummaryCreate, db: Session = De
     if not discovery:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' could not be created.")
     return discovery
-
-'''
-@router.get("/{proposal_id}/discovery/plot", response_model=DiscoveryFigure)
-def get_plot_discovery(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
-    discovery = discoveries.get_by_discovery_id(proposal_id, db)
-    if not discovery:
-        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
-
-    data = jsonable_encoder(discovery)
-
-    for feature in data['data_information']:
-        if feature['title'] == feature_name:
-            data = feature['figure']['fig_data']
-
-    plot_figure(data)
-    discovery_figure = DiscoveryFigure(**data)
-
-    return discovery_figure
-'''
 
 @router.get("/{proposal_id}/discovery/plot_single", response_model=DiscoveryFigure)
 def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
@@ -306,18 +343,18 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
 
         if discovery_most_frequent_element != "":
             discovery_summary_json_categorical = {
-                "feature_name": feature_name,
-                "discovery_number_categories": discovery_number_categories,
-                "discovery_most_frequent_element": discovery_most_frequent_element,
-                "discovery_frequency": discovery_frequency
+                "title": feature_name,
+                "number_categories": discovery_number_categories,
+                "most_frequent_element": discovery_most_frequent_element,
+                "frequency": discovery_frequency
             }
         else:
             discovery_summary_json_numerical = {
-                "feature_name": feature_name,
-                "discovery_mean": discovery_mean,
-                "discovery_std": discovery_std,
-                "discovery_min": discovery_min,
-                "discovery_max": discovery_max
+                "title": feature_name,
+                "mean": discovery_mean,
+                "std": discovery_std,
+                "min": discovery_min,
+                "max": discovery_max
             }
 
     figure_lst = []
@@ -398,12 +435,12 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
             discovery_max /= len(response)
 
             discovery_summary_json = {
-                "feature_name": discovery_title,
+                "title": discovery_title,
                 "feature_type": 'numeric',
-                "discovery_mean": discovery_mean,
-                "discovery_std": discovery_std,
-                "discovery_min": discovery_min,
-                "discovery_max": discovery_max
+                "mean": discovery_mean,
+                "std": discovery_std,
+                "min": discovery_min,
+                "max": discovery_max
             }
             aggregated_feature_lst.append(discovery_summary_json)
 
@@ -434,11 +471,11 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
             discovery_frequency /= len(response)
 
             discovery_summary_json = {
-                "feature_name": discovery_title,
+                "title": discovery_title,
                 "feature_type": 'categorical',
-                "discovery_number_categories": discovery_number_categories,
-                "discovery_most_frequent_element": discovery_most_frequent_element,
-                "discovery_frequency": discovery_frequency
+                "number_categories": discovery_number_categories,
+                "most_frequent_element": discovery_most_frequent_element,
+                "frequency": discovery_frequency
             }
             aggregated_feature_lst.append(discovery_summary_json)
 
@@ -468,34 +505,3 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
     print("DISCOVERY FIGURES : {}".format(discovery_figures))
 
     return discovery_figures
-
-'''
-@router.get("/discovery/plot", response_model=DiscoveryFigures)
-def get_plot_discovery_all(discovery_obj: DiscoverySummary, db: Session = Depends(dependencies.get_db)):
-
-    figure_lst = []
-
-    for i in range(len(aggregated_feature_lst)):
-        figure_lst.append({
-            'feature_name': aggregated_feature_lst[i]['feature_name'],
-            'feature_type': aggregated_feature_lst[i]['feature_type']
-        })
-        if aggregated_feature_lst[i]['feature_type'] == 'categorical':
-            figure = create_errorbar(aggregated_feature_lst[i])
-        else:
-            figure = create_errorbar(aggregated_feature_lst[i])
-
-        fig_json = plotly.io.to_json(figure)
-        obj = json.loads(fig_json)
-        figure_lst[i]['figure'] = obj
-
-
-    figure_schema = {
-        'fig_data_all': figure_lst
-    }
-    discovery_figures = DiscoveryFigures(**figure_schema)
-
-    #print("DISCOVERY FIGURES : {}".format(discovery_figures))
-
-    return discovery_figures
-'''

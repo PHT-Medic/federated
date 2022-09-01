@@ -1,5 +1,3 @@
-import json
-import pandas as pd
 import sklearn
 from sklearn.datasets import load_diabetes
 from fastapi.testclient import TestClient
@@ -7,7 +5,6 @@ from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.aggregator.api.endpoints.discovery import *
 from pht_federated.aggregator.api.discoveries import statistics
-import plotly.graph_objects as go
 
 from pht_federated.tests.aggregator.test_db import override_get_db
 
@@ -60,12 +57,10 @@ def test_discovery_create():
 
 def test_discovery_get_single_aggregated():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?feature_name={FEATURE_NAME}")
-    #print("Resulting Response : {}".format(response.json()))
     assert response.status_code == 200, response.text
 
 def test_discovery_get_all_aggregated():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated")
-    #print("Resulting Response : {}".format(response.json()))
     assert response.status_code == 200, response.text
 
 '''
@@ -75,47 +70,16 @@ def test_delete_discovery():
 '''
 
 '''
-def test_plot_discovery():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?query_all=True")
-    assert response.status_code == 200, response.text
-
-    #print("RESPONSE : {} and type : {}".format(response.json(), type(response.json())))
-
-    for discovery in response.json():
-        for feature in discovery['data_information']:
-            if feature['title'] == FEATURE_NAME:
-                data = feature
-
-    discovery_summary_json = {
-        "feature_name": FEATURE_NAME,
-        "discovery_mean" : data['mean'],
-        "discovery_std" : data['std'],
-        "discovery_min" : data['min'],
-        "discovery_max" : data['max']
-    }
-
-    plot_errorbar(discovery_summary_json)
-
-'''
-'''
-def test_plot_discovery_aggregated():
+def test_plot_discovery_aggregated_single():
 
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_single?feature_name={FEATURE_NAME}")
     assert response.status_code == 200, response.text
 
 '''
-
-def test_plot_discovery_aggregated():
+'''
+def test_plot_discovery_aggregated_all():
 
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_all")
-    assert response.status_code == 200, response.text
-'''
-def test_plot_discovery_aggregated_all_features():
-
-    discovery = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated")
-    assert discovery.status_code == 200, discovery.text
-
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot")
     assert response.status_code == 200, response.text
 
 '''
