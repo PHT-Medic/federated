@@ -70,6 +70,10 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
     discovery_min = 0
     discovery_max = 0
 
+    discovery_number_categories = 0
+    discovery_most_frequent_element = ""
+    discovery_frequency = 0
+
     response = discoveries.get_all_by_discovery_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404,
@@ -77,36 +81,58 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
 
     for discovery in response:
         discovery = jsonable_encoder(discovery)
+        print("DISCOVERY : {}".format(discovery))
         for feature in discovery['data_information']:
             if feature['title'] == feature_name:
-                data = feature
+                if feature['type'] == 'numeric':
+                    data = feature
 
-        discovery_mean += data['mean']
-        discovery_std += data['std']
-        discovery_min += data['min']
-        discovery_max += data['max']
+                    discovery_mean += data['mean']
+                    discovery_std += data['std']
+                    discovery_min += data['min']
+                    discovery_max += data['max']
+                else:
+                    data = feature
+
+                    discovery_number_categories += data['number_categories']
+                    discovery_most_frequent_element = data['most_frequent_element']
+                    discovery_frequency += data['frequency']
 
 
+        discovery_mean /= len(response)
+        discovery_std /= len(response)
+        discovery_min /= len(response)
+        discovery_max /= len(response)
 
-    discovery_mean /= len(response)
-    discovery_std /= len(response)
-    discovery_min /= len(response)
-    discovery_max /= len(response)
+        discovery_number_categories /= len(response)
+        discovery_frequency /= len(response)
 
-    discovery_summary_json = {
-        "feature_name": feature_name,
-        "discovery_mean": discovery_mean,
-        "discovery_std": discovery_std,
-        "discovery_min": discovery_min,
-        "discovery_max": discovery_max
-    }
+        if discovery_most_frequent_element != "":
+            discovery_summary_json_categorical = {
+                "feature_name": feature_name,
+                "discovery_number_categories": discovery_number_categories,
+                "discovery_most_frequent_element": discovery_most_frequent_element,
+                "discovery_frequency": discovery_frequency
+            }
+        else:
+            discovery_summary_json_numerical = {
+                "feature_name": feature_name,
+                "discovery_mean": discovery_mean,
+                "discovery_std": discovery_std,
+                "discovery_min": discovery_min,
+                "discovery_max": discovery_max
+            }
+
     figure_lst = []
-
     figure_lst.append({
         'feature_name': feature_name
     })
 
-    figure = create_errorbar(discovery_summary_json)
+    try:
+        figure = create_errorbar(discovery_summary_json_numerical)
+    except:
+        figure = create_errorbar(discovery_summary_json_categorical)
+
     fig_json = plotly.io.to_json(figure)
     obj = json.loads(fig_json)
     figure_lst[0]['figure'] = obj

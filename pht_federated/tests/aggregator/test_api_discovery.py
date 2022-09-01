@@ -99,12 +99,12 @@ def test_plot_discovery_aggregated():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_single?feature_name={FEATURE_NAME}")
     assert response.status_code == 200, response.text
 
-
+'''
 def test_plot_discovery_aggregated_all_features():
 
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot")
     assert response.status_code == 200, response.text
-
+'''
 
 
 
