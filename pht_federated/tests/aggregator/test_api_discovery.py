@@ -19,7 +19,7 @@ PROPOSAL_ID = 42
 FEATURE_NAME = "bmi"
 
 
-def test_data_set_create():
+def test_discovery_create():
 
     diabetes_dataset = sklearn.datasets.load_diabetes(return_X_y=False, as_frame=False)
 
@@ -58,11 +58,15 @@ def test_data_set_create():
     assert discovery_id
 
 
-def test_discovery_get():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?query_all=True")
+def test_discovery_get_single_aggregated():
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?feature_name={FEATURE_NAME}")
     #print("Resulting Response : {}".format(response.json()))
     assert response.status_code == 200, response.text
 
+def test_discovery_get_all_aggregated():
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated")
+    #print("Resulting Response : {}".format(response.json()))
+    assert response.status_code == 200, response.text
 
 '''
 def test_delete_discovery():
@@ -100,12 +104,21 @@ def test_plot_discovery_aggregated():
     assert response.status_code == 200, response.text
 
 '''
+
+def test_plot_discovery_aggregated():
+
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot_all")
+    assert response.status_code == 200, response.text
+'''
 def test_plot_discovery_aggregated_all_features():
+
+    discovery = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated")
+    assert discovery.status_code == 200, discovery.text
 
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery/plot")
     assert response.status_code == 200, response.text
 
-
+'''
 
 
 
