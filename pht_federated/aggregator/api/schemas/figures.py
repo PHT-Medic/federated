@@ -8,6 +8,7 @@ class FigureData(BaseModel):
 
 class DiscoveryFigure(BaseModel):
     feature_name: Optional[str]
+    feature_type: Optional[str]
     figure: Optional[FigureData]
 
 class FigureCreate(DiscoveryFigure):

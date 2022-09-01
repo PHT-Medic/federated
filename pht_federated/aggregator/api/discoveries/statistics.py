@@ -171,8 +171,6 @@ def create_errorbar(json_data: dict) -> Figure:
     fig.add_trace(trace1)
     fig.add_trace(trace2)
 
-    #print("DISCOVERY MAX : {}".format(abs(json_data['discovery_max'])))
-    #print("DISCOVERY MIN : {}".format(abs(json_data['discovery_min'])))
     #fig.show()
 
     return fig

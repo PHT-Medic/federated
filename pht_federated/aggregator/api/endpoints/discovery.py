@@ -74,6 +74,8 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
     discovery_most_frequent_element = ""
     discovery_frequency = 0
 
+    feature_type = ""
+
     response = discoveries.get_all_by_discovery_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404,
@@ -81,11 +83,11 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
 
     for discovery in response:
         discovery = jsonable_encoder(discovery)
-        print("DISCOVERY : {}".format(discovery))
         for feature in discovery['data_information']:
             if feature['title'] == feature_name:
                 if feature['type'] == 'numeric':
                     data = feature
+                    feature_type = 'numeric'
 
                     discovery_mean += data['mean']
                     discovery_std += data['std']
@@ -93,10 +95,12 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
                     discovery_max += data['max']
                 else:
                     data = feature
+                    feature_type = 'categorical'
 
                     discovery_number_categories += data['number_categories']
-                    discovery_most_frequent_element = data['most_frequent_element']
                     discovery_frequency += data['frequency']
+                    if data['frequency'] > discovery_frequency:
+                        discovery_most_frequent_element = data['most_frequent_element']
 
 
         discovery_mean /= len(response)
@@ -124,14 +128,20 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
             }
 
     figure_lst = []
-    figure_lst.append({
-        'feature_name': feature_name
-    })
 
-    try:
-        figure = create_errorbar(discovery_summary_json_numerical)
-    except:
+
+    if feature_type == 'categorical':
         figure = create_errorbar(discovery_summary_json_categorical)
+        figure_lst.append({
+            'feature_name': feature_name,
+            'feature_type': 'categorical'
+        })
+    else:
+        figure = create_errorbar(discovery_summary_json_numerical)
+        figure_lst.append({
+            'feature_name': feature_name,
+            'feature_type': 'numerical'
+        })
 
     fig_json = plotly.io.to_json(figure)
     obj = json.loads(fig_json)
@@ -156,6 +166,7 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
     aggregated_feature_lst = []
     figure_lst = []
 
+
     response = discoveries.get_all_by_discovery_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404,
@@ -168,52 +179,89 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
 
 
     for feature in feature_lst:
-        value = feature
+        if feature['type'] == 'numeric':
+            value = feature
 
-        discovery_title = ""
-        discovery_mean = 0
-        discovery_std = 0
-        discovery_min = 0
-        discovery_max = 0
+            discovery_title = ""
+            discovery_mean = 0
+            discovery_std = 0
+            discovery_min = 0
+            discovery_max = 0
 
-        for feature2 in feature_lst:
-            if feature2['title'] == value['title']:
-                data = feature2
-                discovery_title = data['title']
-                discovery_mean += data['mean']
-                discovery_std += data['std']
-                discovery_min += data['min']
-                discovery_max += data['max']
+            for feature2 in feature_lst:
+                if feature2['title'] == value['title']:
+                    data = feature2
+                    discovery_title = data['title']
+                    discovery_mean += data['mean']
+                    discovery_std += data['std']
+                    discovery_min += data['min']
+                    discovery_max += data['max']
 
-        feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
+            feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
 
+            discovery_mean /= len(response)
+            discovery_std /= len(response)
+            discovery_min /= len(response)
+            discovery_max /= len(response)
 
+            discovery_summary_json = {
+                "feature_type": 'numeric',
+                "feature_name": discovery_title,
+                "discovery_mean": discovery_mean,
+                "discovery_std": discovery_std,
+                "discovery_min": discovery_min,
+                "discovery_max": discovery_max
+            }
+            aggregated_feature_lst.append(discovery_summary_json)
 
+            if len(feature_lst) == 0:
+                break
 
-        discovery_mean /= len(response)
-        discovery_std /= len(response)
-        discovery_min /= len(response)
-        discovery_max /= len(response)
+        else:
+            value = feature
 
-        discovery_summary_json = {
-            "feature_name": discovery_title,
-            "discovery_mean": discovery_mean,
-            "discovery_std": discovery_std,
-            "discovery_min": discovery_min,
-            "discovery_max": discovery_max
-        }
-        aggregated_feature_lst.append(discovery_summary_json)
+            discovery_title = ""
+            discovery_number_categories = 0
+            discovery_most_frequent_element = ""
+            discovery_frequency = 0
 
-        if len(feature_lst) == 0:
-            break
+            for feature2 in feature_lst:
+                if feature2['title'] == value['title']:
+                    data = feature2
 
+                    discovery_title = data['title']
+                    discovery_number_categories += data['number_categories']
+                    discovery_frequency += data['frequency']
+                    if data['frequency'] > discovery_frequency:
+                        discovery_most_frequent_element = data['most_frequent_element']
+
+            feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
+
+            discovery_number_categories /= len(response)
+            discovery_frequency /= len(response)
+
+            discovery_summary_json = {
+                "feature_type": 'categorical',
+                "feature_name": discovery_title,
+                "discovery_number_categories": discovery_number_categories,
+                "discovery_most_frequent_element": discovery_most_frequent_element,
+                "discovery_frequency": discovery_frequency
+            }
+            aggregated_feature_lst.append(discovery_summary_json)
+
+            if len(feature_lst) == 0:
+                break
 
     for i in range(len(aggregated_feature_lst)):
         figure_lst.append({
-            'feature_name': aggregated_feature_lst[i]['feature_name']
+            'feature_name': aggregated_feature_lst[i]['feature_name'],
+            'feature_type': aggregated_feature_lst[i]['feature_type']
         })
+        if aggregated_feature_lst[i]['feature_type'] == 'categorical':
+            figure = create_errorbar(aggregated_feature_lst[i])
+        else:
+            figure = create_errorbar(aggregated_feature_lst[i])
 
-        figure = create_errorbar(aggregated_feature_lst[i])
         fig_json = plotly.io.to_json(figure)
         obj = json.loads(fig_json)
         figure_lst[i]['figure'] = obj
