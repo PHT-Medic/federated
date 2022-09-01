@@ -6,16 +6,9 @@ class FigureData(BaseModel):
     layout: dict
     data: list
 
-class FeatureData(BaseModel):
-    feature_name: str
-    figure: Optional[FigureData]
-
 class DiscoveryFigure(BaseModel):
-    fig_data: Optional[FeatureData]
-
-    class Config:
-        orm_mode = True
-
+    feature_name: Optional[str]
+    figure: Optional[FigureData]
 
 class FigureCreate(DiscoveryFigure):
     pass

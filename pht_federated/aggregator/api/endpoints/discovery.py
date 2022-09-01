@@ -116,10 +116,9 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
         'fig_data_all': figure_lst
     }
 
-    print("FIGURE SCHEMA : {}".format(figure_schema))
-    discovery_figure = DiscoveryFigures(fig_data_all=figure_lst)
+    discovery_figure = DiscoveryFigures(**figure_schema)
 
-    print("DISCOVERY FIGURE : {}".format(discovery_figure))
+    #print("DISCOVERY FIGURE : {}".format(discovery_figure))
 
     return discovery_figure
 
@@ -154,17 +153,14 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
         for feature2 in feature_lst:
             if feature2['title'] == value['title']:
                 data = feature2
-                #print("DATA : {}".format(data))
                 discovery_title = data['title']
                 discovery_mean += data['mean']
                 discovery_std += data['std']
                 discovery_min += data['min']
                 discovery_max += data['max']
-                #print("DISCOVERY MEAN : {}".format(discovery_mean))
 
-        #print("FEATURE LIST BEFORE : {}".format(feature_lst))
         feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
-        #print("FEATURE LIST AFTER : {}".format(feature_lst))
+
 
 
 
@@ -185,8 +181,6 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
         if len(feature_lst) == 0:
             break
 
-    print("AGGREGATED FEATURE LST : {}".format(aggregated_feature_lst))
-
 
     for i in range(len(aggregated_feature_lst)):
         figure_lst.append({
@@ -202,12 +196,9 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
     figure_schema = {
         'fig_data_all': figure_lst
     }
-
-    print("FIGURE SCHEMA : {}".format(figure_schema))
-
     discovery_figures = DiscoveryFigures(**figure_schema)
 
-    print("DISCOVERY FIGURES : {}".format(discovery_figures))
+    #print("DISCOVERY FIGURES : {}".format(discovery_figures))
 
     return discovery_figures
 
