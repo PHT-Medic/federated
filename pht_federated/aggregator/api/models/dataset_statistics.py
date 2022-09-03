@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
 
 
 class DatasetStatistics(Base):
-    __tablename__ = "dataset_statistcs"
+    __tablename__ = "dataset_statistics"
     id = Column(Integer, primary_key=True, index=True)
     proposal_id = Column(Integer, default=0)
     n_items = Column(Integer, default=0)
