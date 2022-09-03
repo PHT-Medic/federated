@@ -35,19 +35,6 @@ class DiscoveryNumericalColumn(BaseModel):
     figure_data: Optional[DiscoveryFigure]
 
 
-class DiscoveryStatistics(BaseModel):
-    n_items: Optional[int] = 0
-    n_features: Optional[int] = 0
-    column_information: Optional[List[Annotated[Union[DiscoveryCategoricalColumn,
-                                                      DiscoveryNumericalColumn,
-                                                      DiscoveryEqualColumn,
-                                                      DiscoveryUniqueColumn],
-                                                Field(discriminator='type')]]]
-
-    class Config:
-        orm_mode = True
-
-
 
 class DiscoverySummary(BaseModel):
     proposal_id: Optional[int]
@@ -67,6 +54,5 @@ class SummaryCreate(DiscoverySummary):
 
 class SummaryUpdate(DiscoverySummary):
     pass
-
 
 

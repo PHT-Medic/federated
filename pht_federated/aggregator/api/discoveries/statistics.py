@@ -5,11 +5,12 @@ import plotly.express as px
 import plotly.io
 from plotly.graph_objects import Figure
 import json
-from pht_federated.aggregator.api.schemas.discovery import DiscoveryStatistics, DiscoverySummary, DiscoveryFigure
+from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary, DiscoveryFigure
+from pht_federated.aggregator.api.schemas.dataset_statistics import DatasetStatistics
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-def get_discovery_statistics(dataframe: pd.DataFrame, proposal_id: int) -> Optional[DiscoveryStatistics]:
+def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatistics]:
     """
     Computes statistical information of a dataset
     :param dataframe: Dataset as dataframe object
@@ -26,13 +27,12 @@ def get_discovery_statistics(dataframe: pd.DataFrame, proposal_id: int) -> Optio
 
 
     schema_data = {
-        'proposal_id': proposal_id,
-        'item_count': n_items,
-        'feature_count': n_features,
-        'data_information': columns_inf
+        'n_items': n_items,
+        'n_features': n_features,
+        'column_information': columns_inf
     }
 
-    statistics = DiscoverySummary(**schema_data)
+    statistics = DatasetStatistics(**schema_data)
     return statistics
 
 
@@ -143,6 +143,49 @@ def plot_figure_json(json_data: dict):
 def plot_figure(fig: Figure):
     fig.show()
 
+def plot_discovery_summary_single(discovery_summary: dict):
+
+    data_information = discovery_summary['data_information'][0]
+
+    figure_data = {
+        "data": data_information['figure_data']['figure']['data'],
+        "layout": data_information['figure_data']['figure']['layout']
+    }
+
+    plot_figure_json(figure_data)
+
+def plot_discovery_summary_selected_features(discovery_summary: dict, features: list):
+
+    figure_data_lst = []
+
+    data_information = discovery_summary['data_information']
+
+    for data in data_information:
+        figure_data = {
+            "data": data['figure_data']['figure']['data'],
+            "layout": data['figure_data']['figure']['layout']
+        }
+        figure_data_lst.append(figure_data)
+
+    for figure in figure_data_lst:
+        #plot_figure_json(figure)
+        print("Plotting is commented out in statistics.py")
+def plot_discovery_summary_all(discovery_summary: dict):
+
+    figure_data_lst = []
+
+    data_information = discovery_summary['data_information']
+
+    for data in data_information:
+        figure_data = {
+            "data": data['figure_data']['figure']['data'],
+            "layout": data['figure_data']['figure']['layout']
+        }
+        figure_data_lst.append(figure_data)
+
+    for figure in figure_data_lst:
+        #plot_figure_json(figure)
+        print("Plotting is commented out in statistics.py")
 
 def create_errorbar(json_data: dict) -> Figure:
 

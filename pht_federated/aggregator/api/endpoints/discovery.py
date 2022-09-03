@@ -2,9 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from typing import Any, List
 
-from pht_federated.aggregator.api.schemas.discovery import SummaryCreate, DiscoverySummary
+from pht_federated.aggregator.api.schemas.discovery import *
+from pht_federated.aggregator.api.schemas.dataset_statistics import *
 from pht_federated.aggregator.api.schemas.figures import DiscoveryFigure, DiscoveryFigures
 from pht_federated.aggregator.api.crud.crud_discovery import discoveries
+from pht_federated.aggregator.api.crud.crud_dataset_statistics import datasets
 from pht_federated.aggregator.api.discoveries.statistics import *
 
 from pht_federated.aggregator.api import dependencies
@@ -13,17 +15,10 @@ from sqlalchemy.orm import Session
 
 router = APIRouter()
 
-@router.get("/{proposal_id}/discovery_all", response_model=List[DiscoverySummary])
-def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_db)):
-    discovery = discoveries.get_all_by_discovery_id(proposal_id, db)
-    if not discovery:
-        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
-    return discovery
-
-@router.get("/{proposal_id}/discovery_aggregated_single", response_model=DiscoverySummary)
+@router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
 def get_discovery_single_aggregated(proposal_id: int,  feature_name: str, db: Session = Depends(dependencies.get_db)):
 
-    response = discoveries.get_all_by_discovery_id(proposal_id, db)
+    response = datasets.get_all_by_dataset_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
 
@@ -43,9 +38,9 @@ def get_discovery_single_aggregated(proposal_id: int,  feature_name: str, db: Se
 
     for discovery in response:
         discovery = jsonable_encoder(discovery)
-        discovery_item_count += discovery['item_count']
-        discovery_feature_count += discovery['feature_count']
-        for feature in discovery['data_information']:
+        discovery_item_count += discovery['n_items']
+        discovery_feature_count += discovery['n_features']
+        for feature in discovery['column_information']:
             if feature['title'] == feature_name:
                 if feature['type'] == 'numeric':
                     data = feature
@@ -139,10 +134,10 @@ def get_discovery_single_aggregated(proposal_id: int,  feature_name: str, db: Se
 
     return discovery_summary
 
-@router.get("/{proposal_id}/discovery_aggregated_all", response_model=DiscoverySummary)
+@router.get("/{proposal_id}/discovery_all", response_model=DiscoverySummary)
 def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(dependencies.get_db)):
 
-    response = discoveries.get_all_by_discovery_id(proposal_id, db)
+    response = datasets.get_all_by_dataset_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
 
@@ -153,9 +148,9 @@ def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(depende
 
     for discovery in response:
         discovery = jsonable_encoder(discovery)
-        discovery_item_count += discovery['item_count']
-        discovery_feature_count += discovery['feature_count']
-        for feature in discovery['data_information']:
+        discovery_item_count += discovery['n_items']
+        discovery_feature_count += discovery['n_features']
+        for feature in discovery['column_information']:
             feature_lst.append(feature)
 
 
@@ -287,12 +282,20 @@ def delete_discovery(proposal_id: int, db: Session = Depends(dependencies.get_db
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
     return discovery_del
 
-@router.post("/{proposal_id}/discovery", response_model=DiscoverySummary)
-def post_discovery(proposal_id: int, create_msg: SummaryCreate, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
-    discovery = discoveries.create(db, obj_in=create_msg)
-    if not discovery:
-        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' could not be created.")
-    return discovery
+@router.post("/{proposal_id}/discovery", response_model=DiscoveryStatistics)
+def post_discovery_statistics(proposal_id: int, create_msg: StatisticsCreate, db: Session = Depends(dependencies.get_db)) -> DatasetStatistics:
+    dataset = json.loads(create_msg.json())
+    dataset_statistics_schema = {
+        "proposal_id": proposal_id,
+        "n_items": int(dataset['n_items']),
+        "n_features": int(dataset['n_features']),
+        "column_information": dataset['column_information']
+    }
+    discovery_statistics = DiscoveryStatistics(**dataset_statistics_schema)
+    discovery_statistics = datasets.create(db, obj_in=discovery_statistics)
+    if not discovery_statistics:
+        raise HTTPException(status_code=404, detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
+    return discovery_statistics
 
 @router.get("/{proposal_id}/discovery/plot_single", response_model=DiscoveryFigure)
 def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)) -> DiscoveryFigures:
