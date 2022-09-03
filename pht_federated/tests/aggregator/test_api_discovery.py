@@ -56,12 +56,52 @@ def test_discovery_create():
 
 
 def test_discovery_get_single_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery?feature_name={FEATURE_NAME}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated_single?feature_name={FEATURE_NAME}")
     assert response.status_code == 200, response.text
 
 def test_discovery_get_all_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated_all")
     assert response.status_code == 200, response.text
+
+
+def test_plot_discovery_summary_single():
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated_single?feature_name={FEATURE_NAME}")
+    assert response.status_code == 200, response.text
+
+    discovery_summary = response.json()
+    data_information = discovery_summary['data_information'][0]
+
+    #print("DATA INFORMATION : {}".format(data_information))
+    #print("DATA : {}".format(data_information['figure_data']['figure']['data']))
+
+    figure_data = {
+        "data": data_information['figure_data']['figure']['data'],
+        "layout": data_information['figure_data']['figure']['layout']
+    }
+
+    plot_figure_json(figure_data)
+
+
+def test_plot_discovery_summary_all():
+    response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery_aggregated_all")
+    assert response.status_code == 200, response.text
+
+    figure_data_lst = []
+
+    discovery_summary = response.json()
+    data_information = discovery_summary['data_information']
+
+    for data in data_information:
+        figure_data = {
+            "data": data['figure_data']['figure']['data'],
+            "layout": data['figure_data']['figure']['layout']
+        }
+        figure_data_lst.append(figure_data)
+
+    for figure in figure_data_lst:
+        #plot_figure_json(figure)
+        None
+
 
 '''
 def test_delete_discovery():

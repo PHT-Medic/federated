@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-#from pht_federated.aggregator.api.models.discovery import DataSetSummary
 from fastapi.encoders import jsonable_encoder
 from typing import Any, List
 
@@ -14,8 +13,14 @@ from sqlalchemy.orm import Session
 
 router = APIRouter()
 
+@router.get("/{proposal_id}/discovery_all", response_model=List[DiscoverySummary])
+def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_db)):
+    discovery = discoveries.get_all_by_discovery_id(proposal_id, db)
+    if not discovery:
+        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
+    return discovery
 
-@router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
+@router.get("/{proposal_id}/discovery_aggregated_single", response_model=DiscoverySummary)
 def get_discovery_single_aggregated(proposal_id: int,  feature_name: str, db: Session = Depends(dependencies.get_db)):
 
     response = discoveries.get_all_by_discovery_id(proposal_id, db)
@@ -101,8 +106,8 @@ def get_discovery_single_aggregated(proposal_id: int,  feature_name: str, db: Se
     obj = json.loads(fig_json)
 
     figure_schema = {
-        'feature_name': feature_name,
-        'feature_type': feature_type,
+        'title': feature_name,
+        'type': feature_type,
         'figure': obj
     }
 
@@ -134,7 +139,7 @@ def get_discovery_single_aggregated(proposal_id: int,  feature_name: str, db: Se
 
     return discovery_summary
 
-@router.get("/{proposal_id}/discovery_aggregated", response_model=DiscoverySummary)
+@router.get("/{proposal_id}/discovery_aggregated_all", response_model=DiscoverySummary)
 def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(dependencies.get_db)):
 
     response = discoveries.get_all_by_discovery_id(proposal_id, db)
@@ -197,8 +202,8 @@ def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(depende
             obj = json.loads(fig_json)
 
             figure_schema = {
-                'feature_name': discovery_title,
-                'feature_type': "numeric",
+                'title': discovery_title,
+                'type': "numeric",
                 'figure': obj
             }
 
@@ -235,7 +240,7 @@ def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(depende
             discovery_frequency /= len(response)
 
             discovery_summary_json = {
-                "feature_type": 'categorical',
+                "type": 'categorical',
                 "title": discovery_title,
                 "not_na_elements": discovery_item_count_not_na,
                 "number_categories": discovery_number_categories,
@@ -248,8 +253,8 @@ def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(depende
             obj = json.loads(fig_json)
 
             figure_schema = {
-                'feature_name': discovery_title,
-                'feature_type': "numeric",
+                'title': discovery_title,
+                'type': "numeric",
                 'figure': obj
             }
 
@@ -275,15 +280,12 @@ def get_discovery_all_aggregated(proposal_id: int, db: Session = Depends(depende
 
     return discovery_summary
 
-
 @router.delete("/{proposal_id}/discovery", response_model=DiscoverySummary)
 def delete_discovery(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
     discovery_del = discoveries.delete_by_discovery_id(proposal_id, db)
     if not discovery_del:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
     return discovery_del
-
-
 
 @router.post("/{proposal_id}/discovery", response_model=DiscoverySummary)
 def post_discovery(proposal_id: int, create_msg: SummaryCreate, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
@@ -293,7 +295,7 @@ def post_discovery(proposal_id: int, create_msg: SummaryCreate, db: Session = De
     return discovery
 
 @router.get("/{proposal_id}/discovery/plot_single", response_model=DiscoveryFigure)
-def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
+def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)) -> DiscoveryFigures:
 
     discovery_mean = 0
     discovery_std = 0
@@ -363,14 +365,14 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
     if feature_type == 'categorical':
         figure = create_errorbar(discovery_summary_json_categorical)
         figure_lst.append({
-            'feature_name': feature_name,
-            'feature_type': 'categorical'
+            'title': feature_name,
+            'type': 'categorical'
         })
     else:
         figure = create_errorbar(discovery_summary_json_numerical)
         figure_lst.append({
-            'feature_name': feature_name,
-            'feature_type': 'numerical'
+            'title': feature_name,
+            'type': 'numerical'
         })
 
     fig_json = plotly.io.to_json(figure)
@@ -388,9 +390,8 @@ def get_plot_discovery_aggregated_one_feature(proposal_id: int, feature_name: st
 
     return discovery_figure
 
-
 @router.get("/{proposal_id}/discovery/plot_all", response_model=DiscoveryFigures)
-def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = Depends(dependencies.get_db)):
+def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoveryFigures:
 
     feature_lst = []
     aggregated_feature_lst = []
@@ -436,7 +437,7 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
 
             discovery_summary_json = {
                 "title": discovery_title,
-                "feature_type": 'numeric',
+                "type": 'numeric',
                 "mean": discovery_mean,
                 "std": discovery_std,
                 "min": discovery_min,
@@ -484,8 +485,8 @@ def get_plot_discovery_aggregated_all_features(proposal_id: int, db: Session = D
 
     for i in range(len(aggregated_feature_lst)):
         figure_lst.append({
-            'feature_name': aggregated_feature_lst[i]['feature_name'],
-            'feature_type': aggregated_feature_lst[i]['feature_type']
+            'title': aggregated_feature_lst[i]['feature_name'],
+            'type': aggregated_feature_lst[i]['feature_type']
         })
         if aggregated_feature_lst[i]['feature_type'] == 'categorical':
             figure = create_errorbar(aggregated_feature_lst[i])

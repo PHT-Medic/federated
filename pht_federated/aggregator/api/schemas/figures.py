@@ -7,8 +7,8 @@ class FigureData(BaseModel):
     layout: dict
 
 class DiscoveryFigure(BaseModel):
-    feature_name: Optional[str]
-    feature_type: Optional[str]
+    title: Optional[str]
+    type: Optional[str]
     figure: Optional[FigureData]
 
 class FigureCreate(DiscoveryFigure):
