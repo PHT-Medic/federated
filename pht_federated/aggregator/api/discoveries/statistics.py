@@ -123,6 +123,14 @@ def process_categorical_column(columns_inf: dict, i: int, description: pd.DataFr
 
     return columns_inf
 
+def print_available_features(discovery_summary: dict):
+
+    available_features = []
+
+    for feature in discovery_summary['data_information']:
+        available_features.append(feature['title'])
+
+    print("AVAILABLE FEATURES : {}".format(available_features))
 
 def create_figure(fig: Figure) -> DiscoveryFigure:
     """
@@ -161,31 +169,16 @@ def plot_discovery_summary_selected_features(discovery_summary: dict, features: 
     data_information = discovery_summary['data_information']
 
     for data in data_information:
-        figure_data = {
-            "data": data['figure_data']['figure']['data'],
-            "layout": data['figure_data']['figure']['layout']
-        }
-        figure_data_lst.append(figure_data)
+        if data['title'] in features:
+            figure_data = {
+                "data": data['figure_data']['figure']['data'],
+                "layout": data['figure_data']['figure']['layout']
+            }
+            figure_data_lst.append(figure_data)
 
     for figure in figure_data_lst:
-        #plot_figure_json(figure)
-        print("Plotting is commented out in statistics.py")
-def plot_discovery_summary_all(discovery_summary: dict):
-
-    figure_data_lst = []
-
-    data_information = discovery_summary['data_information']
-
-    for data in data_information:
-        figure_data = {
-            "data": data['figure_data']['figure']['data'],
-            "layout": data['figure_data']['figure']['layout']
-        }
-        figure_data_lst.append(figure_data)
-
-    for figure in figure_data_lst:
-        #plot_figure_json(figure)
-        print("Plotting is commented out in statistics.py")
+        plot_figure_json(figure)
+        #print("Plotting is commented out in statistics.py")
 
 def create_errorbar(json_data: dict) -> Figure:
 
@@ -215,36 +208,5 @@ def create_errorbar(json_data: dict) -> Figure:
     fig.add_trace(trace2)
 
     #fig.show()
-
-    return fig
-
-def create_errorbar2(json_data: dict) -> Figure:
-
-    fig = go.Figure()
-
-    trace1 = go.Scatter(
-        x=[json_data['title']],
-        y=[json_data['mean']],
-        error_y=dict(
-            type='data',  # value of error bar given in data coordinates
-            array=[json_data['std']],
-            visible=True)
-    )
-    trace2 = go.Scatter(
-        x=[json_data['title']],
-        y=[json_data['mean']],
-        #line=dict(color="#ffe476"),
-        error_y=dict(
-            type='data',  # value of error bar given in data coordinates
-            symmetric=False,
-            value=abs(json_data['max']),
-            valueminus=abs(json_data['min']),
-            visible=True)
-    )
-
-    fig.add_trace(trace1)
-    fig.add_trace(trace2)
-
-    fig.show()
 
     return fig
