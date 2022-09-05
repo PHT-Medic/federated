@@ -123,15 +123,6 @@ def process_categorical_column(columns_inf: dict, i: int, description: pd.DataFr
 
     return columns_inf
 
-def print_available_features(discovery_summary: dict):
-
-    available_features = []
-
-    for feature in discovery_summary['data_information']:
-        available_features.append(feature['title'])
-
-    print("AVAILABLE FEATURES : {}".format(available_features))
-
 def create_figure(fig: Figure) -> DiscoveryFigure:
     """
     Create DataSetFigure-Object of a plotly figure
@@ -147,38 +138,6 @@ def create_figure(fig: Figure) -> DiscoveryFigure:
 def plot_figure_json(json_data: dict):
     fig_plotly = plotly.io.from_json(json.dumps(json_data))
     fig_plotly.show()
-
-def plot_figure(fig: Figure):
-    fig.show()
-
-def plot_discovery_summary_single(discovery_summary: dict):
-
-    data_information = discovery_summary['data_information'][0]
-
-    figure_data = {
-        "data": data_information['figure_data']['figure']['data'],
-        "layout": data_information['figure_data']['figure']['layout']
-    }
-
-    plot_figure_json(figure_data)
-
-def plot_discovery_summary_selected_features(discovery_summary: dict, features: list):
-
-    figure_data_lst = []
-
-    data_information = discovery_summary['data_information']
-
-    for data in data_information:
-        if data['title'] in features:
-            figure_data = {
-                "data": data['figure_data']['figure']['data'],
-                "layout": data['figure_data']['figure']['layout']
-            }
-            figure_data_lst.append(figure_data)
-
-    for figure in figure_data_lst:
-        plot_figure_json(figure)
-        #print("Plotting is commented out in statistics.py")
 
 def create_errorbar(json_data: dict) -> Figure:
 

@@ -75,18 +75,45 @@ def test_plot_discovery_summary_single():
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
-    #plot_discovery_summary_single(discovery_summary)
+    data_information = discovery_summary['data_information'][0]
+
+    figure_data = {
+        "data": data_information['figure_data']['figure']['data'],
+        "layout": data_information['figure_data']['figure']['layout']
+    }
+
+    plot_figure_json(figure_data)
 
 def test_plot_discovery_summary_selected_features():
     response = client.get(f"/api/proposal/{PROPOSAL_ID}/discovery")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
-    print_available_features(discovery_summary)
+
+    available_features = []
+
+    for feature in discovery_summary['data_information']:
+        available_features.append(feature['title'])
+
+    print("AVAILABLE FEATURES : {}".format(available_features))
 
     selected_features = ['age', 'bmi', 'sex']
 
-    plot_discovery_summary_selected_features(discovery_summary, selected_features)
+    figure_data_lst = []
+
+    data_information = discovery_summary['data_information']
+
+    for data in data_information:
+        if data['title'] in selected_features:
+            figure_data = {
+                "data": data['figure_data']['figure']['data'],
+                "layout": data['figure_data']['figure']['layout']
+            }
+            figure_data_lst.append(figure_data)
+
+    for figure in figure_data_lst:
+        plot_figure_json(figure)
+        # print("Plotting is commented out in statistics.py")
 
 
 '''
