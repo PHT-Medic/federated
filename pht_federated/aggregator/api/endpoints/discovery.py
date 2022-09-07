@@ -158,7 +158,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
         discovery_summary = DiscoverySummary(**discovery_summary_schema)
 
-        print("DISCOVERY SUMMARY : {}".format(discovery_summary))
+        #print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 
         return discovery_summary
 
