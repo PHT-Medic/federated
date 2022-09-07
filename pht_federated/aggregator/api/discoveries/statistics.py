@@ -99,6 +99,7 @@ def process_categorical_column(dataframe: pd.DataFrame, columns_inf: dict, i: in
     top = description[title]["top"]
     freq = description[title]["freq"]
 
+
     # if every entry has a unique value (or at most 50 values are given multiple times)
     if count - 50 < unique <= count:
         column_type = "unique"
@@ -144,6 +145,7 @@ def create_errorbar(json_data: dict) -> Figure:
 
     fig = go.Figure()
 
+    '''
     trace1 = go.Scatter(
         x=[json_data['title']],
         y=[json_data['mean']],
@@ -166,14 +168,40 @@ def create_errorbar(json_data: dict) -> Figure:
 
     fig.add_trace(trace1)
     fig.add_trace(trace2)
+    '''
 
-    #fig.show()
+    fig = make_subplots(rows=1, cols=2)
+
+    trace1 = go.Scatter(
+        x=[json_data['title']],
+        y=[json_data['mean']],
+        error_y=dict(
+            type='data',  # value of error bar given in data coordinates
+            array=[json_data['std']],
+            visible=True)
+    )
+    #print("MAX : {}".format(abs(json_data['max'])))
+    #print("MIN : {}".format(abs(json_data['min'])))
+    trace2 = go.Scatter(
+        x=[json_data['title']],
+        y=[json_data['mean']],
+        #line=dict(color="#ffe476"),
+        error_y=dict(
+            type='data',  # value of error bar given in data coordinates
+            symmetric=False,
+            value=abs(json_data['max']),
+            valueminus=abs(json_data['min']),
+            visible=True)
+    )
+
+    fig.add_trace(trace1)
+    fig.add_trace(trace2)
+
+    fig.update_layout(height=600, width=800, title_text="Side By Side Subplots")
 
     return fig
 
 def create_barplot(json_data: dict) -> Figure:
-
-    fig = go.Figure()
 
     value_counts = json_data['value_counts']
     feature_title = json_data['title']
@@ -181,11 +209,7 @@ def create_barplot(json_data: dict) -> Figure:
     dat = value_counts.items()
     plot_df = pd.DataFrame(data=dat, columns=names_col)
 
-    bar = px.bar(plot_df, x='Count', y='Value', title=f'Value Counts : "{feature_title}"')
-    #bar = go.bar(plot_df, x='Count', y='Value', title='Discovery Summary Value Counts')
-
-    #fig.add_bar(bar)
-    #fig.show()
+    bar = px.bar(plot_df, x='Count', y='Value', title=f'Value Counts : "{feature_title}"', color=dat)
 
     return bar
 

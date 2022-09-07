@@ -173,7 +173,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
         discovery_summary = DiscoverySummary(**discovery_summary_schema)
 
-        print("DISCOVERY SUMMARY : {}".format(discovery_summary))
+        #print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 
         return discovery_summary
 
@@ -239,19 +239,18 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
 
         discovery_number_categories /= len(response)
 
-        c = Counter()
-        for d in discovery_value_counts:
-            c.update(d)
-
-        discovery_value_counts = dict(c)
-        for entry in discovery_value_counts.items():
-            discovery_value_counts[entry[0]] = round(entry[1] / len(response))
-
-        discovery_most_frequent_element = max(discovery_value_counts, key=discovery_value_counts.get)
-        discovery_frequency = discovery_value_counts[discovery_most_frequent_element]
-
-
         if feature_type == "categorical":
+            c = Counter()
+            for d in discovery_value_counts:
+                c.update(d)
+
+            discovery_value_counts = dict(c)
+            for entry in discovery_value_counts.items():
+                discovery_value_counts[entry[0]] = round(entry[1] / len(response))
+
+            discovery_most_frequent_element = max(discovery_value_counts, key=discovery_value_counts.get)
+            discovery_frequency = discovery_value_counts[discovery_most_frequent_element]
+
             discovery_summary_json_categorical = {
                 "type": "categorical",
                 "title": feature_name,

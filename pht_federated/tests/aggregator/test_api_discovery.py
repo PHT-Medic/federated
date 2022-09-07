@@ -20,6 +20,7 @@ PROPOSAL_ID_NUMERIC = 42
 PROPOSAL_ID_NUMERIC2 = 43
 PROPOSAL_ID_CATEGORICAL = 44
 FEATURE_NAME_NUMERIC = "bmi"
+FEATURE_NAME_NUMERIC2 = "Age"
 FEATURE_NAME_CATEGORICAL = 'Embarked'
 
 
@@ -117,8 +118,6 @@ def test_discovery_create_mixed():
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
 
-    print("STATS1 TITANIC : {}".format(stats1_json))
-
     response = client.post(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery", json={
         "n_items": stats1_json['n_items'],
         "n_features": stats1_json['n_features'],
@@ -150,11 +149,12 @@ def test_discovery_get_single_aggregated():
 
 
 def test_plot_discovery_summary_single():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery_feature?feature_name={FEATURE_NAME_NUMERIC2}")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
     data_information = discovery_summary['data_information'][0]
+    print("DATA INFORMATION : {}".format(data_information))
 
     figure_data = {
         "data": data_information['figure_data']['figure']['data'],
