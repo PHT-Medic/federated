@@ -173,21 +173,22 @@ def create_errorbar(json_data: dict) -> Figure:
 
 def create_barplot(json_data: dict) -> Figure:
 
-    '''
-    trace1 = go.Bar(
-        x=[str(x) for x in datag.ix[:, 0].tolist()[1:6]],
-        y=datag.ix[:, 1].tolist()[1:6],
-        name='travel')
+    fig = go.Figure()
 
-    data = [trace1]
-    layout = go.Layout(
-        barmode='stack',
-        title='Realization: 0, 0',
-        xaxis=dict(title='Model',
-                   type='category'),
-        yaxis=dict(title='Time (minutes)'))
-    fig = go.Figure(data=data, layout=layout)
-    offline.plot(fig, image='png', filename='stacked-bar')
-    '''
-    None
+    value_counts = json_data['value_counts']
+    feature_title = json_data['title']
+    names_col = ["Value", "Count"]
+    dat = value_counts.items()
+    plot_df = pd.DataFrame(data=dat, columns=names_col)
+
+    bar = px.bar(plot_df, x='Count', y='Value', title=f'Value Counts : "{feature_title}"')
+    #bar = go.bar(plot_df, x='Count', y='Value', title='Discovery Summary Value Counts')
+
+    #fig.add_bar(bar)
+    #fig.show()
+
+    return bar
+
+
+
 

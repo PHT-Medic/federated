@@ -19,7 +19,8 @@ client = TestClient(app)
 PROPOSAL_ID_NUMERIC = 42
 PROPOSAL_ID_NUMERIC2 = 43
 PROPOSAL_ID_CATEGORICAL = 44
-FEATURE_NAME = "bmi"
+FEATURE_NAME_NUMERIC = "bmi"
+FEATURE_NAME_CATEGORICAL = 'Embarked'
 
 
 def test_discovery_create_numeric():
@@ -142,14 +143,14 @@ def test_discovery_create_mixed():
 def test_discovery_get_all_aggregated():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery")
     assert response.status_code == 200, response.text
-'''
+
 def test_discovery_get_single_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery_feature?feature_name={FEATURE_NAME}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
     assert response.status_code == 200, response.text
 
 
 def test_plot_discovery_summary_single():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery_feature?feature_name={FEATURE_NAME}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
@@ -192,7 +193,7 @@ def test_plot_discovery_summary_selected_features():
     for figure in figure_data_lst:
         #plot_figure_json(figure)
         print("Plotting is commented out!")
-'''
+
 
 '''
 def test_delete_discovery():
