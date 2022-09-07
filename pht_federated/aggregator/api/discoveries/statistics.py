@@ -20,7 +20,6 @@ def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatist
         raise TypeError
     shape = dataframe.shape
     description = dataframe.describe(include='all')
-
     n_items = shape[0]
     n_features = shape[1]
     columns_inf = get_column_information(dataframe, description)
@@ -55,7 +54,7 @@ def get_column_information(dataframe: pd.DataFrame, description: pd.DataFrame) -
         if not(is_numeric_dtype(dataframe[title])) or is_bool_dtype(dataframe[title]):
             # extract information from categorical column
             columns_inf[i]['not_na_elements'] = count - nan_count
-            columns_inf = process_categorical_column(columns_inf, i, description, title)
+            columns_inf = process_categorical_column(dataframe, columns_inf, i, description, title)
         else:
             # extract information from numerical column
             zero_count = dataframe[title][dataframe[title]==0].count()
@@ -85,7 +84,7 @@ def process_numerical_column(columns_inf: dict, i: int, description: pd.DataFram
     return columns_inf
 
 
-def process_categorical_column(columns_inf: dict, i: int, description: pd.DataFrame, title: str) -> dict:
+def process_categorical_column(dataframe: pd.DataFrame, columns_inf: dict, i: int, description: pd.DataFrame, title: str) -> dict:
     """
     Extract information from categorical column and create plot of column data
     :param dataframe: discovery as dataframe object
@@ -114,10 +113,12 @@ def process_categorical_column(columns_inf: dict, i: int, description: pd.DataFr
             # if column has just one equal value, no plot is created
 
         else:
+            value_counts = dataframe[title].value_counts().to_dict()
             column_type = "categorical"
             columns_inf[i]['number_categories'] = unique
             columns_inf[i]['most_frequent_element'] = top
             columns_inf[i]['frequency'] = freq
+            columns_inf[i]['value_counts'] = value_counts
 
         columns_inf[i]['type'] = column_type
 
@@ -169,3 +170,24 @@ def create_errorbar(json_data: dict) -> Figure:
     #fig.show()
 
     return fig
+
+def create_barplot(json_data: dict) -> Figure:
+
+    '''
+    trace1 = go.Bar(
+        x=[str(x) for x in datag.ix[:, 0].tolist()[1:6]],
+        y=datag.ix[:, 1].tolist()[1:6],
+        name='travel')
+
+    data = [trace1]
+    layout = go.Layout(
+        barmode='stack',
+        title='Realization: 0, 0',
+        xaxis=dict(title='Model',
+                   type='category'),
+        yaxis=dict(title='Time (minutes)'))
+    fig = go.Figure(data=data, layout=layout)
+    offline.plot(fig, image='png', filename='stacked-bar')
+    '''
+    None
+

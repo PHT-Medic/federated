@@ -8,6 +8,8 @@ from pht_federated.aggregator.api.schemas.figures import DiscoveryFigure, Discov
 from pht_federated.aggregator.api.crud.crud_discovery import discoveries
 from pht_federated.aggregator.api.crud.crud_dataset_statistics import datasets
 from pht_federated.aggregator.api.discoveries.statistics import *
+from collections import Counter
+
 
 from pht_federated.aggregator.api import dependencies
 from sqlalchemy.orm import Session
@@ -38,9 +40,12 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
             discovery_item_count += discovery['n_items']
             discovery_feature_count += discovery['n_features']
             for feature in discovery['column_information']:
-                feature_lst.append(feature)
+                if feature['type'] == 'unique' or feature['type'] == 'equal':
+                    continue
+                else:
+                    feature_lst.append(feature)
 
-
+        print("FEATURE LIST : {}".format(feature_lst))
         for feature in feature_lst:
             if feature['type'] == 'numeric':
                 value = feature
@@ -104,6 +109,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                 discovery_number_categories = 0
                 discovery_most_frequent_element = ""
                 discovery_frequency = 0
+                discovery_value_counts = []
 
                 for feature2 in feature_lst:
                     if feature2['title'] == value['title']:
@@ -112,14 +118,23 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                         discovery_title = data['title']
                         discovery_item_count_not_na += data['not_na_elements']
                         discovery_number_categories += data['number_categories']
-                        discovery_frequency += data['frequency']
-                        if data['frequency'] > discovery_frequency:
-                            discovery_most_frequent_element = data['most_frequent_element']
+                        discovery_value_counts.append(data['value_counts'])
+
 
                 feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
 
                 discovery_number_categories /= len(response)
-                discovery_frequency /= len(response)
+
+                c = Counter()
+                for d in discovery_value_counts:
+                    c.update(d)
+
+                discovery_value_counts = dict(c)
+                for entry in discovery_value_counts.items():
+                    discovery_value_counts[entry[0]] = round(entry[1] / len(response))
+
+                discovery_most_frequent_element = max(discovery_value_counts, key=discovery_value_counts.get)
+                discovery_frequency = discovery_value_counts[discovery_most_frequent_element]
 
                 discovery_summary_json = {
                     "type": 'categorical',
@@ -127,9 +142,11 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                     "not_na_elements": discovery_item_count_not_na,
                     "number_categories": discovery_number_categories,
                     "most_frequent_element": discovery_most_frequent_element,
-                    "frequency": discovery_frequency
+                    "frequency": discovery_frequency,
+                    "value_counts": discovery_value_counts
                 }
 
+                print("DISCOVERY SUMMARY CATEGORICAL : {}".format(discovery_summary_json))
                 figure = create_errorbar(discovery_summary_json)
                 fig_json = plotly.io.to_json(figure)
                 obj = json.loads(fig_json)
@@ -180,6 +197,7 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
     discovery_number_categories = 0
     discovery_most_frequent_element = ""
     discovery_frequency = 0
+    discovery_value_counts = []
 
     feature_type = ""
 
@@ -210,19 +228,27 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
 
                         discovery_item_count_not_na += data['not_na_elements']
                         discovery_number_categories += data['number_categories']
-                        discovery_frequency += data['frequency']
-                        if data['frequency'] > discovery_frequency:
-                            discovery_most_frequent_element = data['most_frequent_element']
+                        discovery_value_counts.append(data['value_counts'])
 
             discovery_mean /= len(response)
             discovery_std /= len(response)
             discovery_min /= len(response)
             discovery_max /= len(response)
+            discovery_feature_count /= len(response)
 
             discovery_number_categories /= len(response)
-            discovery_frequency /= len(response)
 
-            discovery_feature_count /= len(response)
+            c = Counter()
+            for d in discovery_value_counts:
+                c.update(d)
+
+            discovery_value_counts = dict(c)
+            for entry in discovery_value_counts.items():
+                discovery_value_counts[entry[0]] = round(entry[1] / len(response))
+
+            discovery_most_frequent_element = max(discovery_value_counts, key=discovery_value_counts.get)
+            discovery_frequency = discovery_value_counts[discovery_most_frequent_element]
+
 
         if feature_type == "categorical":
             discovery_summary_json_categorical = {
@@ -231,7 +257,8 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                 "not_na_elements": discovery_item_count_not_na,
                 "number_categories": discovery_number_categories,
                 "most_frequent_element": discovery_most_frequent_element,
-                "frequency": discovery_frequency
+                "frequency": discovery_frequency,
+                "value_counts": discovery_value_counts
             }
         else:
             discovery_summary_json_numeric = {
