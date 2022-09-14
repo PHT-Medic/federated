@@ -70,13 +70,13 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
                 discovery_mean_combined = (sum([pair[1] for pair in discovery_mean]) / sum(discovery_item_count_not_na))
                 discovery_std = calc_combined_std(discovery_item_count_not_na, discovery_std, discovery_mean, discovery_mean_combined)
-                discovery_min = min(discovery_min)
+                discovery_min = min(discovery_min, default=0)
                 discovery_max = max(discovery_max)
 
                 discovery_summary_json = {
                     "type": 'numeric',
                     "title": discovery_title,
-                    "not_na_elements": discovery_item_count_not_na,
+                    "not_na_elements": sum(discovery_item_count_not_na),
                     "mean": discovery_mean_combined,
                     "std": discovery_std,
                     "min": discovery_min,
@@ -104,7 +104,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                 value = feature
 
                 discovery_title = ""
-                discovery_item_count_not_na = 0
+                discovery_item_count_not_na = []
                 discovery_number_categories = 0
                 discovery_value_counts = []
 
@@ -113,14 +113,12 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                         data = feature2
 
                         discovery_title = data['title']
-                        discovery_item_count_not_na += data['not_na_elements']
+                        discovery_item_count_not_na.append(data['not_na_elements'])
                         discovery_number_categories += data['number_categories']
                         discovery_value_counts.append(data['value_counts'])
 
 
                 feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
-
-                discovery_number_categories /= len(response)
 
                 c = Counter()
                 for d in discovery_value_counts:
@@ -132,11 +130,12 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
                 discovery_most_frequent_element = max(discovery_value_counts, key=discovery_value_counts.get)
                 discovery_frequency = discovery_value_counts[discovery_most_frequent_element]
+                discovery_number_categories /= len(response)
 
                 discovery_summary_json = {
                     "type": 'categorical',
                     "title": discovery_title,
-                    "not_na_elements": discovery_item_count_not_na,
+                    "not_na_elements": sum(discovery_item_count_not_na),
                     "number_categories": discovery_number_categories,
                     "most_frequent_element": discovery_most_frequent_element,
                     "frequency": discovery_frequency,
@@ -191,8 +190,6 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
     discovery_max = []
 
     discovery_number_categories = 0
-    discovery_most_frequent_element = ""
-    discovery_frequency = 0
     discovery_value_counts = []
 
     feature_type = ""
@@ -223,19 +220,11 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                             data = feature
                             feature_type = 'categorical'
 
-                            discovery_item_count_not_na += data['not_na_elements']
+                            discovery_item_count_not_na.append(data['not_na_elements'])
                             discovery_number_categories += data['number_categories']
                             discovery_value_counts.append(data['value_counts'])
                 except:
                     continue
-
-        discovery_mean_combined = (sum([pair[1] for pair in discovery_mean]) / sum(discovery_item_count_not_na))
-        discovery_std = calc_combined_std(discovery_item_count_not_na, discovery_std, discovery_mean, discovery_mean_combined)
-        discovery_min = min(discovery_min)
-        discovery_max = max(discovery_max)
-        discovery_feature_count /= len(response)
-
-        discovery_number_categories /= len(response)
 
         if feature_type == "categorical":
             c = Counter()
@@ -248,17 +237,25 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
 
             discovery_most_frequent_element = max(discovery_value_counts, key=discovery_value_counts.get)
             discovery_frequency = discovery_value_counts[discovery_most_frequent_element]
+            discovery_number_categories /= len(response)
 
             discovery_summary_json_categorical = {
                 "type": "categorical",
                 "title": feature_name,
-                "not_na_elements": discovery_item_count_not_na,
+                "not_na_elements": sum(discovery_item_count_not_na),
                 "number_categories": discovery_number_categories,
                 "most_frequent_element": discovery_most_frequent_element,
                 "frequency": discovery_frequency,
                 "value_counts": discovery_value_counts
             }
+            figure = create_barplot(discovery_summary_json_categorical)
         else:
+            discovery_mean_combined = (sum([pair[1] for pair in discovery_mean]) / sum(discovery_item_count_not_na))
+            discovery_std = calc_combined_std(discovery_item_count_not_na, discovery_std, discovery_mean,discovery_mean_combined)
+            discovery_min = min(discovery_min, default=0)
+            discovery_max = max(discovery_max, default=0)
+            discovery_feature_count /= len(response)
+
             discovery_summary_json_numeric = {
                 "type": "numeric",
                 "title": feature_name,
@@ -268,12 +265,8 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                 "min": discovery_min,
                 "max": discovery_max
             }
-
-
-        if feature_type == 'categorical':
-            figure = create_barplot(discovery_summary_json_categorical)
-        else:
             figure = create_dot_plot(discovery_summary_json_numeric)
+
 
         fig_json = plotly.io.to_json(figure)
         obj = json.loads(fig_json)
@@ -286,12 +279,9 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
 
         discovery_figure = DiscoveryFigure(**figure_schema)
 
-        try:
-            discovery_summary_json_categorical['figure_data'] = discovery_figure
-        except:
-            discovery_summary_json_numeric['figure_data'] = discovery_figure
-
         if feature_type == 'categorical':
+            discovery_summary_json_categorical['figure_data'] = discovery_figure
+
             discovery_summary_schema = {
                 "proposal_id": proposal_id,
                 "item_count": discovery_item_count,
@@ -299,6 +289,8 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                 "data_information": [discovery_summary_json_categorical]
             }
         else:
+            discovery_summary_json_numeric['figure_data'] = discovery_figure
+
             discovery_summary_schema = {
                 "proposal_id": proposal_id,
                 "item_count": discovery_item_count,

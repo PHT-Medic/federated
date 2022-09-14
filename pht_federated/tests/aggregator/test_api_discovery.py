@@ -193,7 +193,7 @@ def test_plot_discovery_summary_selected_features():
 
     for figure in figure_data_lst:
         plot_figure_json(figure)
-        #print("Plotting is commented out!")
+        print("Plotting is commented out!")
 
 
 

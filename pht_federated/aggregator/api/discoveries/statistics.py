@@ -162,7 +162,7 @@ def create_dot_plot(json_data: dict) -> Figure:
         y=std_plus,
         marker=dict(color="red", size=12),
         mode='markers',
-        name="Standard Deivation +"
+        name="Standard Deivation"
     )
     trace_std_minus = go.Scatter(
         x=feature_name,
@@ -189,7 +189,7 @@ def create_dot_plot(json_data: dict) -> Figure:
 
     data = [trace_mean, trace_std_plus, trace_std_minus, trace_min, trace_max]
     layout = go.Layout(
-        title=f"Dot-Plot over the discovery results of numerical feature :  f'{json_data['title']}",
+        title=f'Dot-Plot over Discovery Results of Numerical Feature : "{feature_name[0]}"',
         xaxis_title="Feature Name",
         yaxis_title="Value"
     )
@@ -205,7 +205,7 @@ def create_barplot(json_data: dict) -> Figure:
     dat = value_counts.items()
     plot_df = pd.DataFrame(data=dat, columns=names_col)
 
-    bar = px.bar(plot_df, x='Count', y='Value', title=f'Value Counts : "{feature_title}"', color=dat)
+    bar = px.bar(plot_df, x='Count', y='Value', title=f'Value Counts of Categorical Feature : "{feature_title}"', color=dat)
 
     return bar
 
@@ -214,8 +214,8 @@ def calc_combined_std(sample_size: list, std_lst: list, means: list, combined_me
 
     nominator = []
 
-    for i in range(std_lst):
-        nominator.append(sample_size[i] * pow(std_lst[i], 2) + sample_size[i] * pow((means[i] - combined_mean), 2))
+    for i in range(len(std_lst)):
+        nominator.append(sample_size[i] * pow(std_lst[i], 2) + sample_size[i] * pow((means[i][0] - combined_mean), 2))
 
     combined_std = sum(nominator) / sum(sample_size)
 
