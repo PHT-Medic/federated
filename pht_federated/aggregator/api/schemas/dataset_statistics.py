@@ -34,11 +34,21 @@ class DatasetNumericalColumn(BaseModel):
     min: Optional[float]
     max: Optional[float]
 
+class DiscoveryUnstructuredColumn(BaseModel):
+    type: Literal['unstructured']
+    title: Optional[str]
+    not_na_elements: Optional[int]
+    number_categories: Optional[int]
+    value_counts: Optional[Dict[str, int]]
+    most_frequent_element: Optional[Union[int, str]]
+    frequency: Optional[int]
+
 class DatasetStatistics(BaseModel):
     n_items: Optional[int]
     n_features: Optional[int]
     column_information: Optional[List[Annotated[Union[DatasetCategoricalColumn,
                                                       DatasetNumericalColumn,
+                                                      DiscoveryUnstructuredColumn,
                                                       DatasetEqualColumn,
                                                       DatasetUniqueColumn],
                                                 Field(discriminator='type')]]]

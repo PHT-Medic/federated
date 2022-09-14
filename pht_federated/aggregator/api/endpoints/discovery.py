@@ -70,7 +70,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
                 discovery_mean_combined = (sum([pair[1] for pair in discovery_mean]) / sum(discovery_item_count_not_na))
                 discovery_std = calc_combined_std(discovery_item_count_not_na, discovery_std, discovery_mean, discovery_mean_combined)
-                discovery_min = min(discovery_min, default=0)
+                discovery_min = min(discovery_min)
                 discovery_max = max(discovery_max)
 
                 discovery_summary_json = {
@@ -100,7 +100,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                 if len(feature_lst) == 0:
                     break
 
-            else:
+            elif feature['type'] == 'categorical':
                 value = feature
 
                 discovery_title = ""
@@ -116,7 +116,6 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                         discovery_item_count_not_na.append(data['not_na_elements'])
                         discovery_number_categories += data['number_categories']
                         discovery_value_counts.append(data['value_counts'])
-
 
                 feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
 
@@ -158,6 +157,53 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
                 if len(feature_lst) == 0:
                     break
+
+            elif feature['type'] == 'unstructured':
+
+                discovery_summary_json = {
+                    "type": 'unstructured'
+                }
+                aggregated_feature_lst.append(discovery_summary_json)
+
+            elif feature['type'] == 'unique':
+
+                discovery_no_duplicates = 0
+
+                for feature2 in feature_lst:
+                    if feature['type'] == 'unique':
+                        data = feature2
+                        discovery_no_duplicates += data['number_of_duplicates']
+
+                feature_lst = [x for x in feature_lst if x['feature_type'] != 'unique']
+                if len(feature_lst) == 0:
+                    break
+
+                discovery_no_duplicates /= len(response)
+
+                discovery_summary_json = {
+                    "type": 'unique',
+                    "number_of_duplicates": discovery_no_duplicates
+                }
+                aggregated_feature_lst.append(discovery_summary_json)
+
+            elif feature['type'] == 'equal':
+
+                for feature2 in feature_lst:
+                    if feature['type'] == 'equal':
+                        data = feature2
+                        discovery_equal_value = data['value']
+
+                feature_lst = [x for x in feature_lst if x['feature_type'] != 'equal']
+                if len(feature_lst) == 0:
+                    break
+
+                discovery_summary_json = {
+                    "type": 'equal',
+                    "value": discovery_equal_value
+                }
+                aggregated_feature_lst.append(discovery_summary_json)
+
+
 
         discovery_feature_count /= len(response)
 

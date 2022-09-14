@@ -23,6 +23,15 @@ class DiscoveryCategoricalColumn(BaseModel):
     frequency: Optional[int]
     figure_data: Optional[DiscoveryFigure]
 
+class DiscoveryUnstructuredColumn(BaseModel):
+    type: Literal['unstructured']
+    title: Optional[str]
+    not_na_elements: Optional[int]
+    number_categories: Optional[int]
+    value_counts: Optional[Dict[str, int]]
+    most_frequent_element: Optional[Union[int, str]]
+    frequency: Optional[int]
+    figure_data: Optional[DiscoveryFigure]
 
 class DiscoveryNumericalColumn(BaseModel):
     type: Literal['numeric']
@@ -41,7 +50,10 @@ class DiscoverySummary(BaseModel):
     item_count: Optional[int]
     feature_count: Optional[int]
     data_information: Optional[List[Annotated[Union[DiscoveryCategoricalColumn,
-                                                    DiscoveryNumericalColumn],
+                                                    DiscoveryNumericalColumn,
+                                                    DiscoveryUnstructuredColumn,
+                                                    DiscoveryEqualColumn,
+                                                    DiscoveryUniqueColumn],
                                               Field(discriminator='type')]]]
 
     class Config:
