@@ -26,6 +26,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
     feature_lst = []
     aggregated_feature_lst = []
+
     discovery_item_count = 0
     discovery_feature_count = 0
 
@@ -40,10 +41,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
             discovery_item_count += discovery['n_items']
             discovery_feature_count += discovery['n_features']
             for feature in discovery['column_information']:
-                if feature['type'] == 'unique' or feature['type'] == 'equal':
-                    continue
-                else:
-                    feature_lst.append(feature)
+                feature_lst.append(feature)
 
         for feature in feature_lst:
             if feature['type'] == 'numeric':
@@ -167,14 +165,17 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
             elif feature['type'] == 'unique':
 
+                value = feature
+                discovery_title = ""
                 discovery_no_duplicates = 0
 
                 for feature2 in feature_lst:
-                    if feature['type'] == 'unique':
+                    if feature2['title'] == value['title']:
                         data = feature2
+                        discovery_title = data['title']
                         discovery_no_duplicates += data['number_of_duplicates']
 
-                feature_lst = [x for x in feature_lst if x['feature_type'] != 'unique']
+                feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
                 if len(feature_lst) == 0:
                     break
 
@@ -182,23 +183,29 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
                 discovery_summary_json = {
                     "type": 'unique',
+                    "title": discovery_title,
                     "number_of_duplicates": discovery_no_duplicates
                 }
                 aggregated_feature_lst.append(discovery_summary_json)
 
             elif feature['type'] == 'equal':
 
+                value = feature
+                discovery_title = ""
+
                 for feature2 in feature_lst:
-                    if feature['type'] == 'equal':
+                    if feature2['title'] == value['title']:
                         data = feature2
+                        discovery_title = data['title']
                         discovery_equal_value = data['value']
 
-                feature_lst = [x for x in feature_lst if x['feature_type'] != 'equal']
+                feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
                 if len(feature_lst) == 0:
                     break
 
                 discovery_summary_json = {
                     "type": 'equal',
+                    "title": discovery_title,
                     "value": discovery_equal_value
                 }
                 aggregated_feature_lst.append(discovery_summary_json)
@@ -234,6 +241,8 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
     discovery_std = []
     discovery_min = []
     discovery_max = []
+    discovery_no_duplicates = 0
+    discovery_equal_value = ""
 
     discovery_number_categories = 0
     discovery_value_counts = []
@@ -251,26 +260,34 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
             discovery_item_count += discovery['n_items']
             discovery_feature_count += discovery['n_features']
             for feature in discovery['column_information']:
-                try:
-                    if feature['title'] == feature_name:
-                        if feature['type'] == 'numeric':
-                            data = feature
-                            feature_type = 'numeric'
+                if feature['title'] == feature_name:
+                    data = feature
+                    if feature['type'] == 'numeric':
+                        feature_type = 'numeric'
 
-                            discovery_item_count_not_na.append(data['not_na_elements'])
-                            discovery_mean.append((data['mean'], data['mean'] * data['not_na_elements']))
-                            discovery_std.append(data['std'])
-                            discovery_min.append(data['min'])
-                            discovery_max.append(data['max'])
-                        elif feature['type'] == 'categorical':
-                            data = feature
-                            feature_type = 'categorical'
+                        discovery_item_count_not_na.append(data['not_na_elements'])
+                        discovery_mean.append((data['mean'], data['mean'] * data['not_na_elements']))
+                        discovery_std.append(data['std'])
+                        discovery_min.append(data['min'])
+                        discovery_max.append(data['max'])
 
-                            discovery_item_count_not_na.append(data['not_na_elements'])
-                            discovery_number_categories += data['number_categories']
-                            discovery_value_counts.append(data['value_counts'])
-                except:
-                    continue
+                    elif feature['type'] == 'categorical':
+                        feature_type = 'categorical'
+
+                        discovery_item_count_not_na.append(data['not_na_elements'])
+                        discovery_number_categories += data['number_categories']
+                        discovery_value_counts.append(data['value_counts'])
+
+                    elif feature['type'] == 'unstructured':
+                        None
+
+                    elif feature['type'] == 'unique':
+                        feature_type = "unique"
+                        discovery_no_duplicates += data['number_of_duplicates']
+
+                    elif feature['type'] == 'equal':
+                        feature_type = "equal"
+                        discovery_equal_value = data['value']
 
         if feature_type == "categorical":
             c = Counter()
@@ -295,7 +312,25 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                 "value_counts": discovery_value_counts
             }
             figure = create_barplot(discovery_summary_json_categorical)
-        else:
+            fig_json = plotly.io.to_json(figure)
+            obj = json.loads(fig_json)
+
+            figure_schema = {
+                'title': feature_name,
+                'type': feature_type,
+                'figure': obj
+            }
+
+            discovery_figure = DiscoveryFigure(**figure_schema)
+
+            discovery_summary_json_categorical['figure_data'] = discovery_figure
+            discovery_summary_schema = {
+                "proposal_id": proposal_id,
+                "item_count": discovery_item_count,
+                "feature_count": discovery_feature_count,
+                "data_information": [discovery_summary_json_categorical]
+            }
+        elif feature_type == "numeric":
             discovery_mean_combined = (sum([pair[1] for pair in discovery_mean]) / sum(discovery_item_count_not_na))
             discovery_std = calc_combined_std(discovery_item_count_not_na, discovery_std, discovery_mean,discovery_mean_combined)
             discovery_min = min(discovery_min, default=0)
@@ -312,29 +347,16 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                 "max": discovery_max
             }
             figure = create_dot_plot(discovery_summary_json_numeric)
+            fig_json = plotly.io.to_json(figure)
+            obj = json.loads(fig_json)
 
-
-        fig_json = plotly.io.to_json(figure)
-        obj = json.loads(fig_json)
-
-        figure_schema = {
-            'title': feature_name,
-            'type': feature_type,
-            'figure': obj
-        }
-
-        discovery_figure = DiscoveryFigure(**figure_schema)
-
-        if feature_type == 'categorical':
-            discovery_summary_json_categorical['figure_data'] = discovery_figure
-
-            discovery_summary_schema = {
-                "proposal_id": proposal_id,
-                "item_count": discovery_item_count,
-                "feature_count": discovery_feature_count,
-                "data_information": [discovery_summary_json_categorical]
+            figure_schema = {
+                'title': feature_name,
+                'type': feature_type,
+                'figure': obj
             }
-        else:
+
+            discovery_figure = DiscoveryFigure(**figure_schema)
             discovery_summary_json_numeric['figure_data'] = discovery_figure
 
             discovery_summary_schema = {
@@ -342,6 +364,43 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                 "item_count": discovery_item_count,
                 "feature_count": discovery_feature_count,
                 "data_information": [discovery_summary_json_numeric]
+            }
+        elif feature_type == "unstructured":
+
+            discovery_summary_json_unstructured = {
+                "type": 'unstructured'
+            }
+            discovery_summary_schema = {
+                "proposal_id": proposal_id,
+                "item_count": discovery_item_count,
+                "feature_count": discovery_feature_count,
+                "data_information": [discovery_summary_json_unstructured]
+            }
+        elif feature_type == "unique":
+
+            discovery_summary_json_unique = {
+                "type": 'unique',
+                "title": feature_name,
+                "number_of_duplicates": discovery_no_duplicates
+            }
+            discovery_summary_schema = {
+                "proposal_id": proposal_id,
+                "item_count": discovery_item_count,
+                "feature_count": discovery_feature_count,
+                "data_information": [discovery_summary_json_unique]
+            }
+        elif feature_type == "equal":
+
+            discovery_summary_json_equal = {
+                "type": 'equal',
+                "title": feature_name,
+                "value": discovery_equal_value
+            }
+            discovery_summary_schema = {
+                "proposal_id": proposal_id,
+                "item_count": discovery_item_count,
+                "feature_count": discovery_feature_count,
+                "data_information": [discovery_summary_json_equal]
             }
 
         discovery_summary = DiscoverySummary(**discovery_summary_schema)

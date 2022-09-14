@@ -5,26 +5,18 @@ from pht_federated.aggregator.api.schemas.figures import *
 
 class DiscoveryUniqueColumn(BaseModel):
     type: Literal['unique']
+    title: Optional[str]
     number_of_duplicates: Optional[int]
 
 
 class DiscoveryEqualColumn(BaseModel):
     type: Literal['equal']
+    title: Optional[str]
     value: Optional[str]
 
 
 class DiscoveryCategoricalColumn(BaseModel):
     type: Literal['categorical']
-    title: Optional[str]
-    not_na_elements: Optional[int]
-    number_categories: Optional[int]
-    value_counts: Optional[Dict[str, int]]
-    most_frequent_element: Optional[Union[int, str]]
-    frequency: Optional[int]
-    figure_data: Optional[DiscoveryFigure]
-
-class DiscoveryUnstructuredColumn(BaseModel):
-    type: Literal['unstructured']
     title: Optional[str]
     not_na_elements: Optional[int]
     number_categories: Optional[int]
@@ -41,6 +33,16 @@ class DiscoveryNumericalColumn(BaseModel):
     std: Optional[float]
     min: Optional[float]
     max: Optional[float]
+    figure_data: Optional[DiscoveryFigure]
+
+class DiscoveryUnstructuredColumn(BaseModel):
+    type: Literal['unstructured']
+    title: Optional[str]
+    not_na_elements: Optional[int]
+    number_targets: Optional[int]
+    target_counts: Optional[Dict[str, int]]
+    most_frequent_target: Optional[Union[int, str]]
+    frequency: Optional[int]
     figure_data: Optional[DiscoveryFigure]
 
 

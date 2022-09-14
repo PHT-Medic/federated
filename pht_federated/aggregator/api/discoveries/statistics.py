@@ -103,12 +103,13 @@ def process_categorical_column(dataframe: pd.DataFrame, columns_inf: dict, i: in
     if count - 50 < unique <= count:
         column_type = "unique"
         columns_inf[i]['type'] = column_type
-        if unique != count:
-            columns_inf[i]['number_of_duplicates'] = count - unique
+        columns_inf[i]['title'] = title
+        columns_inf[i]['number_of_duplicates'] = count - unique
     else:
         # all elements of column have the same value
         if unique == 1:
             column_type = "equal"
+            columns_inf[i]['title'] = title
             columns_inf[i]['value'] = top
             # if column has just one equal value, no plot is created
 

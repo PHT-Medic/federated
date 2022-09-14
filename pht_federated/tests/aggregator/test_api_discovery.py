@@ -192,8 +192,8 @@ def test_plot_discovery_summary_selected_features():
             figure_data_lst.append(figure_data)
 
     for figure in figure_data_lst:
-        plot_figure_json(figure)
-        print("Plotting is commented out!")
+        #plot_figure_json(figure)
+        print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
 
 
 
