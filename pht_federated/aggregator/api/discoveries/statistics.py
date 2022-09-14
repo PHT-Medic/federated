@@ -148,8 +148,8 @@ def create_dot_plot(json_data: dict) -> Figure:
     mean = [json_data['mean']]
     std_plus = [json_data['mean'] + json_data['std']]
     std_minus = [json_data['mean'] - json_data['std']]
-    min = [json_data['min']]
-    max = [json_data['max']]
+    min_value = [json_data['min']]
+    max_value = [json_data['max']]
 
     trace_mean = go.Scatter(
         x=feature_name,
@@ -163,26 +163,26 @@ def create_dot_plot(json_data: dict) -> Figure:
         y=std_plus,
         marker=dict(color="red", size=12),
         mode='markers',
-        name="Standard Derivation +"
+        name="Standard Deivation +"
     )
     trace_std_minus = go.Scatter(
         x=feature_name,
         y=std_minus,
         marker=dict(color="red", size=12),
         mode='markers',
-        name="Standard Derivation -",
+        name="Standard Deviation -",
         showlegend=False
     )
     trace_min = go.Scatter(
         x=feature_name,
-        y=min,
+        y=min_value,
         marker=dict(color="green", size=12),
         mode='markers',
         name="Min-Value"
     )
     trace_max = go.Scatter(
         x=feature_name,
-        y=max,
+        y=max_value,
         marker=dict(color="green", size=12),
         mode='markers',
         name="Max-Value"

@@ -51,27 +51,27 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
                 discovery_title = ""
                 discovery_item_count_not_na = 0
-                discovery_mean = 0
+                discovery_mean = []
                 discovery_std = 0
-                discovery_min = 0
-                discovery_max = 0
+                discovery_min = []
+                discovery_max = []
 
                 for feature2 in feature_lst:
                     if feature2['title'] == value['title']:
                         data = feature2
                         discovery_title = data['title']
                         discovery_item_count_not_na += data['not_na_elements']
-                        discovery_mean += data['mean'] * discovery_item_count_not_na
+                        discovery_mean.append((data['mean'], data['mean'] * discovery_item_count_not_na))
                         discovery_std += data['std']
-                        discovery_min += data['min']
-                        discovery_max += data['max']
+                        discovery_min.append(data['min'])
+                        discovery_max.append(data['max'])
 
                 feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
 
-                discovery_mean /= discovery_item_count_not_na
+                discovery_mean = (sum([pair[1] for pair in discovery_mean]) / discovery_item_count_not_na)
                 discovery_std /= len(response)
-                discovery_min /= len(response)
-                discovery_max /= len(response)
+                discovery_min = min(discovery_min)
+                discovery_max = max(discovery_max)
 
                 discovery_summary_json = {
                     "type": 'numeric',
@@ -188,10 +188,10 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
     discovery_item_count = 0
     discovery_feature_count = 0
     discovery_item_count_not_na = 0
-    discovery_mean = 0
+    discovery_mean = []
     discovery_std = 0
-    discovery_min = 0
-    discovery_max = 0
+    discovery_min = []
+    discovery_max = []
 
     discovery_number_categories = 0
     discovery_most_frequent_element = ""
@@ -218,10 +218,10 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                             feature_type = 'numeric'
 
                             discovery_item_count_not_na += data['not_na_elements']
-                            discovery_mean += data['mean'] * discovery_item_count_not_na
+                            discovery_mean.append((data['mean'], data['mean'] * discovery_item_count_not_na))
                             discovery_std += data['std']
-                            discovery_min += data['min']
-                            discovery_max += data['max']
+                            discovery_min.append(data['min'])
+                            discovery_max.append(data['max'])
                         elif feature['type'] == 'categorical':
                             data = feature
                             feature_type = 'categorical'
@@ -232,10 +232,10 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                 except:
                     continue
 
-        discovery_mean /= discovery_item_count_not_na
+        discovery_mean = (sum([pair[1] for pair in discovery_mean]) / discovery_item_count_not_na)
         discovery_std /= len(response)
-        discovery_min /= len(response)
-        discovery_max /= len(response)
+        discovery_min = min(discovery_min)
+        discovery_max = max(discovery_max)
         discovery_feature_count /= len(response)
 
         discovery_number_categories /= len(response)
