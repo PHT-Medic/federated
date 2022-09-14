@@ -8,8 +8,7 @@ import json
 from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary, DiscoveryFigure
 from pht_federated.aggregator.api.schemas.dataset_statistics import DatasetStatistics
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
+import math
 def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatistics]:
     """
     Computes statistical information of a dataset
@@ -211,5 +210,15 @@ def create_barplot(json_data: dict) -> Figure:
     return bar
 
 
+def calc_combined_std(sample_size: list, std_lst: list, means: list, combined_mean: float) -> float:
+
+    nominator = []
+
+    for i in range(std_lst):
+        nominator.append(sample_size[i] * pow(std_lst[i], 2) + sample_size[i] * pow((means[i] - combined_mean), 2))
+
+    combined_std = sum(nominator) / sum(sample_size)
+
+    return combined_std
 
 
