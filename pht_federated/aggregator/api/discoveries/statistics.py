@@ -141,63 +141,60 @@ def plot_figure_json(json_data: dict):
     fig_plotly = plotly.io.from_json(json.dumps(json_data))
     fig_plotly.show()
 
-def create_errorbar(json_data: dict) -> Figure:
 
-    fig = go.Figure()
+def create_dot_plot(json_data: dict) -> Figure:
 
-    '''
-    trace1 = go.Scatter(
-        x=[json_data['title']],
-        y=[json_data['mean']],
-        error_y=dict(
-            type='data',  # value of error bar given in data coordinates
-            array=[json_data['std']],
-            visible=True)
+    feature_name = [json_data['title']]
+    mean = [json_data['mean']]
+    std_plus = [json_data['mean'] + json_data['std']]
+    std_minus = [json_data['mean'] - json_data['std']]
+    min = [json_data['min']]
+    max = [json_data['max']]
+
+    trace_mean = go.Scatter(
+        x=feature_name,
+        y=mean,
+        marker=dict(color="blue", size=12),
+        mode='markers',
+        name="Mean"
     )
-    trace2 = go.Scatter(
-        x=[json_data['title']],
-        y=[json_data['mean']],
-        #line=dict(color="#ffe476"),
-        error_y=dict(
-            type='data',  # value of error bar given in data coordinates
-            symmetric=False,
-            value=abs(json_data['max']),
-            valueminus=abs(json_data['min']),
-            visible=True)
+    trace_std_plus = go.Scatter(
+        x=feature_name,
+        y=std_plus,
+        marker=dict(color="red", size=12),
+        mode='markers',
+        name="Standard Derivation +"
     )
-
-    fig.add_trace(trace1)
-    fig.add_trace(trace2)
-    '''
-
-    fig = make_subplots(rows=1, cols=2)
-
-    trace1 = go.Scatter(
-        x=[json_data['title']],
-        y=[json_data['mean']],
-        error_y=dict(
-            type='data',  # value of error bar given in data coordinates
-            array=[json_data['std']],
-            visible=True)
+    trace_std_minus = go.Scatter(
+        x=feature_name,
+        y=std_minus,
+        marker=dict(color="red", size=12),
+        mode='markers',
+        name="Standard Derivation -",
+        showlegend=False
     )
-    #print("MAX : {}".format(abs(json_data['max'])))
-    #print("MIN : {}".format(abs(json_data['min'])))
-    trace2 = go.Scatter(
-        x=[json_data['title']],
-        y=[json_data['mean']],
-        #line=dict(color="#ffe476"),
-        error_y=dict(
-            type='data',  # value of error bar given in data coordinates
-            symmetric=False,
-            value=abs(json_data['max']),
-            valueminus=abs(json_data['min']),
-            visible=True)
+    trace_min = go.Scatter(
+        x=feature_name,
+        y=min,
+        marker=dict(color="green", size=12),
+        mode='markers',
+        name="Min-Value"
+    )
+    trace_max = go.Scatter(
+        x=feature_name,
+        y=max,
+        marker=dict(color="green", size=12),
+        mode='markers',
+        name="Max-Value"
     )
 
-    fig.add_trace(trace1)
-    fig.add_trace(trace2)
-
-    fig.update_layout(height=600, width=800, title_text="Side By Side Subplots")
+    data = [trace_mean, trace_std_plus, trace_std_minus, trace_min, trace_max]
+    layout = go.Layout(
+        title=f"Dot-Plot over the discovery results of numerical feature :  f'{json_data['title']}",
+        xaxis_title="Feature Name",
+        yaxis_title="Value"
+    )
+    fig = go.Figure(data=data, layout=layout)
 
     return fig
 

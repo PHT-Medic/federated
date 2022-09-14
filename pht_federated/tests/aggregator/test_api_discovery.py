@@ -18,7 +18,7 @@ client = TestClient(app)
 
 PROPOSAL_ID_NUMERIC = 42
 PROPOSAL_ID_NUMERIC2 = 43
-PROPOSAL_ID_CATEGORICAL = 44
+PROPOSAL_ID_MIXED = 44
 FEATURE_NAME_NUMERIC = "bmi"
 FEATURE_NAME_NUMERIC2 = "Age"
 FEATURE_NAME_CATEGORICAL = 'Embarked'
@@ -118,21 +118,21 @@ def test_discovery_create_mixed():
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery", json={
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
         "n_items": stats1_json['n_items'],
         "n_features": stats1_json['n_features'],
         "column_information": stats1_json['column_information']
     })
     assert response.status_code == 200, response.text
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery", json={
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
         "n_items": stats2_json['n_items'],
         "n_features": stats2_json['n_features'],
         "column_information": stats2_json['column_information']
     })
     assert response.status_code == 200, response.text
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery", json={
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
         "n_items": stats3_json['n_items'],
         "n_features": stats3_json['n_features'],
         "column_information": stats3_json['column_information']
@@ -140,16 +140,16 @@ def test_discovery_create_mixed():
     assert response.status_code == 200, response.text
 
 def test_discovery_get_all_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery")
     assert response.status_code == 200, response.text
 
 def test_discovery_get_single_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
     assert response.status_code == 200, response.text
 
 
 def test_plot_discovery_summary_single():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery_feature?feature_name={FEATURE_NAME_NUMERIC2}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery_feature?feature_name={FEATURE_NAME_NUMERIC2}")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
@@ -163,8 +163,9 @@ def test_plot_discovery_summary_single():
 
     plot_figure_json(figure_data)
 
+
 def test_plot_discovery_summary_selected_features():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_CATEGORICAL}/discovery")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
@@ -191,8 +192,9 @@ def test_plot_discovery_summary_selected_features():
             figure_data_lst.append(figure_data)
 
     for figure in figure_data_lst:
-        #plot_figure_json(figure)
+        plot_figure_json(figure)
         print("Plotting is commented out!")
+
 
 
 '''

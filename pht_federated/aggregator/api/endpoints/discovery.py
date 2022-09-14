@@ -83,7 +83,8 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                     "max": discovery_max
                 }
 
-                figure = create_errorbar(discovery_summary_json)
+                #figure = create_errorbar(discovery_summary_json)
+                figure = create_dot_plot(discovery_summary_json)
                 fig_json = plotly.io.to_json(figure)
                 obj = json.loads(fig_json)
 
@@ -275,7 +276,7 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
         if feature_type == 'categorical':
             figure = create_barplot(discovery_summary_json_categorical)
         else:
-            figure = create_errorbar(discovery_summary_json_numeric)
+            figure = create_dot_plot(discovery_summary_json_numeric)
 
         fig_json = plotly.io.to_json(figure)
         obj = json.loads(fig_json)
