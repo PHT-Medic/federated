@@ -61,14 +61,14 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
                         data = feature2
                         discovery_title = data['title']
                         discovery_item_count_not_na += data['not_na_elements']
-                        discovery_mean += data['mean']
+                        discovery_mean += data['mean'] * discovery_item_count_not_na
                         discovery_std += data['std']
                         discovery_min += data['min']
                         discovery_max += data['max']
 
                 feature_lst = [x for x in feature_lst if x['title'] != discovery_title]
 
-                discovery_mean /= len(response)
+                discovery_mean /= discovery_item_count_not_na
                 discovery_std /= len(response)
                 discovery_min /= len(response)
                 discovery_max /= len(response)
@@ -218,7 +218,7 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                             feature_type = 'numeric'
 
                             discovery_item_count_not_na += data['not_na_elements']
-                            discovery_mean += data['mean']
+                            discovery_mean += data['mean'] * discovery_item_count_not_na
                             discovery_std += data['std']
                             discovery_min += data['min']
                             discovery_max += data['max']
@@ -232,7 +232,7 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
                 except:
                     continue
 
-        discovery_mean /= len(response)
+        discovery_mean /= discovery_item_count_not_na
         discovery_std /= len(response)
         discovery_min /= len(response)
         discovery_max /= len(response)

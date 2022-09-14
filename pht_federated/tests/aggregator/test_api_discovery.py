@@ -149,7 +149,7 @@ def test_discovery_get_single_aggregated():
 
 
 def test_plot_discovery_summary_single():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery_feature?feature_name={FEATURE_NAME_NUMERIC2}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
@@ -193,7 +193,7 @@ def test_plot_discovery_summary_selected_features():
 
     for figure in figure_data_lst:
         plot_figure_json(figure)
-        print("Plotting is commented out!")
+        #print("Plotting is commented out!")
 
 
 
