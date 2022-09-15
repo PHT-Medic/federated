@@ -22,7 +22,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 
     response = datasets.get_all_by_proposal_id(proposal_id, db)
     if not response:
-        raise HTTPException(status_code=400, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
+        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
 
     feature_lst = []
     aggregated_feature_lst = []

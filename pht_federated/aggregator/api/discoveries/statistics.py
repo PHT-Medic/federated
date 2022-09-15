@@ -17,7 +17,7 @@ def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatist
     :return: Dataset statistics
     """
     if not (isinstance(dataframe, pd.DataFrame)):
-        raise TypeError("The given dataset needs to be in pandas DataFrame format in order to get DiscoveryStatistcs.")
+        raise TypeError("The given dataset needs to be in pandas DataFrame format in order to get Discovery statistcs.")
     shape = dataframe.shape
     description = dataframe.describe(include='all')
     n_items = shape[0]
