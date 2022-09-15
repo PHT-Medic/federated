@@ -20,9 +20,9 @@ router = APIRouter()
 @router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
 def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_db)):
 
-    response = datasets.get_all_by_dataset_id(proposal_id, db)
+    response = datasets.get_all_by_proposal_id(proposal_id, db)
     if not response:
-        raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
+        raise HTTPException(status_code=400, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
 
     feature_lst = []
     aggregated_feature_lst = []
@@ -38,8 +38,8 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
     else:
         for discovery in response:
             discovery = jsonable_encoder(discovery)
-            discovery_item_count += discovery['n_items']
-            discovery_feature_count += discovery['n_features']
+            discovery_item_count += discovery['item_count']
+            discovery_feature_count += discovery['feature_count']
             for feature in discovery['column_information']:
                 feature_lst.append(feature)
 
@@ -230,7 +230,7 @@ def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_d
 @router.get("/{proposal_id}/discovery_feature", response_model=DiscoverySummary)
 def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Depends(dependencies.get_db)):
 
-    response = datasets.get_all_by_dataset_id(proposal_id, db)
+    response = datasets.get_all_by_proposal_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
 
@@ -257,8 +257,8 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
     else:
         for discovery in response:
             discovery = jsonable_encoder(discovery)
-            discovery_item_count += discovery['n_items']
-            discovery_feature_count += discovery['n_features']
+            discovery_item_count += discovery['item_count']
+            discovery_feature_count += discovery['feature_count']
             for feature in discovery['column_information']:
                 if feature['title'] == feature_name:
                     data = feature
@@ -411,23 +411,23 @@ def get_discovery_single(proposal_id: int,  feature_name: str, db: Session = Dep
 
 @router.delete("/{proposal_id}/discovery", response_model=DiscoveryStatistics)
 def delete_discovery_statistics(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoveryStatistics:
-    discovery_del = datasets.delete_by_dataset_id(proposal_id, db)
+    discovery_del = datasets.delete_by_proposal_id(proposal_id, db)
     if not discovery_del:
         raise HTTPException(status_code=404, detail=f"DatasetStatistics of proposal with id '{proposal_id}' not found.")
     return discovery_del
 
 @router.post("/{proposal_id}/discovery", response_model=DiscoveryStatistics)
 def post_discovery_statistics(proposal_id: int, create_msg: StatisticsCreate, db: Session = Depends(dependencies.get_db)) -> DatasetStatistics:
-    dataset = json.loads(create_msg.json())
+    dataset_statistics = json.loads(create_msg.json())
     discovery_statistics_schema = {
         "proposal_id": proposal_id,
-        "n_items": int(dataset['n_items']),
-        "n_features": int(dataset['n_features']),
-        "column_information": dataset['column_information']
+        "item_count": dataset_statistics['item_count'],
+        "feature_count": dataset_statistics['feature_count'],
+        "column_information": dataset_statistics['column_information']
     }
-    discovery_statistics = DiscoveryStatistics(**discovery_statistics_schema)
+    discovery_statistics = StatisticsCreate(**discovery_statistics_schema)
     discovery_statistics = datasets.create(db, obj_in=discovery_statistics)
     if not discovery_statistics:
-        raise HTTPException(status_code=404, detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
+        raise HTTPException(status_code=400, detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
     return discovery_statistics
 

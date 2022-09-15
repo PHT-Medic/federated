@@ -9,15 +9,15 @@ from .. import dependencies
 
 class CRUDDiscoveries(CRUDBase[DiscoverySummary, SummaryCreate, SummaryUpdate]):
 
-    def get_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
+    def get_by_proposal_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
         discovery = db.query(DiscoverySummary).filter(DiscoverySummary.proposal_id == proposal_id).first()
         return discovery
 
-    def get_all_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> List[DiscoverySummary]:
+    def get_all_by_proposal_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> List[DiscoverySummary]:
         discovery = db.query(DiscoverySummary).filter(DiscoverySummary.proposal_id == proposal_id).all()
         return discovery
 
-    def delete_by_discovery_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
+    def delete_by_proposal_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoverySummary:
         discovery_del = db.query(DiscoverySummary).filter(DiscoverySummary.proposal_id == proposal_id).delete()
         return discovery_del
 

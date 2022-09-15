@@ -10,11 +10,11 @@ from .. import dependencies
 class CRUDDatasetStatistics(CRUDBase[DatasetStatistics, StatisticsCreate, StatisticsUpdate]):
 
 
-    def get_all_by_dataset_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> List[DatasetStatistics]:
+    def get_all_by_proposal_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> List[DatasetStatistics]:
         dataset = db.query(DatasetStatistics).filter(DatasetStatistics.proposal_id == proposal_id).all()
         return dataset
 
-    def delete_by_dataset_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DatasetStatistics:
+    def delete_by_proposal_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DatasetStatistics:
         dataset_del = db.query(DatasetStatistics).filter(DatasetStatistics.proposal_id == proposal_id).delete()
         return dataset_del
 

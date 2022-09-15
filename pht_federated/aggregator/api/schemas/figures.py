@@ -11,13 +11,6 @@ class DiscoveryFigure(BaseModel):
     type: Optional[str]
     figure: Optional[FigureData]
 
-class FigureCreate(DiscoveryFigure):
-    pass
-
-
-class FigureUpdate(DiscoveryFigure):
-    pass
-
 
 class DiscoveryFigures(BaseModel):
     fig_data_all: Optional[List[DiscoveryFigure]]

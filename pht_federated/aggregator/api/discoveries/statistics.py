@@ -8,7 +8,8 @@ import json
 from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary, DiscoveryFigure
 from pht_federated.aggregator.api.schemas.dataset_statistics import DatasetStatistics
 import plotly.graph_objects as go
-import math
+
+
 def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatistics]:
     """
     Computes statistical information of a dataset
@@ -16,7 +17,7 @@ def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatist
     :return: Dataset statistics
     """
     if not (isinstance(dataframe, pd.DataFrame)):
-        raise TypeError
+        raise TypeError("The given dataset needs to be in pandas DataFrame format in order to get DiscoveryStatistcs.")
     shape = dataframe.shape
     description = dataframe.describe(include='all')
     n_items = shape[0]
@@ -25,8 +26,8 @@ def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatist
 
 
     schema_data = {
-        'n_items': n_items,
-        'n_features': n_features,
+        'item_count': n_items,
+        'feature_count': n_features,
         'column_information': columns_inf
     }
 

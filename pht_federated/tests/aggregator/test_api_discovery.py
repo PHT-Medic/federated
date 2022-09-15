@@ -46,22 +46,22 @@ def test_discovery_create_numeric():
 
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
-                            "n_items" : stats1_json['n_items'],
-                            "n_features" : stats1_json['n_features'],
+                            "item_count" : stats1_json['item_count'],
+                            "feature_count" : stats1_json['feature_count'],
                             "column_information" : stats1_json['column_information']
     })
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
-                            "n_items" : stats2_json['n_items'],
-                            "n_features" : stats2_json['n_features'],
+                            "item_count" : stats2_json['item_count'],
+                            "feature_count" : stats2_json['feature_count'],
                             "column_information" : stats2_json['column_information']
     })
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
-                            "n_items" : stats3_json['n_items'],
-                            "n_features" : stats3_json['n_features'],
+                            "item_count" : stats3_json['item_count'],
+                            "feature_count" : stats3_json['feature_count'],
                             "column_information" : stats3_json['column_information']
     })
     assert response.status_code == 200, response.text
@@ -84,22 +84,22 @@ def test_discovery_create_numeric2():
     stats3_json = jsonable_encoder(stats_df3)
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/discovery", json={
-        "n_items": stats1_json['n_items'],
-        "n_features": stats1_json['n_features'],
+        "item_count": stats1_json['item_count'],
+        "feature_count": stats1_json['feature_count'],
         "column_information": stats1_json['column_information']
     })
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/discovery", json={
-        "n_items": stats2_json['n_items'],
-        "n_features": stats2_json['n_features'],
+        "item_count": stats2_json['item_count'],
+        "feature_count": stats2_json['feature_count'],
         "column_information": stats2_json['column_information']
     })
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/discovery", json={
-        "n_items": stats3_json['n_items'],
-        "n_features": stats3_json['n_features'],
+        "item_count": stats3_json['item_count'],
+        "feature_count": stats3_json['feature_count'],
         "column_information": stats3_json['column_information']
     })
     assert response.status_code == 200, response.text
@@ -119,22 +119,22 @@ def test_discovery_create_mixed():
     stats3_json = jsonable_encoder(stats_df3)
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
-        "n_items": stats1_json['n_items'],
-        "n_features": stats1_json['n_features'],
+        "item_count": stats1_json['item_count'],
+        "feature_count": stats1_json['feature_count'],
         "column_information": stats1_json['column_information']
     })
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
-        "n_items": stats2_json['n_items'],
-        "n_features": stats2_json['n_features'],
+        "item_count": stats2_json['item_count'],
+        "feature_count": stats2_json['feature_count'],
         "column_information": stats2_json['column_information']
     })
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
-        "n_items": stats3_json['n_items'],
-        "n_features": stats3_json['n_features'],
+        "item_count": stats3_json['item_count'],
+        "feature_count": stats3_json['feature_count'],
         "column_information": stats3_json['column_information']
     })
     assert response.status_code == 200, response.text
