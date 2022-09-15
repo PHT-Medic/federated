@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 @router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
-def get_discovery_all(proposal_id: int, db: Session = Depends(dependencies.get_db)):
+def get_discovery_all(proposal_id: int, feature_name: str, db: Session = Depends(dependencies.get_db)):
 
     response = datasets.get_all_by_proposal_id(proposal_id, db)
     if not response:
