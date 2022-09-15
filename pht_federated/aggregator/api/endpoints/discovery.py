@@ -1,11 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
-from typing import Any, List
 
-from pht_federated.aggregator.api.schemas.discovery import *
 from pht_federated.aggregator.api.schemas.dataset_statistics import *
-from pht_federated.aggregator.api.schemas.figures import DiscoveryFigure, DiscoveryFigures
-from pht_federated.aggregator.api.crud.crud_discovery import discoveries
 from pht_federated.aggregator.api.crud.crud_dataset_statistics import datasets
 from pht_federated.aggregator.api.discoveries.statistics import *
 from collections import Counter
