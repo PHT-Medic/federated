@@ -140,7 +140,7 @@ def test_discovery_create_mixed():
     assert response.status_code == 200, response.text
 
 def test_discovery_get_all_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery?feature_name={FEATURE_NAME_CATEGORICAL}")
     assert response.status_code == 200, response.text
 
 def test_discovery_get_single_aggregated():
@@ -165,7 +165,7 @@ def test_plot_discovery_summary_single():
 
 
 def test_plot_discovery_summary_selected_features():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?feature_name={FEATURE_NAME_CATEGORICAL}")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
