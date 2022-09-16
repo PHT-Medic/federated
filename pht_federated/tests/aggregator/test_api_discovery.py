@@ -22,6 +22,7 @@ PROPOSAL_ID_MIXED = 44
 FEATURE_NAME_NUMERIC = "bmi"
 FEATURE_NAME_NUMERIC2 = "Age"
 FEATURE_NAME_CATEGORICAL = 'Embarked'
+SELECTED_FEATURES = "Age,Sex,Embarked"
 
 
 def test_discovery_create_numeric():
@@ -140,9 +141,10 @@ def test_discovery_create_mixed():
     assert response.status_code == 200, response.text
 
 def test_discovery_get_all_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery?feature_name={FEATURE_NAME_CATEGORICAL}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery?query={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
 
+'''
 def test_discovery_get_single_aggregated():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
     assert response.status_code == 200, response.text
@@ -195,7 +197,7 @@ def test_plot_discovery_summary_selected_features():
         #plot_figure_json(figure)
         print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
 
-
+'''
 
 '''
 def test_delete_discovery():
