@@ -23,6 +23,7 @@ FEATURE_NAME_NUMERIC = "bmi"
 FEATURE_NAME_NUMERIC2 = "Age"
 FEATURE_NAME_CATEGORICAL = 'Embarked'
 SELECTED_FEATURES = "Age,Sex,Embarked"
+SELECTED_FEATURES = "age,sex,bmi"
 
 
 def test_discovery_create_numeric():
@@ -140,64 +141,35 @@ def test_discovery_create_mixed():
     })
     assert response.status_code == 200, response.text
 
-def test_discovery_get_all_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery?query={SELECTED_FEATURES}")
+def test_discovery_get_all():
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery")
     assert response.status_code == 200, response.text
 
-'''
-def test_discovery_get_single_aggregated():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
+def test_discovery_get_selected():
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
 
-
-def test_plot_discovery_summary_single():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery_feature?feature_name={FEATURE_NAME_CATEGORICAL}")
-    assert response.status_code == 200, response.text
-
-    discovery_summary = response.json()
-    data_information = discovery_summary['data_information'][0]
-    print("DATA INFORMATION : {}".format(data_information))
-
-    figure_data = {
-        "data": data_information['figure_data']['figure']['data'],
-        "layout": data_information['figure_data']['figure']['layout']
-    }
-
-    plot_figure_json(figure_data)
-
-
-def test_plot_discovery_summary_selected_features():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?feature_name={FEATURE_NAME_CATEGORICAL}")
+def test_plot_discovery():
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()
-
-    available_features = []
-
-    for feature in discovery_summary['data_information']:
-        available_features.append(feature['title'])
-
-    #print("AVAILABLE FEATURES : {}".format(available_features))
-
-    selected_features = ['age', 'bmi', 'sex']
-
     figure_data_lst = []
 
     data_information = discovery_summary['data_information']
 
     for data in data_information:
-        if data['title'] in selected_features:
-            figure_data = {
-                "data": data['figure_data']['figure']['data'],
-                "layout": data['figure_data']['figure']['layout']
-            }
-            figure_data_lst.append(figure_data)
+        figure_data = {
+            "data": data['figure_data']['figure']['data'],
+            "layout": data['figure_data']['figure']['layout']
+        }
+        figure_data_lst.append(figure_data)
 
     for figure in figure_data_lst:
-        #plot_figure_json(figure)
-        print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
+        plot_figure_json(figure)
+        #print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
 
-'''
+
 
 '''
 def test_delete_discovery():

@@ -3,7 +3,6 @@ from collections import Counter
 
 
 def aggregate_numeric_column(feature_lst: list, feature: dict):
-    value = feature
 
     discovery_title = ""
     discovery_item_count_not_na = []
@@ -13,7 +12,7 @@ def aggregate_numeric_column(feature_lst: list, feature: dict):
     discovery_max = []
 
     for feature2 in feature_lst:
-        if feature2['title'] == value['title']:
+        if feature2['title'] == feature['title']:
             data = feature2
             discovery_title = data['title']
             discovery_item_count_not_na.append(data['not_na_elements'])
@@ -53,14 +52,14 @@ def aggregate_numeric_column(feature_lst: list, feature: dict):
     return discovery_summary_json
 
 def aggregate_categorical_column(feature_lst: list, feature: dict, num_discoveries: int):
-    value = feature
+
     discovery_title = ""
     discovery_item_count_not_na = []
     discovery_number_categories = 0
     discovery_value_counts = []
 
     for feature2 in feature_lst:
-        if feature2['title'] == value['title']:
+        if feature2['title'] == feature['title']:
             data = feature2
 
             discovery_title = data['title']
@@ -115,12 +114,11 @@ def aggregate_unstructured_data(feature_lst: list, feature: dict):
 
 def aggregate_unique_column(feature_lst: list, feature: dict, num_discoveries: int):
 
-    value = feature
     discovery_title = ""
     discovery_no_duplicates = 0
 
     for feature2 in feature_lst:
-        if feature2['title'] == value['title']:
+        if feature2['title'] == feature['title']:
             data = feature2
             discovery_title = data['title']
             discovery_no_duplicates += data['number_of_duplicates']
@@ -137,12 +135,11 @@ def aggregate_unique_column(feature_lst: list, feature: dict, num_discoveries: i
 
 def aggregate_equal_column(feature_lst: list, feature: dict):
 
-    value = feature
     discovery_title = ""
     discovery_equal_value = []
 
     for feature2 in feature_lst:
-        if feature2['title'] == value['title']:
+        if feature2['title'] == feature['title']:
             data = feature2
             discovery_title = data['title']
             discovery_equal_value.append(data['value'])
