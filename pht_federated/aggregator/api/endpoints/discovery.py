@@ -73,11 +73,11 @@ def get_discovery_all(proposal_id: int, query: Union[str, None] = Query(default=
             "proposal_id": proposal_id,
             "item_count": discovery_item_count,
             "feature_count": discovery_feature_count,
-            "data_information": aggregated_feature_lst
+            "column_information": aggregated_feature_lst
         }
         discovery_summary = DiscoverySummary(**discovery_summary_schema)
 
-        #print("DISCOVERY SUMMARY : {}".format(discovery_summary))
+        print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 
         return discovery_summary
 

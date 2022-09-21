@@ -156,7 +156,7 @@ def test_plot_discovery():
     discovery_summary = response.json()
     figure_data_lst = []
 
-    data_information = discovery_summary['data_information']
+    data_information = discovery_summary['column_information']
 
     for data in data_information:
         try:

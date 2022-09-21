@@ -24,7 +24,7 @@ class DiscoveryUnstructuredData(DatasetUnstructuredData):
 
 
 class DiscoverySummary(DiscoveryStatistics):
-    data_information: Optional[List[Annotated[Union[DiscoveryCategoricalColumn,
+    column_information: Optional[List[Annotated[Union[DiscoveryCategoricalColumn,
                                                     DiscoveryNumericalColumn,
                                                     DiscoveryUnstructuredData,
                                                     DiscoveryEqualColumn,
