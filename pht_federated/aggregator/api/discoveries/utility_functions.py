@@ -152,7 +152,7 @@ def aggregate_equal_column(feature_lst: list, feature: dict):
     discovery_summary_json = {
         "type": 'equal',
         "title": discovery_title,
-        "value": discovery_equal_value
+        "value": discovery_equal_value[0]
     }
 
     return discovery_summary_json

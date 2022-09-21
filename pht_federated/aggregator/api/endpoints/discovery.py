@@ -6,7 +6,7 @@ from pht_federated.aggregator.api.crud.crud_dataset_statistics import datasets
 from pht_federated.aggregator.api.discoveries.utility_functions import *
 from pht_federated.aggregator.api import dependencies
 from sqlalchemy.orm import Session
-
+from datetime import datetime
 
 router = APIRouter()
 
@@ -19,7 +19,6 @@ def get_discovery_all(proposal_id: int, query: Union[str, None] = Query(default=
 
     feature_lst = []
     aggregated_feature_lst = []
-
     discovery_item_count = 0
     discovery_feature_count = 0
 
@@ -33,6 +32,7 @@ def get_discovery_all(proposal_id: int, query: Union[str, None] = Query(default=
             discovery = jsonable_encoder(discovery)
             discovery_item_count += discovery['item_count']
             discovery_feature_count += discovery['feature_count']
+
             for feature in discovery['column_information']:
                 if query:
                     selected_features = query.split(',')
@@ -77,7 +77,7 @@ def get_discovery_all(proposal_id: int, query: Union[str, None] = Query(default=
         }
         discovery_summary = DiscoverySummary(**discovery_summary_schema)
 
-        print("DISCOVERY SUMMARY : {}".format(discovery_summary))
+        #print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 
         return discovery_summary
 
@@ -92,6 +92,17 @@ def delete_discovery_statistics(proposal_id: int, db: Session = Depends(dependen
 @router.post("/{proposal_id}/discovery", response_model=DiscoveryStatistics)
 def post_discovery_statistics(proposal_id: int, create_msg: StatisticsCreate, db: Session = Depends(dependencies.get_db)) -> DatasetStatistics:
     dataset_statistics = json.loads(create_msg.json())
+    proposal_schema = {
+        "id" : proposal_id,
+        "name": "example_proposal",
+        "created_at": datetime.now(),
+        "updated_at": datetime.now()
+    }
+    proposal = StatisticsCreate(**proposal_schema)
+    proposal = datasets.create(db, obj_in=proposal)
+    if not proposal:
+        raise HTTPException(status_code=400, detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
+
     discovery_statistics_schema = {
         "proposal_id": proposal_id,
         "item_count": dataset_statistics['item_count'],

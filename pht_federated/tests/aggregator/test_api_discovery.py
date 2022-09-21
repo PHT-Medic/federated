@@ -159,23 +159,23 @@ def test_plot_discovery():
     data_information = discovery_summary['data_information']
 
     for data in data_information:
-        figure_data = {
-            "data": data['figure_data']['figure']['data'],
-            "layout": data['figure_data']['figure']['layout']
-        }
-        figure_data_lst.append(figure_data)
+        try:
+            figure_data = {
+                "data": data['figure_data']['figure']['data'],
+                "layout": data['figure_data']['figure']['layout']
+            }
+            figure_data_lst.append(figure_data)
+        except:
+            print(f"Feature {data['title']} does not have figure_data available.")
 
     for figure in figure_data_lst:
         plot_figure_json(figure)
         #print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
 
-
-
-'''
 def test_delete_discovery():
-    response = client.delete(f"/api/proposal/{PROPOSAL_ID}/discovery")
+    response = client.delete(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery")
     assert response.status_code == 200, response.text
-'''
+
 
 
 
