@@ -1,13 +1,9 @@
-import pandas as pd
 from typing import Optional
 from pandas.api.types import is_numeric_dtype, is_bool_dtype
-import plotly.express as px
 import plotly.io
-from plotly.graph_objects import Figure
-import json
 from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary, DiscoveryFigure
 from pht_federated.aggregator.api.schemas.dataset_statistics import DatasetStatistics
-import plotly.graph_objects as go
+from pht_federated.aggregator.api.discoveries.plots import *
 
 
 def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatistics]:
@@ -23,7 +19,6 @@ def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatist
     n_items = shape[0]
     n_features = shape[1]
     columns_inf = get_column_information(dataframe, description)
-
 
     schema_data = {
         'item_count': n_items,
@@ -51,17 +46,16 @@ def get_column_information(dataframe: pd.DataFrame, description: pd.DataFrame) -
             'title': title
         })
         nan_count = dataframe[title].isna().sum()
-        if not(is_numeric_dtype(dataframe[title])) or is_bool_dtype(dataframe[title]):
+        if not (is_numeric_dtype(dataframe[title])) or is_bool_dtype(dataframe[title]):
             # extract information from categorical column
             columns_inf[i]['not_na_elements'] = count - nan_count
             columns_inf = process_categorical_column(dataframe, columns_inf, i, description, title)
         else:
             # extract information from numerical column
-            zero_count = dataframe[title][dataframe[title]==0].count()
+            zero_count = dataframe[title][dataframe[title] == 0].count()
             undefined_count = nan_count + zero_count
             columns_inf[i]['not_na_elements'] = count - undefined_count
             columns_inf = process_numerical_column(columns_inf, i, description, title)
-
 
     return columns_inf
 
@@ -84,7 +78,8 @@ def process_numerical_column(columns_inf: dict, i: int, description: pd.DataFram
     return columns_inf
 
 
-def process_categorical_column(dataframe: pd.DataFrame, columns_inf: dict, i: int, description: pd.DataFrame, title: str) -> dict:
+def process_categorical_column(dataframe: pd.DataFrame, columns_inf: dict, i: int, description: pd.DataFrame,
+                               title: str) -> dict:
     """
     Extract information from categorical column and create plot of column data
     :param dataframe: discovery as dataframe object
@@ -98,7 +93,6 @@ def process_categorical_column(dataframe: pd.DataFrame, columns_inf: dict, i: in
     unique = description[title]["unique"]
     top = description[title]["top"]
     freq = description[title]["freq"]
-
 
     # if every entry has a unique value (or at most 50 values are given multiple times)
     if count - 50 < unique <= count:
@@ -126,6 +120,7 @@ def process_categorical_column(dataframe: pd.DataFrame, columns_inf: dict, i: in
 
     return columns_inf
 
+
 def create_figure(fig: Figure) -> DiscoveryFigure:
     """
     Create DataSetFigure-Object of a plotly figure
@@ -133,87 +128,20 @@ def create_figure(fig: Figure) -> DiscoveryFigure:
     :return: DataSetFigure-Object with JSON-representation of plotly figure
     """
     fig_json = plotly.io.to_json(fig)
-    obj = json.loads(fig_json)
-    figure = DiscoveryFigure(fig_data=obj)
-    #print("Figure  data : {}".format(figure.fig_data))
+    figure = DiscoveryFigure.parse_raw(fig_json)
+    # print("Figure  data : {}".format(figure.fig_data))
     return figure
-
-def plot_figure_json(json_data: dict):
-    fig_plotly = plotly.io.from_json(json.dumps(json_data))
-    fig_plotly.show()
-
-
-def create_dot_plot(json_data: dict) -> Figure:
-
-    feature_name = [json_data['title']]
-    mean = [json_data['mean']]
-    std_plus = [json_data['mean'] + json_data['std']]
-    std_minus = [json_data['mean'] - json_data['std']]
-    min_value = [json_data['min']]
-    max_value = [json_data['max']]
-
-    trace_mean = go.Scatter(
-        x=feature_name,
-        y=mean,
-        marker=dict(color="blue", size=12),
-        mode='markers',
-        name="Mean"
-    )
-    trace_std_plus = go.Scatter(
-        x=feature_name,
-        y=std_plus,
-        marker=dict(color="red", size=12),
-        mode='markers',
-        name="Standard Deivation"
-    )
-    trace_std_minus = go.Scatter(
-        x=feature_name,
-        y=std_minus,
-        marker=dict(color="red", size=12),
-        mode='markers',
-        name="Standard Deviation -",
-        showlegend=False
-    )
-    trace_min = go.Scatter(
-        x=feature_name,
-        y=min_value,
-        marker=dict(color="green", size=12),
-        mode='markers',
-        name="Min-Value"
-    )
-    trace_max = go.Scatter(
-        x=feature_name,
-        y=max_value,
-        marker=dict(color="green", size=12),
-        mode='markers',
-        name="Max-Value"
-    )
-
-    data = [trace_mean, trace_std_plus, trace_std_minus, trace_min, trace_max]
-    layout = go.Layout(
-        title=f'Dot-Plot over Discovery Results of Numerical Feature : "{feature_name[0]}"',
-        xaxis_title="Feature Name",
-        yaxis_title="Value"
-    )
-    fig = go.Figure(data=data, layout=layout)
-
-    return fig
-
-def create_barplot(json_data: dict) -> Figure:
-
-    value_counts = json_data['value_counts']
-    feature_title = json_data['title']
-    names_col = ["Value", "Count"]
-    dat = value_counts.items()
-    plot_df = pd.DataFrame(data=dat, columns=names_col)
-
-    bar = px.bar(plot_df, x='Count', y='Value', title=f'Value Counts of Categorical Feature : "{feature_title}"', color=dat)
-
-    return bar
 
 
 def calc_combined_std(sample_size: list, std_lst: list, means: list, combined_mean: float) -> float:
-
+    """
+    Computes combined standard deviation of multiple different DatasetStatistics
+    :param sample_size: list of num of samples for each dataset
+    :param std_lst: list of standard deviations for each dataset
+    :param means: list of means for each dataset
+    :param combined_mean: combined mean value for the number of datasets
+    :return: combined standard deviation
+    """
     nominator = []
 
     for i in range(len(std_lst)):
@@ -222,5 +150,3 @@ def calc_combined_std(sample_size: list, std_lst: list, means: list, combined_me
     combined_std = sum(nominator) / sum(sample_size)
 
     return combined_std
-
-

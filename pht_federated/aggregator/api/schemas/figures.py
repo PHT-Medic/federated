@@ -6,6 +6,7 @@ class FigureData(BaseModel):
     data: list
     layout: dict
 
+
 class DiscoveryFigure(BaseModel):
     title: Optional[str]
     type: Optional[str]

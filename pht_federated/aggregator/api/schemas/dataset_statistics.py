@@ -3,8 +3,6 @@ from typing import Optional, Any, List, Union, Dict, Literal
 from typing_extensions import Annotated
 
 
-
-
 class DatasetUniqueColumn(BaseModel):
     type: Literal['unique']
     title: Optional[str]
@@ -36,6 +34,7 @@ class DatasetNumericalColumn(BaseModel):
     min: Optional[float]
     max: Optional[float]
 
+
 class DatasetUnstructuredData(BaseModel):
     type: Literal['unstructured']
     title: Optional[str]
@@ -44,6 +43,7 @@ class DatasetUnstructuredData(BaseModel):
     target_counts: Optional[Dict[str, int]]
     most_frequent_target: Optional[Union[int, str]]
     frequency: Optional[int]
+
 
 class DatasetStatistics(BaseModel):
     item_count: Optional[int]
@@ -57,6 +57,7 @@ class DatasetStatistics(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class DiscoveryStatistics(DatasetStatistics):
     proposal_id: Optional[int]

@@ -7,8 +7,8 @@ from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.aggregator.api.endpoints.discovery import *
 from pht_federated.aggregator.api.discoveries import statistics
+from pht_federated.aggregator.api.discoveries.plots import *
 from sklearn.datasets import load_breast_cancer, load_wine
-
 
 from pht_federated.tests.aggregator.test_db import override_get_db
 
@@ -27,44 +27,40 @@ SELECTED_FEATURES = "age,sex,bmi"
 
 
 def test_discovery_create_numeric():
-
     diabetes_dataset = sklearn.datasets.load_diabetes(return_X_y=False, as_frame=False)
 
     df = pd.DataFrame(diabetes_dataset['data'], columns=diabetes_dataset['feature_names'])
     df['target'] = diabetes_dataset['target']
-    #print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
+    # print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
-
 
     stats_df1 = statistics.get_discovery_statistics(df_split[0])
     stats_df2 = statistics.get_discovery_statistics(df_split[1])
     stats_df3 = statistics.get_discovery_statistics(df_split[2])
-    #print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
+    # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     stats1_json = jsonable_encoder(stats_df1)
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
 
-
-
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
-                            "item_count" : stats1_json['item_count'],
-                            "feature_count" : stats1_json['feature_count'],
-                            "column_information" : stats1_json['column_information']
+        "item_count": stats1_json['item_count'],
+        "feature_count": stats1_json['feature_count'],
+        "column_information": stats1_json['column_information']
     })
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
-                            "item_count" : stats2_json['item_count'],
-                            "feature_count" : stats2_json['feature_count'],
-                            "column_information" : stats2_json['column_information']
+        "item_count": stats2_json['item_count'],
+        "feature_count": stats2_json['feature_count'],
+        "column_information": stats2_json['column_information']
     })
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
-                            "item_count" : stats3_json['item_count'],
-                            "feature_count" : stats3_json['feature_count'],
-                            "column_information" : stats3_json['column_information']
+        "item_count": stats3_json['item_count'],
+        "feature_count": stats3_json['feature_count'],
+        "column_information": stats3_json['column_information']
     })
     assert response.status_code == 200, response.text
 
@@ -73,7 +69,7 @@ def test_discovery_create_numeric2():
     breast_cancer_dataset = load_breast_cancer(return_X_y=False, as_frame=False)
     df = pd.DataFrame(breast_cancer_dataset['data'], columns=breast_cancer_dataset['feature_names'])
     df['target'] = breast_cancer_dataset['target']
-    #print("Breast Cancer dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
+    # print("Breast Cancer dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
 
     stats_df1 = statistics.get_discovery_statistics(df_split[0])
@@ -141,13 +137,16 @@ def test_discovery_create_mixed():
     })
     assert response.status_code == 200, response.text
 
+
 def test_discovery_get_all():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery")
     assert response.status_code == 200, response.text
 
+
 def test_discovery_get_selected():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
+
 
 def test_plot_discovery():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
@@ -170,15 +169,9 @@ def test_plot_discovery():
 
     for figure in figure_data_lst:
         plot_figure_json(figure)
-        #print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
+        # print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
+
 
 def test_delete_discovery():
     response = client.delete(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery")
     assert response.status_code == 200, response.text
-
-
-
-
-
-
-
