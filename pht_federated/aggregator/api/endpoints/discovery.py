@@ -23,8 +23,8 @@ def get_discovery_all(proposal_id: int, query: Union[str, None] = Query(default=
     return discovery_summary
 
 
-@router.delete("/{proposal_id}/discovery", response_model=DiscoveryStatistics)
-def delete_discovery_statistics(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DiscoveryStatistics:
+@router.delete("/{proposal_id}/discovery", response_model=int)
+def delete_discovery_statistics(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> int:
     discovery_del = datasets.delete_by_proposal_id(proposal_id, db)
     if not discovery_del:
         raise HTTPException(status_code=404, detail=f"DatasetStatistics of proposal with id '{proposal_id}' not found.")
