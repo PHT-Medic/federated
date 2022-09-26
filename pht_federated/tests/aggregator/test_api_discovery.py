@@ -16,6 +16,9 @@ app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
+#PROPOSAL_ID_NUMERIC = "a70cc0e2-c245-4c00-9cde-5a63b11ae2a8"
+#PROPOSAL_ID_NUMERIC2 = "e19e449d-a508-4d3b-bbae-f47f0c32db06"
+#PROPOSAL_ID_MIXED = "9669ea07-dc5f-44b0-b6a0-4eed9cf61885"
 PROPOSAL_ID_NUMERIC = 42
 PROPOSAL_ID_NUMERIC2 = 43
 PROPOSAL_ID_MIXED = 44

@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
-def get_discovery_all(proposal_id: int, query: Union[str, None] = Query(default=None),
+def get_discovery_all(proposal_id: str, query: Union[str, None] = Query(default=None),
                       db: Session = Depends(dependencies.get_db)):
     response = datasets.get_all_by_proposal_id(proposal_id, db)
     if not response:
@@ -24,7 +24,7 @@ def get_discovery_all(proposal_id: int, query: Union[str, None] = Query(default=
 
 
 @router.delete("/{proposal_id}/discovery", response_model=int)
-def delete_discovery_statistics(proposal_id: int, db: Session = Depends(dependencies.get_db)) -> int:
+def delete_discovery_statistics(proposal_id: str, db: Session = Depends(dependencies.get_db)) -> int:
     discovery_del = datasets.delete_by_proposal_id(proposal_id, db)
     if not discovery_del:
         raise HTTPException(status_code=404, detail=f"DatasetStatistics of proposal with id '{proposal_id}' not found.")
@@ -32,10 +32,10 @@ def delete_discovery_statistics(proposal_id: int, db: Session = Depends(dependen
 
 
 @router.post("/{proposal_id}/discovery", response_model=DiscoveryStatistics)
-def post_discovery_statistics(proposal_id: int, create_msg: StatisticsCreate,
+def post_discovery_statistics(proposal_id: str, create_msg: StatisticsCreate,
                               db: Session = Depends(dependencies.get_db)) -> DatasetStatistics:
     proposal_schema = {
-        "proposal_id": proposal_id,
+        "id": proposal_id,
         "name": "example_proposal",
         "created_at": datetime.now(),
         "updated_at": datetime.now()
