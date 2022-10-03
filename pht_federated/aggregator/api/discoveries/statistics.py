@@ -95,7 +95,7 @@ def process_categorical_column(dataframe: pd.DataFrame, columns_inf: dict, i: in
     freq = description[title]["freq"]
 
     # if every entry has a unique value (or at most 50 values are given multiple times)
-    if count - 50 < unique <= count:
+    if count - percentage(95, count) < unique <= count:
         column_type = "unique"
         columns_inf[i]['type'] = column_type
         columns_inf[i]['title'] = title
@@ -150,3 +150,6 @@ def calc_combined_std(sample_size: list, std_lst: list, means: list, combined_me
     combined_std = sum(nominator) / sum(sample_size)
 
     return combined_std
+
+def percentage(percent, whole):
+    return (percent * whole) / 100.0

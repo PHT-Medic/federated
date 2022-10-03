@@ -1,6 +1,5 @@
 import sklearn
 import numpy as np
-from tabulate import tabulate
 from sklearn.datasets import load_diabetes
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.app import app
@@ -8,7 +7,7 @@ from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.aggregator.api.endpoints.discovery import *
 from pht_federated.aggregator.api.discoveries import statistics
 from pht_federated.aggregator.api.discoveries.plots import *
-from sklearn.datasets import load_breast_cancer, load_wine
+from sklearn.datasets import load_breast_cancer
 
 from pht_federated.tests.aggregator.test_db import override_get_db
 
@@ -145,10 +144,46 @@ def test_discovery_get_all():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery")
     assert response.status_code == 200, response.text
 
+    response = response.json()
+
+    df_titanic = pd.read_csv('./data/train_data_titanic.csv')
+    stats_df = statistics.get_discovery_statistics(df_titanic)
+
+
+    assert stats_df.item_count == response['item_count']
+    assert stats_df.feature_count == response['feature_count']
+
+    assert stats_df.column_information[0].mean == response['column_information'][0]['mean']
+    assert stats_df.column_information[0].min == response['column_information'][0]['min']
+    assert stats_df.column_information[0].max == response['column_information'][0]['max']
+    assert stats_df.column_information[0].not_na_elements == response['column_information'][0]['not_na_elements']
+
+    assert stats_df.column_information[4].number_categories == response['column_information'][4]['number_categories']
+    assert stats_df.column_information[4].value_counts == response['column_information'][4]['value_counts']
+    assert stats_df.column_information[4].most_frequent_element == response['column_information'][4]['most_frequent_element']
+    assert stats_df.column_information[4].frequency == response['column_information'][4]['frequency']
+
+
 
 def test_discovery_get_selected():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
+
+    response = response.json()
+
+    diabetes_dataset = sklearn.datasets.load_diabetes(return_X_y=False, as_frame=False)
+    df = pd.DataFrame(diabetes_dataset['data'], columns=diabetes_dataset['feature_names'])
+    df['target'] = diabetes_dataset['target']
+    stats_df = statistics.get_discovery_statistics(df)
+
+
+    assert stats_df.item_count == response['item_count']
+    assert stats_df.feature_count == response['feature_count']
+
+    assert stats_df.column_information[0].mean == response['column_information'][0]['mean']
+    assert stats_df.column_information[0].min == response['column_information'][0]['min']
+    assert stats_df.column_information[0].max == response['column_information'][0]['max']
+    assert stats_df.column_information[0].not_na_elements == response['column_information'][0]['not_na_elements']
 
 
 def test_plot_discovery():
@@ -171,10 +206,11 @@ def test_plot_discovery():
             print(f"Feature {data['title']} does not have figure_data available.")
 
     for figure in figure_data_lst:
-        plot_figure_json(figure)
-        # print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
+        #plot_figure_json(figure)
+        print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
 
 
 def test_delete_discovery():
     response = client.delete(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery")
     assert response.status_code == 200, response.text
+

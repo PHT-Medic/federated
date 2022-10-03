@@ -160,8 +160,8 @@ def aggregate_categorical_columns(feature_lst: list, feature: dict, num_discover
         c.update(d)
 
     discovery_value_counts = dict(c)
-    for entry in discovery_value_counts.items():
-        discovery_value_counts[entry[0]] = round(entry[1] / num_discoveries)
+    #for entry in discovery_value_counts.items():
+    #    discovery_value_counts[entry[0]] = round(entry[1] / num_discoveries)
 
     discovery_most_frequent_element = max(discovery_value_counts, key=discovery_value_counts.get)
     discovery_frequency = discovery_value_counts[discovery_most_frequent_element]

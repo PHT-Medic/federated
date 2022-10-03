@@ -19,12 +19,12 @@ class Proposals(Base):
     name = Column(String, unique=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, nullable=True)
-
 '''
+
 class DatasetStatistics(Base):
     __tablename__ = "dataset_statistics"
-    #id = Column(Integer, primary_key=True, index=True)
-    proposal_id = Column(UUID(as_uuid=True), ForeignKey('proposals.id'), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
+    proposal_id = Column(UUID, ForeignKey('proposals.id'))
     item_count = Column(Integer, default=0)
     feature_count = Column(Integer, default=0)
     column_information = Column(JSON, default={})

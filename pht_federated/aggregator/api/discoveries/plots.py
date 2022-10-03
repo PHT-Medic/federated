@@ -1,20 +1,30 @@
 import plotly.express as px
 import plotly.io
 from plotly.graph_objects import Figure
-import pandas as pd
+import json
+from pht_federated.aggregator.api.schemas.discovery import DiscoveryFigure
 import plotly.graph_objects as go
+import pandas as pd
 
 
-def plot_figure_json(fig_data: dict):
-    plotly.io.show(fig_data)
+def create_figure(fig: Figure) -> DiscoveryFigure:
+    """
+    Create DataSetFigure-Object of a plotly figure
+    :param fig: Plotly figure
+    :return: DataSetFigure-Object with JSON-representation of plotly figure
+    """
+    fig_json = plotly.io.to_json(fig)
+    obj = json.loads(fig_json)
+    figure = DiscoveryFigure(fig_data=obj)
+    # print("Figure  data : {}".format(figure.fig_data))
+    return figure
+
+
+def plot_figure_json(json_data: dict):
+    plotly.io.show(json_data)
 
 
 def create_dot_plot(json_data: dict) -> Figure:
-    """
-    Creates dot plot from numerical data aggregated during discovery summary
-    :param json_data: dict containing the numerical discovery summary data
-    :return: plotly Figure object
-    """
     feature_name = [json_data['title']]
     mean = [json_data['mean']]
     std_plus = [json_data['mean'] + json_data['std']]
@@ -71,11 +81,6 @@ def create_dot_plot(json_data: dict) -> Figure:
 
 
 def create_barplot(json_data: dict) -> Figure:
-    """
-    Creates bar plot from categorical data aggregated during discovery summary
-    :param json_data: dict containing the categorical discovery summary data
-    :return: plotly Figure object
-    """
     value_counts = json_data['value_counts']
     feature_title = json_data['title']
     names_col = ["Value", "Count"]
