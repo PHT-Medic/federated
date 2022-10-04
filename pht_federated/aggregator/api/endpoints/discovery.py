@@ -58,7 +58,7 @@ def post_discovery_statistics(proposal_id: str, db: Session = Depends(dependenci
 
     proposal_schema = {
         "id": proposal_id,
-        "name": "example_proposal",
+        "name": "example_proposal-" + str(uuid.uuid4()),
         "created_at": datetime.now(),
         "updated_at": datetime.now()
     }

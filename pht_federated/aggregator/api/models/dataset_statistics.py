@@ -17,6 +17,6 @@ class DatasetStatistics(Base):
 class Proposals(Base):
     __tablename__ = "proposals"
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
-    name = Column(String, default='test')
+    name = Column(String, unique=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, nullable=True)
