@@ -8,6 +8,7 @@ from pht_federated.aggregator.api.endpoints.discovery import *
 from pht_federated.aggregator.api.discoveries import statistics
 from pht_federated.aggregator.api.discoveries.plots import *
 from sklearn.datasets import load_breast_cancer
+from uuid import uuid4
 
 from pht_federated.tests.aggregator.test_db import override_get_db
 
@@ -15,17 +16,15 @@ app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
-#PROPOSAL_ID_NUMERIC = "a70cc0e2-c245-4c00-9cde-5a63b11ae2a8"
-#PROPOSAL_ID_NUMERIC2 = "e19e449d-a508-4d3b-bbae-f47f0c32db06"
-#PROPOSAL_ID_MIXED = "9669ea07-dc5f-44b0-b6a0-4eed9cf61885"
-PROPOSAL_ID_NUMERIC = 42
-PROPOSAL_ID_NUMERIC2 = 43
-PROPOSAL_ID_MIXED = 44
+PROPOSAL_ID_NUMERIC = uuid4()
+PROPOSAL_ID_NUMERIC2 = uuid4()
+PROPOSAL_ID_MIXED = uuid4()
 FEATURE_NAME_NUMERIC = "bmi"
 FEATURE_NAME_NUMERIC2 = "Age"
 FEATURE_NAME_CATEGORICAL = 'Embarked'
 SELECTED_FEATURES = "Age,Sex,Embarked"
 SELECTED_FEATURES = "age,sex,bmi"
+
 
 
 def test_discovery_create_numeric():
@@ -44,6 +43,9 @@ def test_discovery_create_numeric():
     stats1_json = jsonable_encoder(stats_df1)
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
+
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/proposal")
+    assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
         "item_count": stats1_json['item_count'],
@@ -83,6 +85,9 @@ def test_discovery_create_numeric2():
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
 
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/proposal")
+    assert response.status_code == 200, response.text
+
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/discovery", json={
         "item_count": stats1_json['item_count'],
         "feature_count": stats1_json['feature_count'],
@@ -117,6 +122,9 @@ def test_discovery_create_mixed():
     stats1_json = jsonable_encoder(stats_df1)
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
+
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/proposal")
+    assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
         "item_count": stats1_json['item_count'],

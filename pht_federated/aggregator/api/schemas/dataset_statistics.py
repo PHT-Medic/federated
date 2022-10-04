@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Any, List, Union, Dict, Literal
 from typing_extensions import Annotated
+import uuid
 
 
 class DatasetUniqueColumn(BaseModel):
@@ -60,7 +61,8 @@ class DatasetStatistics(BaseModel):
 
 
 class DiscoveryStatistics(DatasetStatistics):
-    proposal_id: Optional[int]
+    id: Optional[uuid.UUID]
+    proposal_id: Optional[uuid.UUID]
 
     class Config:
         orm_mode = True

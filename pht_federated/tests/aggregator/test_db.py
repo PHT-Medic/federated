@@ -3,7 +3,8 @@ from sqlmodel import SQLModel
 #from dotenv import load_dotenv, find_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+from subprocess import check_output
+import testing.postgresql
 from pht_federated.aggregator.db.base_class import Base
 
 # Create new sqlite database for testing
@@ -11,7 +12,11 @@ from pht_federated.aggregator.db.base_class import Base
 # load the .env file
 #load_dotenv(find_dotenv())
 
-SQLALCHEMY_DATABASE_URL = os.getenv("TEST_DB", "sqlite:///./test.db")
+#SQLALCHEMY_DATABASE_URL = os.getenv("TEST_DB", "sqlite:///./test.db")
+
+
+SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://test:test@localhost:5442/test_db"
+
 
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
@@ -19,6 +24,7 @@ if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     )
 else:
     engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

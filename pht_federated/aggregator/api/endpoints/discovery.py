@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pht_federated.aggregator.api.schemas.dataset_statistics import *
+from pht_federated.aggregator.api.schemas.proposals import *
 from pht_federated.aggregator.api.crud.crud_dataset_statistics import datasets
+from pht_federated.aggregator.api.crud.crud_proposals import proposals
 from pht_federated.aggregator.api.discoveries.utility_functions import *
 from pht_federated.aggregator.api import dependencies
 from sqlalchemy.orm import Session
@@ -34,20 +36,10 @@ def delete_discovery_statistics(proposal_id: str, db: Session = Depends(dependen
 @router.post("/{proposal_id}/discovery", response_model=DiscoveryStatistics)
 def post_discovery_statistics(proposal_id: str, create_msg: StatisticsCreate,
                               db: Session = Depends(dependencies.get_db)) -> DatasetStatistics:
-    proposal_schema = {
-        "id": proposal_id,
-        "name": "example_proposal",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
-    }
-    proposal = StatisticsCreate(**proposal_schema)
-    proposal = datasets.create(db, obj_in=proposal)
-    if not proposal:
-        raise HTTPException(status_code=400,
-                            detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
 
     dataset_statistics = create_msg.dict()
     discovery_statistics_schema = {
+        "id": uuid.uuid4(),
         "proposal_id": proposal_id,
         "item_count": dataset_statistics['item_count'],
         "feature_count": dataset_statistics['feature_count'],
@@ -59,3 +51,21 @@ def post_discovery_statistics(proposal_id: str, create_msg: StatisticsCreate,
         raise HTTPException(status_code=400,
                             detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
     return discovery_statistics
+
+
+@router.post("/{proposal_id}/proposal", response_model=Proposals)
+def post_discovery_statistics(proposal_id: str, db: Session = Depends(dependencies.get_db)) -> Proposals:
+
+    proposal_schema = {
+        "id": proposal_id,
+        "name": "example_proposal",
+        "created_at": datetime.now(),
+        "updated_at": datetime.now()
+    }
+    proposal = ProposalsCreate(**proposal_schema)
+    proposal = proposals.create(db, obj_in=proposal)
+    if not proposal:
+        raise HTTPException(status_code=400,
+                            detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
+
+    return proposal
