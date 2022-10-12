@@ -6,7 +6,7 @@ import json
 from fastapi.encoders import jsonable_encoder
 
 
-def aggregate_proposal_features(response: list, proposal_id: int, query: Union[str, None]) -> [DiscoverySummary, ValueError]:
+def aggregate_proposal_features(response: list, proposal_id: int, query: Union[str, None]) -> DiscoverySummary:
     """
     Aggregates the individual values of >= 2 DatasetStatistics objects
     :param response: list of DatasetStatistics objects
@@ -21,7 +21,7 @@ def aggregate_proposal_features(response: list, proposal_id: int, query: Union[s
     discovery_feature_count = 0
 
     if len(response) < 2:
-        return ValueError("Not able to aggregate a discovery summary over less than 2 DatasetStatistics. Aborted.")
+        raise ValueError("Not able to aggregate a discovery summary over less than 2 DatasetStatistics. Aborted.")
     else:
         for discovery in response:
             discovery = jsonable_encoder(discovery)
