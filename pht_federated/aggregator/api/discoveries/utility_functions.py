@@ -6,7 +6,7 @@ import json
 from fastapi.encoders import jsonable_encoder
 
 
-def aggregate_proposal_features(response: list, proposal_id: int, query: Union[str, None]) -> DiscoverySummary:
+def aggregate_proposal_features(response: list, proposal_id: int, query: Union[str, None]) -> [DiscoverySummary, ValueError]:
     """
     Aggregates the individual values of >= 2 DatasetStatistics objects
     :param response: list of DatasetStatistics objects
@@ -21,7 +21,7 @@ def aggregate_proposal_features(response: list, proposal_id: int, query: Union[s
     discovery_feature_count = 0
 
     if len(response) < 2:
-        raise ValueError("Not able to aggregate a discovery summary over less than 2 DatasetStatistics. Aborted.")
+        return ValueError("Not able to aggregate a discovery summary over less than 2 DatasetStatistics. Aborted.")
     else:
         for discovery in response:
             discovery = jsonable_encoder(discovery)
@@ -208,9 +208,9 @@ def aggregate_unique_columns(feature_lst: list, feature: dict, num_discoveries: 
     discovery_title = ""
     discovery_no_duplicates = 0
 
-    for feature2 in feature_lst:
-        if feature2['title'] == feature['title']:
-            data = feature2
+    for feature_duplicate in feature_lst:
+        if feature_duplicate['title'] == feature['title']:
+            data = feature_duplicate
             discovery_title = data['title']
             discovery_no_duplicates += data['number_of_duplicates']
 
@@ -235,9 +235,9 @@ def aggregate_equal_columns(feature_lst: list, feature: dict):
     discovery_title = ""
     discovery_equal_value = []
 
-    for feature2 in feature_lst:
-        if feature2['title'] == feature['title']:
-            data = feature2
+    for feature_duplicate in feature_lst:
+        if feature_duplicate['title'] == feature['title']:
+            data = feature_duplicate
             discovery_title = data['title']
             discovery_equal_value.append(data['value'])
 

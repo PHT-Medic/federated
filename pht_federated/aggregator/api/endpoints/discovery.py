@@ -17,6 +17,9 @@ def get_discovery_all(proposal_id: str, query: Union[str, None] = Query(default=
     response = datasets.get_all_by_proposal_id(proposal_id, db)
     if not response:
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
+    if type(response) == ValueError:
+        raise HTTPException(status_code=403, detail="Not able to aggregate a discovery summary over less than 2 DatasetStatistics. Aborted.")
+
 
     discovery_summary = aggregate_proposal_features(response, proposal_id, query)
 
