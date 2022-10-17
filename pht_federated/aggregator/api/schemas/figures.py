@@ -1,19 +1,20 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 
 class FigureData(BaseModel):
-    layout: dict
     data: list
+    layout: dict
 
 
 class DiscoveryFigure(BaseModel):
-    fig_data: Optional[FigureData]
+    title: Optional[str]
+    type: Optional[str]
+    figure: Optional[FigureData]
 
 
-class FigureCreate(DiscoveryFigure):
-    pass
+class DiscoveryFigures(BaseModel):
+    fig_data_all: Optional[List[DiscoveryFigure]]
 
-
-class FigureUpdate(DiscoveryFigure):
-    pass
+    class Config:
+        orm_mode = True

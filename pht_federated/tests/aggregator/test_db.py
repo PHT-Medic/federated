@@ -1,17 +1,18 @@
 import os
-from sqlmodel import SQLModel
-#from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv, find_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
 from pht_federated.aggregator.db.base_class import Base
 
 # Create new sqlite database for testing
 
 # load the .env file
-#load_dotenv(find_dotenv())
+load_dotenv(find_dotenv())
 
-SQLALCHEMY_DATABASE_URL = os.getenv("TEST_DB", "sqlite:///./test.db")
+if os.getenv("STATION_DB"):
+    SQLALCHEMY_DATABASE_URL = os.getenv('STATION_DB')
+else:
+    SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://test:test@localhost:5442/test_db"
 
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
