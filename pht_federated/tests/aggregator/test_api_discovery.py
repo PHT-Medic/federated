@@ -123,6 +123,8 @@ def test_discovery_create_mixed():
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
 
+    print("PROPOSAL ID MIXED : {}".format(PROPOSAL_ID_MIXED))
+
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/proposal")
     assert response.status_code == 200, response.text
 
@@ -133,7 +135,7 @@ def test_discovery_create_mixed():
     })
     assert response.status_code == 200, response.text
 
-    '''
+
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
         "item_count": stats2_json['item_count'],
         "feature_count": stats2_json['feature_count'],
@@ -147,7 +149,7 @@ def test_discovery_create_mixed():
         "column_information": stats3_json['column_information']
     })
     assert response.status_code == 200, response.text
-    '''
+
 
 def test_discovery_get_all():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery")
