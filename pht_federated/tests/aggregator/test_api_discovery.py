@@ -45,7 +45,7 @@ def test_discovery_create_numeric():
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/proposal")
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}")
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
@@ -86,7 +86,7 @@ def test_discovery_create_numeric2():
     stats2_json = jsonable_encoder(stats_df2)
     stats3_json = jsonable_encoder(stats_df3)
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/proposal")
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}")
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/discovery", json={
@@ -126,7 +126,7 @@ def test_discovery_create_mixed():
 
     print("PROPOSAL ID MIXED : {}".format(PROPOSAL_ID_MIXED))
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/proposal")
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}")
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={

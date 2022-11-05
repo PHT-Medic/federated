@@ -57,7 +57,7 @@ def post_discovery_statistics(proposal_id: str, create_msg: StatisticsCreate,
     return discovery_statistics
 
 
-@router.post("/{proposal_id}/proposal", response_model=Proposals)
+@router.post("/{proposal_id}", response_model=Proposals)
 def post_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) -> Proposals:
 
     proposal_schema = {

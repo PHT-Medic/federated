@@ -82,7 +82,7 @@ class DiscoveryClient:
             proposal_id = int(os.getenv("PROPOSAL_ID"))
         assert proposal_id
 
-        endpoint = f"/{proposal_id}/proposal"
+        endpoint = f"/{proposal_id}"
         requests_post_proposal_url = self.api_url + endpoint
         print("REQUESTS POST PROPOSAL URL : {}".format(requests_post_proposal_url))
         r = requests.post(requests_post_proposal_url)
