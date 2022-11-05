@@ -1,5 +1,6 @@
 import sklearn
 import numpy as np
+import pandas as pd
 from sklearn.datasets import load_diabetes
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.app import app

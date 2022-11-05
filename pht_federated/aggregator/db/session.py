@@ -1,18 +1,15 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
-#from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-#load_dotenv(find_dotenv())
+load_dotenv(find_dotenv())
 
-# SQLALCHEMY_DATABASE_URL = "sqlite:///./app.db"
 
-if os.getenv("FEDERATED_DB"):
-    SQLALCHEMY_DATABASE_URL = os.getenv('FEDERATED_DB')
+if os.getenv("FEDERATED_DEV_DB"):
+    SQLALCHEMY_DATABASE_URL = os.getenv('FEDERATED_DEV_DB')
 else:
-    SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://admin:admin@localhost/pht_station"
-
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://admin:admin@localhost:5442/pht_station"
+    SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://admin:admin@localhost:5442/dev_db"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,  # connect_args={"check_same_thread": False}  For sqlite db

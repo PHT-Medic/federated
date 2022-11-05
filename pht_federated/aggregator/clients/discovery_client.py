@@ -45,7 +45,7 @@ class DiscoveryClient:
         return results
 
 
-    def post_discovery(self, proposal_id: uuid4 = None):
+    def post_discovery_statistics(self, proposal_id: uuid4 = None):
         if not proposal_id:
             proposal_id = int(os.getenv("PROPOSAL_ID"))
         assert proposal_id
@@ -58,6 +58,20 @@ class DiscoveryClient:
             "feature_count": 20,
             "column_information": {}
         })
+        results = r
+        print("Results : {}".format(results))
+
+        return results
+
+    def delete_discovery_statistics(self, proposal_id: uuid4 = None):
+        if not proposal_id:
+            proposal_id = int(os.getenv("PROPOSAL_ID"))
+        assert proposal_id
+
+        endpoint = f"/{proposal_id}/discovery"
+        requests_delete_discovery_url = self.api_url + endpoint
+        print("REQUESTS DELETE DISCOVERY URL : {}".format(requests_delete_discovery_url))
+        r = requests.delete(requests_delete_discovery_url)
         results = r
         print("Results : {}".format(results))
 
@@ -79,7 +93,4 @@ class DiscoveryClient:
 
 
 
-discovery_client = DiscoveryClient(api_url="http://127.0.0.1:8000", username="admin", password="admin")
-discovery_client.post_proposal(proposal_id=PROPOSAL_ID_MIXED)
-discovery_client.post_discovery(proposal_id=PROPOSAL_ID_MIXED)
-discovery_client.get_aggregated_discovery_results(proposal_id=PROPOSAL_ID_MIXED)
+discovery_client = DiscoveryClient(api_url="http://127.0.0.1:8000")
