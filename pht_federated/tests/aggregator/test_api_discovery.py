@@ -161,6 +161,8 @@ def test_discovery_get_all():
     df_titanic = pd.read_csv('./data/train_data_titanic.csv')
     stats_df = statistics.get_discovery_statistics(df_titanic)
 
+    print("RESPONSE : {}".format(response))
+
 
     assert stats_df.item_count == response['item_count']
     assert stats_df.feature_count == response['feature_count']

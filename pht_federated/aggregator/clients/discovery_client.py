@@ -18,14 +18,6 @@ class DiscoveryClient:
 
         print("SELF API URL : {}".format(self.api_url))
 
-        # self.url = self.url.rstrip("/") + "/api/v2.0"
-
-        self.username = username if username else os.getenv("HARBOR_USER")
-        assert self.username
-
-        self.password = password if password else os.getenv("HARBOR_PW")
-        assert self.password
-
     def get_aggregated_discovery_results(self, proposal_id: uuid4 = None, query: Union[str, None] = None) -> dict:
         if not proposal_id:
             proposal_id = int(os.getenv("PROPOSAL_ID"))
@@ -37,10 +29,8 @@ class DiscoveryClient:
             endpoint = f"/{proposal_id}/discovery?query={query}"
 
         requests_get_url = self.api_url + endpoint
-        print("REQUESTS GET URL : {}".format(requests_get_url))
-        r = requests.get(requests_get_url)
-        results = r.json()
-        print("Results : {}".format(results))
+        #print("REQUESTS GET URL : {}".format(requests_get_url))
+        results = requests.get(requests_get_url)
 
         return results
 
@@ -52,14 +42,18 @@ class DiscoveryClient:
 
         endpoint = f"/{proposal_id}/discovery"
         requests_post_discovery_url = self.api_url + endpoint
-        print("REQUESTS POST DISCOVERY URL : {}".format(requests_post_discovery_url))
-        r = requests.post(requests_post_discovery_url, json={
+        #print("REQUESTS POST DISCOVERY URL : {}".format(requests_post_discovery_url))
+        results = requests.post(requests_post_discovery_url, json={
             "item_count": 50,
             "feature_count": 20,
-            "column_information": {}
+            "column_information": [{'type': 'numeric',
+                                    'title': 'PassengerId',
+                                    'not_na_elements': 891,
+                                    'mean': 446.0,
+                                    'std': 66181.5,
+                                    'min': 1.0,
+                                    'max': 891.0}]
         })
-        results = r
-        print("Results : {}".format(results))
 
         return results
 
@@ -70,10 +64,8 @@ class DiscoveryClient:
 
         endpoint = f"/{proposal_id}/discovery"
         requests_delete_discovery_url = self.api_url + endpoint
-        print("REQUESTS DELETE DISCOVERY URL : {}".format(requests_delete_discovery_url))
-        r = requests.delete(requests_delete_discovery_url)
-        results = r
-        print("Results : {}".format(results))
+        #print("REQUESTS DELETE DISCOVERY URL : {}".format(requests_delete_discovery_url))
+        results = requests.delete(requests_delete_discovery_url)
 
         return results
 
@@ -84,13 +76,12 @@ class DiscoveryClient:
 
         endpoint = f"/{proposal_id}"
         requests_post_proposal_url = self.api_url + endpoint
-        print("REQUESTS POST PROPOSAL URL : {}".format(requests_post_proposal_url))
-        r = requests.post(requests_post_proposal_url)
-        results = r
-        print("Results : {}".format(results))
+        #print("REQUESTS POST PROPOSAL URL : {}".format(requests_post_proposal_url))
+        results = requests.post(requests_post_proposal_url)
 
         return results
 
 
 
 discovery_client = DiscoveryClient(api_url="http://127.0.0.1:8000")
+

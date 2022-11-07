@@ -9,4 +9,4 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=dev_db
     ports:
-      - "5442:5432"
+      - "5452:5432"
