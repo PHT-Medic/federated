@@ -7,30 +7,53 @@ SELECTED_FEATURES = "age,sex,bmi"
 
 
 def test_post_proposal():
-    result = discovery_client.post_proposal(proposal_id=PROPOSAL_ID_MIXED)
-    result = discovery_client.post_proposal(proposal_id=PROPOSAL_ID_NUMERIC)
-    print("Result : {}".format(result.json()))
+    response_mix = discovery_client.post_proposal(proposal_id=PROPOSAL_ID_MIXED)
+    response_num = discovery_client.post_proposal(proposal_id=PROPOSAL_ID_NUMERIC)
+
+    assert response_mix.status_code == 200, response_mix.text
+    assert response_num.status_code == 200, response_num.text
 
 
 def test_post_discovery_statistics():
-    result = discovery_client.post_discovery_statistics(proposal_id=PROPOSAL_ID_MIXED)
-    result = discovery_client.post_discovery_statistics(proposal_id=PROPOSAL_ID_MIXED)
-    result = discovery_client.post_discovery_statistics(proposal_id=PROPOSAL_ID_MIXED)
-    result = discovery_client.post_discovery_statistics(proposal_id=PROPOSAL_ID_NUMERIC)
-    result = discovery_client.post_discovery_statistics(proposal_id=PROPOSAL_ID_NUMERIC)
-    result = discovery_client.post_discovery_statistics(proposal_id=PROPOSAL_ID_NUMERIC)
-    print("Result : {}".format(result.json()))
+
+    create_msg = {
+            "item_count": 50,
+            "feature_count": 20,
+            "column_information": [{'type': 'numeric',
+                                    'title': 'PassengerId',
+                                    'not_na_elements': 891,
+                                    'mean': 446.0,
+                                    'std': 66181.5,
+                                    'min': 1.0,
+                                    'max': 891.0}]
+        }
+    response_mix1 = discovery_client.post_discovery_statistics(create_msg=create_msg, proposal_id=PROPOSAL_ID_MIXED)
+    response_mix2 = discovery_client.post_discovery_statistics(create_msg=create_msg,proposal_id=PROPOSAL_ID_MIXED)
+    response_mix3 = discovery_client.post_discovery_statistics(create_msg=create_msg,proposal_id=PROPOSAL_ID_MIXED)
+    response_num1 = discovery_client.post_discovery_statistics(create_msg=create_msg,proposal_id=PROPOSAL_ID_NUMERIC)
+    response_num2 = discovery_client.post_discovery_statistics(create_msg=create_msg,proposal_id=PROPOSAL_ID_NUMERIC)
+    response_num3 = discovery_client.post_discovery_statistics(create_msg=create_msg,proposal_id=PROPOSAL_ID_NUMERIC)
+
+    assert response_mix1.status_code == 200, response_mix1.text
+    assert response_mix2.status_code == 200, response_mix2.text
+    assert response_mix3.status_code == 200, response_mix3.text
+    assert response_num1.status_code == 200, response_num1.text
+    assert response_num2.status_code == 200, response_num2.text
+    assert response_num3.status_code == 200, response_num3.text
 
 def test_get_aggregated_discovery_results():
-    result = discovery_client.get_aggregated_discovery_results(proposal_id=PROPOSAL_ID_MIXED)
-    print("Result : {}".format(result))
+    response = discovery_client.get_aggregated_discovery_results(proposal_id=PROPOSAL_ID_MIXED)
+    assert response.status_code == 200, response.text
 
 def test_get_aggregated_discovery_results_query():
-    result = discovery_client.get_aggregated_discovery_results(proposal_id=PROPOSAL_ID_NUMERIC, query=SELECTED_FEATURES)
-    print("Result : {}".format(result))
+    response = discovery_client.get_aggregated_discovery_results(proposal_id=PROPOSAL_ID_NUMERIC, query=SELECTED_FEATURES)
+    assert response.status_code == 200, response.text
 
 def test_delete_discovery_statistics():
-    result = discovery_client.delete_discovery_statistics(proposal_id=PROPOSAL_ID_MIXED)
-    print("Result : {}".format(result.json()))
+    response = discovery_client.delete_discovery_statistics(proposal_id=PROPOSAL_ID_MIXED)
+    assert response.status_code == 200, response.text
 
+#def test_delete_proposal():
+#    response = discovery_client.delete_proposal(proposal_id=PROPOSAL_ID_MIXED)
+#    assert response.status_code == 200, response.text
 
