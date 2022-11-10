@@ -73,3 +73,10 @@ def post_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) 
                             detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
 
     return proposal
+
+@router.delete("/{proposal_id}", response_model=int)
+def delete_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) -> int:
+    proposal_del = proposals.delete_by_proposal_id(proposal_id, db)
+    if not proposal_del:
+        raise HTTPException(status_code=404, detail=f"Proposal with id '{proposal_id}' not found.")
+    return proposal_del

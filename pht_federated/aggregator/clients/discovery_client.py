@@ -2,6 +2,7 @@ import requests
 import os
 from typing import Union, List
 from uuid import uuid4
+from requests.models import Response
 
 class DiscoveryClient:
 
@@ -18,7 +19,7 @@ class DiscoveryClient:
 
         print("SELF API URL : {}".format(self.api_url))
 
-    def post_proposal(self, proposal_id: uuid4 = None):
+    def post_proposal(self, proposal_id: uuid4 = None) -> Response:
         """
         Sending POST request to create a proposal entry in the database with defined proposal_id
         :param proposal_id: uuid4 value that identifies proposal
@@ -32,12 +33,9 @@ class DiscoveryClient:
         requests_post_proposal_url = self.api_url + endpoint
         results = requests.post(requests_post_proposal_url)
 
-        print("Type results : {}".format(type(results)))
-
-
         return results
 
-    def post_discovery_statistics(self, create_msg: dict, proposal_id: uuid4 = None):
+    def post_discovery_statistics(self, create_msg: dict, proposal_id: uuid4 = None) -> Response:
         """
         Sending POST request to create a DiscoveryStatistics entry in the database connected to proposal_id
         :param create_msg: json body of DiscoveryStatistics object
@@ -52,12 +50,9 @@ class DiscoveryClient:
         requests_post_discovery_url = self.api_url + endpoint
         results = requests.post(requests_post_discovery_url, json=create_msg)
 
-        print("Type results : {}".format(type(results)))
-
-
         return results
 
-    def get_aggregated_discovery_results(self, proposal_id: uuid4 = None, query: Union[str, None] = None) -> dict:
+    def get_aggregated_discovery_results(self, proposal_id: uuid4 = None, query: Union[str, None] = None) -> Response:
         """
         Sending GET request to get a aggregated DiscoveryStatistics object over objects in database for corresponding
         proposal_id
@@ -77,12 +72,9 @@ class DiscoveryClient:
         requests_get_url = self.api_url + endpoint
         results = requests.get(requests_get_url)
 
-        print("Type results : {}".format(type(results)))
-
-
         return results
 
-    def delete_discovery_statistics(self, proposal_id: uuid4 = None):
+    def delete_discovery_statistics(self, proposal_id: uuid4 = None) -> Response:
         """
         Sending DELETE request to delete a DiscoveryStatistics object for corresponding proposal_id
         :param proposal_id: uuid4 value that identifies corresponding proposal
@@ -95,8 +87,6 @@ class DiscoveryClient:
         endpoint = f"/{proposal_id}/discovery"
         requests_delete_discovery_url = self.api_url + endpoint
         results = requests.delete(requests_delete_discovery_url)
-
-        print("Type results : {}".format(type(results)))
 
         return results
 

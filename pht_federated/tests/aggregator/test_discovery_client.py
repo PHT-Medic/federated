@@ -52,5 +52,3 @@ def test_get_aggregated_discovery_results_query():
 def test_delete_discovery_statistics():
     response = discovery_client.delete_discovery_statistics(proposal_id=PROPOSAL_ID_MIXED)
     assert response.status_code == 200, response.text
-
-
