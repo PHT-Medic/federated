@@ -3,12 +3,12 @@ import os
 from typing import Union, List
 from uuid import uuid4
 
-PROPOSAL_ID_MIXED = uuid4()
-
 class DiscoveryClient:
 
     def __init__(self, api_url: str = None, username: str = None, password: str = None):
-        # Setup and verify connection parameters either based on arguments or .env vars
+        """
+            Setup and verify connection parameters either based on arguments or .env vars
+        """
 
         self.api_url = api_url if api_url else os.getenv("AGGREGATOR_API_URL")
         if not self.api_url.startswith("http://"):
@@ -19,29 +19,52 @@ class DiscoveryClient:
         print("SELF API URL : {}".format(self.api_url))
 
     def post_proposal(self, proposal_id: uuid4 = None):
+        """
+        Sending POST request to create a proposal entry in the database with defined proposal_id
+        :param proposal_id: uuid4 value that identifies proposal
+        :return: result body of POST request
+        """
         if not proposal_id:
             proposal_id = int(os.getenv("PROPOSAL_ID"))
         assert proposal_id
 
         endpoint = f"/{proposal_id}"
         requests_post_proposal_url = self.api_url + endpoint
-        #print("REQUESTS POST PROPOSAL URL : {}".format(requests_post_proposal_url))
         results = requests.post(requests_post_proposal_url)
+
+        print("Type results : {}".format(type(results)))
+
 
         return results
 
     def post_discovery_statistics(self, create_msg: dict, proposal_id: uuid4 = None):
+        """
+        Sending POST request to create a DiscoveryStatistics entry in the database connected to proposal_id
+        :param create_msg: json body of DiscoveryStatistics object
+        :param proposal_id: uuid4 value that identifies corresponding proposal
+        :return: result body of POST request
+        """
         if not proposal_id:
             proposal_id = int(os.getenv("PROPOSAL_ID"))
         assert proposal_id
 
         endpoint = f"/{proposal_id}/discovery"
         requests_post_discovery_url = self.api_url + endpoint
-        #print("REQUESTS POST DISCOVERY URL : {}".format(requests_post_discovery_url))
         results = requests.post(requests_post_discovery_url, json=create_msg)
 
+        print("Type results : {}".format(type(results)))
+
+
         return results
+
     def get_aggregated_discovery_results(self, proposal_id: uuid4 = None, query: Union[str, None] = None) -> dict:
+        """
+        Sending GET request to get a aggregated DiscoveryStatistics object over objects in database for corresponding
+        proposal_id
+        :param proposal_id: uuid4 value that identifies corresponding proposal
+        :param query: optional comma seperated list of selected features to filter
+        :return: result body of GET request
+        """
         if not proposal_id:
             proposal_id = int(os.getenv("PROPOSAL_ID"))
         assert proposal_id
@@ -52,32 +75,28 @@ class DiscoveryClient:
             endpoint = f"/{proposal_id}/discovery?query={query}"
 
         requests_get_url = self.api_url + endpoint
-        #print("REQUESTS GET URL : {}".format(requests_get_url))
         results = requests.get(requests_get_url)
 
-        return results
+        print("Type results : {}".format(type(results)))
 
-    def delete_proposal(self, proposal_id: uuid4 = None):
-        if not proposal_id:
-            proposal_id = int(os.getenv("PROPOSAL_ID"))
-        assert proposal_id
-
-        endpoint = f"/{proposal_id}"
-        requests_delete_proposal_url = self.api_url + endpoint
-        #print("REQUESTS DELETE PROPOSAL URL : {}".format(requests_delete_proposal_url))
-        results = requests.delete(requests_delete_proposal_url)
 
         return results
 
     def delete_discovery_statistics(self, proposal_id: uuid4 = None):
+        """
+        Sending DELETE request to delete a DiscoveryStatistics object for corresponding proposal_id
+        :param proposal_id: uuid4 value that identifies corresponding proposal
+        :return: result body of DELETE request
+        """
         if not proposal_id:
             proposal_id = int(os.getenv("PROPOSAL_ID"))
         assert proposal_id
 
         endpoint = f"/{proposal_id}/discovery"
         requests_delete_discovery_url = self.api_url + endpoint
-        #print("REQUESTS DELETE DISCOVERY URL : {}".format(requests_delete_discovery_url))
         results = requests.delete(requests_delete_discovery_url)
+
+        print("Type results : {}".format(type(results)))
 
         return results
 

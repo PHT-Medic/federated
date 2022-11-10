@@ -23,7 +23,7 @@ def test_post_discovery_statistics():
                                     'title': 'PassengerId',
                                     'not_na_elements': 891,
                                     'mean': 446.0,
-                                    'std': 66181.5,
+                                    'std': 81.5,
                                     'min': 1.0,
                                     'max': 891.0}]
         }
@@ -53,7 +53,4 @@ def test_delete_discovery_statistics():
     response = discovery_client.delete_discovery_statistics(proposal_id=PROPOSAL_ID_MIXED)
     assert response.status_code == 200, response.text
 
-#def test_delete_proposal():
-#    response = discovery_client.delete_proposal(proposal_id=PROPOSAL_ID_MIXED)
-#    assert response.status_code == 200, response.text
 
