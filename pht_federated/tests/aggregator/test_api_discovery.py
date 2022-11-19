@@ -180,7 +180,7 @@ def test_discovery_get_all():
 
 
 def test_discovery_get_selected():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?features={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
 
     response = response.json()
@@ -201,7 +201,7 @@ def test_discovery_get_selected():
 
 
 def test_plot_discovery():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?features={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()

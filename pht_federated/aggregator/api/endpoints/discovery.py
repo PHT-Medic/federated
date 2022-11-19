@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
-def get_discovery_all(proposal_id: str, query: Union[str, None] = Query(default=None),
+def get_discovery_all(proposal_id: str, features: Union[str, None] = Query(default=None),
                       db: Session = Depends(dependencies.get_db)):
     try:
         response = datasets.get_all_by_proposal_id(proposal_id, db)
@@ -22,7 +22,7 @@ def get_discovery_all(proposal_id: str, query: Union[str, None] = Query(default=
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
 
 
-    discovery_summary = aggregate_proposal_features(response, proposal_id, query)
+    discovery_summary = aggregate_proposal_features(response, proposal_id, features)
 
     # print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 

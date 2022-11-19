@@ -1,5 +1,5 @@
 from typing import Generator
-from pht_federated.aggregator.storage.db.engine import SessionLocal
+from pht_federated.aggregator.storage.db.session import SessionLocal
 
 
 def get_db() -> Generator:

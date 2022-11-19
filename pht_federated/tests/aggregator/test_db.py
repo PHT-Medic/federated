@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv, find_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from pht_federated.aggregator.db.base_class import Base
+from pht_federated.aggregator.storage.db.base_class import Base
 
 # Create new sqlite database for testing
 

@@ -6,7 +6,7 @@ import json
 from fastapi.encoders import jsonable_encoder
 
 
-def aggregate_proposal_features(response: list, proposal_id: int, query: Union[str, None]) -> DiscoverySummary:
+def aggregate_proposal_features(response: list, proposal_id: int, features: Union[str, None]) -> DiscoverySummary:
     """
     Aggregates the individual values of >= 2 DatasetStatistics objects
     :param response: list of DatasetStatistics objects
@@ -29,8 +29,8 @@ def aggregate_proposal_features(response: list, proposal_id: int, query: Union[s
             discovery_feature_count += discovery['feature_count']
 
             for feature in discovery['column_information']:
-                if query:
-                    selected_features = query.split(',')
+                if features:
+                    selected_features = features.split(',')
                     if feature['title'] in selected_features:
                         feature_lst.append(feature)
                 else:
