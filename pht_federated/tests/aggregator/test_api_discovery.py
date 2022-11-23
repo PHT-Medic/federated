@@ -36,14 +36,10 @@ def test_discovery_create_numeric():
     # print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
 
-    stats_df1 = statistics.get_discovery_statistics(df_split[0])
-    stats_df2 = statistics.get_discovery_statistics(df_split[1])
-    stats_df3 = statistics.get_discovery_statistics(df_split[2])
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
-
-    stats1_json = jsonable_encoder(stats_df1)
-    stats2_json = jsonable_encoder(stats_df2)
-    stats3_json = jsonable_encoder(stats_df3)
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}")
     assert response.status_code == 200, response.text
@@ -77,14 +73,10 @@ def test_discovery_create_numeric2():
     # print("Breast Cancer dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
 
-    stats_df1 = statistics.get_discovery_statistics(df_split[0])
-    stats_df2 = statistics.get_discovery_statistics(df_split[1])
-    stats_df3 = statistics.get_discovery_statistics(df_split[2])
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
-
-    stats1_json = jsonable_encoder(stats_df1)
-    stats2_json = jsonable_encoder(stats_df2)
-    stats3_json = jsonable_encoder(stats_df3)
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}")
     assert response.status_code == 200, response.text
@@ -115,14 +107,10 @@ def test_discovery_create_mixed():
     df_titanic = pd.read_csv('./data/train_data_titanic.csv')
     df_split = np.array_split(df_titanic, 3)
 
-    stats_df1 = statistics.get_discovery_statistics(df_split[0])
-    stats_df2 = statistics.get_discovery_statistics(df_split[1])
-    stats_df3 = statistics.get_discovery_statistics(df_split[2])
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
-
-    stats1_json = jsonable_encoder(stats_df1)
-    stats2_json = jsonable_encoder(stats_df2)
-    stats3_json = jsonable_encoder(stats_df3)
 
     print("PROPOSAL ID MIXED : {}".format(PROPOSAL_ID_MIXED))
 
@@ -160,8 +148,6 @@ def test_discovery_get_all():
 
     df_titanic = pd.read_csv('./data/train_data_titanic.csv')
     stats_df = statistics.get_discovery_statistics(df_titanic)
-
-    print("RESPONSE : {}".format(response))
 
 
     assert stats_df.item_count == response['item_count']

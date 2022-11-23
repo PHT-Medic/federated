@@ -4,6 +4,9 @@ from typing import Union
 from uuid import uuid4
 from requests.models import Response
 from loguru import logger
+from pht_federated.aggregator.api.schemas.dataset_statistics import DiscoveryStatistics
+from pht_federated.aggregator.api.schemas.proposals import Proposals
+from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary
 
 class DiscoveryClient:
 
@@ -20,7 +23,7 @@ class DiscoveryClient:
 
         logger.info("Establishing connection to API url : {}".format(self.api_url))
 
-    def post_proposal(self, proposal_id: uuid4 = None) -> Response:
+    def post_proposal(self, proposal_id: uuid4 = None) -> Proposals:
         """
         Sending POST request to create a proposal entry in the database with defined proposal_id
         :param proposal_id: uuid4 value that identifies proposal
@@ -28,14 +31,15 @@ class DiscoveryClient:
         """
         endpoint = f"/{proposal_id}"
         requests_post_proposal_url = self.api_url + endpoint
-        results = requests.post(requests_post_proposal_url)
-        results.raise_for_status()
+        request = requests.post(requests_post_proposal_url)
+        request.raise_for_status()
 
-        print("Type results : {}".format(type(results)))
+        result = request.json()
+        result = Proposals(**result)
 
-        return results
+        return result
 
-    def post_discovery_statistics(self, statistics_create: dict, proposal_id: uuid4 = None) -> Response:
+    def post_discovery_statistics(self, statistics_create: dict, proposal_id: uuid4 = None) -> DiscoveryStatistics:
         """
         Sending POST request to create a DiscoveryStatistics entry in the database connected to proposal_id
         :param create_msg: json body of DiscoveryStatistics object
@@ -44,15 +48,17 @@ class DiscoveryClient:
         """
         endpoint = f"/{proposal_id}/discovery"
         requests_post_discovery_url = self.api_url + endpoint
-        results = requests.post(requests_post_discovery_url, json=statistics_create)
-        results.raise_for_status()
+        request = requests.post(requests_post_discovery_url, json=statistics_create)
+        request.raise_for_status()
 
+        result = request.json()
+        result = DiscoveryStatistics(**result)
 
-        return results
+        return result
 
-    def get_aggregated_discovery_results(self, proposal_id: uuid4 = None, features: Union[str, None] = None) -> Response:
+    def get_aggregated_discovery_results(self, proposal_id: uuid4 = None, features: Union[str, None] = None) -> DiscoverySummary:
         """
-        Sending GET request to get a aggregated DiscoveryStatistics object over objects in database for corresponding
+        Sending GET request to get a aggregated DiscoverySummary object over objects in database for corresponding
         proposal_id
         :param proposal_id: uuid4 value that identifies corresponding proposal
         :param query: optional comma seperated list of selected features to filter
@@ -64,11 +70,13 @@ class DiscoveryClient:
             endpoint = f"/{proposal_id}/discovery?query={features}"
 
         requests_get_url = self.api_url + endpoint
-        results = requests.get(requests_get_url)
-        results.raise_for_status()
+        request = requests.get(requests_get_url)
+        request.raise_for_status()
 
+        result = request.json()
+        result = DiscoverySummary(**result)
 
-        return results
+        return result
 
     def delete_discovery_statistics(self, proposal_id: uuid4 = None) -> Response:
         """
@@ -78,11 +86,12 @@ class DiscoveryClient:
         """
         endpoint = f"/{proposal_id}/discovery"
         requests_delete_discovery_url = self.api_url + endpoint
-        results = requests.delete(requests_delete_discovery_url)
-        results.raise_for_status()
+        request = requests.delete(requests_delete_discovery_url)
+        request.raise_for_status()
 
+        result = request.json()
 
-        return results
+        return result
 
 
 

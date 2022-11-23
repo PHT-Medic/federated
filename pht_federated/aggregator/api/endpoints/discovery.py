@@ -63,8 +63,8 @@ def post_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) 
     proposal_schema = {
         "id": proposal_id,
         "name": "example_proposal-" + str(uuid.uuid4()),
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
+        "created_at": datetime.now().replace(second=0, microsecond=0),
+        "updated_at": datetime.now().replace(second=0, microsecond=0)
     }
     proposal = ProposalsCreate(**proposal_schema)
     proposal = proposals.create(db, obj_in=proposal)

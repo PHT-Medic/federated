@@ -14,7 +14,7 @@ class CRUDDatasetStatistics(CRUDBase[DatasetStatistics, StatisticsCreate, Statis
         dataset = db.query(DatasetStatistics).filter(DatasetStatistics.proposal_id == proposal_id).all()
         return dataset
 
-    def delete_by_proposal_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> DatasetStatistics:
+    def delete_by_proposal_id(self, proposal_id: int, db: Session = Depends(dependencies.get_db)) -> int:
         dataset_del = db.query(DatasetStatistics).filter(DatasetStatistics.proposal_id == proposal_id).delete()
         return dataset_del
 
