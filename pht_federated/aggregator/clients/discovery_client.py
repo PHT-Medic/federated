@@ -78,7 +78,7 @@ class DiscoveryClient:
 
         return result
 
-    def delete_discovery_statistics(self, proposal_id: uuid4 = None) -> Response:
+    def delete_discovery_statistics(self, proposal_id: uuid4 = None) -> int:
         """
         Sending DELETE request to delete a DiscoveryStatistics object for corresponding proposal_id
         :param proposal_id: uuid4 value that identifies corresponding proposal
