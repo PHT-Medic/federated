@@ -1,16 +1,15 @@
-from sqlmodel import create_engine
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
-# SQLALCHEMY_DATABASE_URL = "sqlite:///./app.db"
 
-if os.getenv("STATION_DB"):
-    SQLALCHEMY_DATABASE_URL = os.getenv('STATION_DB')
+if os.getenv("AGGREGATOR_DB"):
+    SQLALCHEMY_DATABASE_URL = os.getenv('AGGREGATOR_DB')
 else:
-    SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://admin:admin@localhost:5442/pht_station"
+    SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://admin:admin@localhost:5452/dev_db"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,  # connect_args={"check_same_thread": False}  For sqlite db

@@ -1,5 +1,6 @@
 import sklearn
 import numpy as np
+import pandas as pd
 from sklearn.datasets import load_diabetes
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.app import app
@@ -35,16 +36,12 @@ def test_discovery_create_numeric():
     # print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
 
-    stats_df1 = statistics.get_discovery_statistics(df_split[0])
-    stats_df2 = statistics.get_discovery_statistics(df_split[1])
-    stats_df3 = statistics.get_discovery_statistics(df_split[2])
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
-    stats1_json = jsonable_encoder(stats_df1)
-    stats2_json = jsonable_encoder(stats_df2)
-    stats3_json = jsonable_encoder(stats_df3)
-
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/proposal")
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}")
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
@@ -76,16 +73,12 @@ def test_discovery_create_numeric2():
     # print("Breast Cancer dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
 
-    stats_df1 = statistics.get_discovery_statistics(df_split[0])
-    stats_df2 = statistics.get_discovery_statistics(df_split[1])
-    stats_df3 = statistics.get_discovery_statistics(df_split[2])
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
-    stats1_json = jsonable_encoder(stats_df1)
-    stats2_json = jsonable_encoder(stats_df2)
-    stats3_json = jsonable_encoder(stats_df3)
-
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/proposal")
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}")
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/discovery", json={
@@ -114,16 +107,14 @@ def test_discovery_create_mixed():
     df_titanic = pd.read_csv('./data/train_data_titanic.csv')
     df_split = np.array_split(df_titanic, 3)
 
-    stats_df1 = statistics.get_discovery_statistics(df_split[0])
-    stats_df2 = statistics.get_discovery_statistics(df_split[1])
-    stats_df3 = statistics.get_discovery_statistics(df_split[2])
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
-    stats1_json = jsonable_encoder(stats_df1)
-    stats2_json = jsonable_encoder(stats_df2)
-    stats3_json = jsonable_encoder(stats_df3)
+    print("PROPOSAL ID MIXED : {}".format(PROPOSAL_ID_MIXED))
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/proposal")
+    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}")
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
@@ -133,7 +124,7 @@ def test_discovery_create_mixed():
     })
     assert response.status_code == 200, response.text
 
-    '''
+
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
         "item_count": stats2_json['item_count'],
         "feature_count": stats2_json['feature_count'],
@@ -147,7 +138,7 @@ def test_discovery_create_mixed():
         "column_information": stats3_json['column_information']
     })
     assert response.status_code == 200, response.text
-    '''
+
 
 def test_discovery_get_all():
     response = client.get(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery")
@@ -175,7 +166,7 @@ def test_discovery_get_all():
 
 
 def test_discovery_get_selected():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?features={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
 
     response = response.json()
@@ -196,7 +187,7 @@ def test_discovery_get_selected():
 
 
 def test_plot_discovery():
-    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?query={SELECTED_FEATURES}")
+    response = client.get(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery?features={SELECTED_FEATURES}")
     assert response.status_code == 200, response.text
 
     discovery_summary = response.json()

@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.get("/{proposal_id}/discovery", response_model=DiscoverySummary)
-def get_discovery_all(proposal_id: str, query: Union[str, None] = Query(default=None),
+def get_discovery_all(proposal_id: str, features: Union[str, None] = Query(default=None),
                       db: Session = Depends(dependencies.get_db)):
     try:
         response = datasets.get_all_by_proposal_id(proposal_id, db)
@@ -22,7 +22,7 @@ def get_discovery_all(proposal_id: str, query: Union[str, None] = Query(default=
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
 
 
-    discovery_summary = aggregate_proposal_features(response, proposal_id, query)
+    discovery_summary = aggregate_proposal_features(response, proposal_id, features)
 
     # print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 
@@ -57,14 +57,14 @@ def post_discovery_statistics(proposal_id: str, create_msg: StatisticsCreate,
     return discovery_statistics
 
 
-@router.post("/{proposal_id}/proposal", response_model=Proposals)
+@router.post("/{proposal_id}", response_model=Proposals)
 def post_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) -> Proposals:
 
     proposal_schema = {
         "id": proposal_id,
         "name": "example_proposal-" + str(uuid.uuid4()),
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
+        "created_at": datetime.now().replace(second=0, microsecond=0),
+        "updated_at": datetime.now().replace(second=0, microsecond=0)
     }
     proposal = ProposalsCreate(**proposal_schema)
     proposal = proposals.create(db, obj_in=proposal)
@@ -73,3 +73,10 @@ def post_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) 
                             detail=f"DatasetStatistics of proposal with id '{proposal_id}' could not be created.")
 
     return proposal
+
+@router.delete("/{proposal_id}", response_model=int)
+def delete_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) -> int:
+    proposal_del = proposals.delete_by_proposal_id(proposal_id, db)
+    if not proposal_del:
+        raise HTTPException(status_code=404, detail=f"Proposal with id '{proposal_id}' not found.")
+    return proposal_del

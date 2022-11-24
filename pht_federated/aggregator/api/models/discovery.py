@@ -1,6 +1,6 @@
-from pht_federated.aggregator.db.base_class import Base
+from pht_federated.aggregator.storage.db.base_class import Base
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, Integer, JSON
 
 
 
