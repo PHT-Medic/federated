@@ -1,7 +1,7 @@
 import fsspec
 from torch import load
 
-from pht_federated.client.storage import MinioBuckets
+from pht_federated.clients.storage import MinioBuckets
 
 
 def load_model_checkpoint(fs: fsspec.AbstractFileSystem, model_name: str, checkpoint_path: str):

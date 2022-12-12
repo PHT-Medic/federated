@@ -1,4 +1,4 @@
-from pht_federated.client.storage import get_minio_fs
+from pht_federated.clients.storage import get_minio_fs
 from dotenv import load_dotenv, find_dotenv
 
 

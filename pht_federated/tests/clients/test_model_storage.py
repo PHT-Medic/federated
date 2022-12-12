@@ -1,6 +1,6 @@
 import pytest
-from pht_federated.client.storage import get_minio_fs
-from pht_federated.client.storage import models
+from pht_federated.clients.storage import get_minio_fs
+from pht_federated.clients.storage import models
 from dotenv import load_dotenv, find_dotenv
 
 

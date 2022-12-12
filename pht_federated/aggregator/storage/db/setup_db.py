@@ -1,5 +1,5 @@
 from pht_federated.aggregator.storage.db.session import engine
-from pht_federated.aggregator.storage.db.base import Base
+from pht_federated.aggregator.db.base import Base
 
 
 def setup_db():

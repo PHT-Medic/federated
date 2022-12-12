@@ -1,13 +1,12 @@
 from fastapi.encoders import jsonable_encoder
 from pht_federated.aggregator.api.discoveries import statistics
-from pht_federated.aggregator.clients.discovery_client import DiscoveryClient
+from pht_federated.clients.discovery_client import DiscoveryClient
 from uuid import uuid4
 from pht_federated.aggregator.api.schemas.dataset_statistics import DiscoveryStatistics
 from pht_federated.aggregator.api.schemas.proposals import Proposals
 from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary
 from datetime import datetime
 import sklearn
-from sklearn.datasets import load_diabetes, load_breast_cancer
 import pandas as pd
 import numpy as np
 import json
@@ -71,7 +70,7 @@ def test_post_discovery_statistics_numeric():
 
 def test_post_discovery_statistics_mixed():
 
-    df_titanic = pd.read_csv('./data/train_data_titanic.csv')
+    df_titanic = pd.read_csv('../aggregator/data/train_data_titanic.csv')
     df_split = np.array_split(df_titanic, 3)
 
     stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
@@ -113,7 +112,7 @@ def test_get_aggregated_discovery_results():
 
     response = json.loads(response.json())
 
-    df_titanic = pd.read_csv('./data/train_data_titanic.csv')
+    df_titanic = pd.read_csv('../aggregator/data/train_data_titanic.csv')
     stats_df = statistics.get_discovery_statistics(df_titanic)
 
     assert stats_df.column_information[0].mean == response['column_information'][0]['mean']

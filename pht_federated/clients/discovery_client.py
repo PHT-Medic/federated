@@ -8,6 +8,7 @@ from pht_federated.aggregator.api.schemas.dataset_statistics import DiscoverySta
 from pht_federated.aggregator.api.schemas.proposals import Proposals
 from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary
 
+
 class DiscoveryClient:
 
     def __init__(self, api_url: str = None):
@@ -56,7 +57,8 @@ class DiscoveryClient:
 
         return result
 
-    def get_aggregated_discovery_results(self, proposal_id: uuid4 = None, features: Union[str, None] = None) -> DiscoverySummary:
+    def get_aggregated_discovery_results(self, proposal_id: uuid4 = None,
+                                         features: Union[str, None] = None) -> DiscoverySummary:
         """
         Sending GET request to get a aggregated DiscoverySummary object over objects in database for corresponding
         proposal_id
@@ -92,6 +94,3 @@ class DiscoveryClient:
         result = request.json()
 
         return result
-
-
-

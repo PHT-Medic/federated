@@ -1,4 +1,4 @@
-from pht_federated.aggregator.storage.db.base_class import Base
+from pht_federated.aggregator.db.base_class import Base
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime

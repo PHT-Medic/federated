@@ -33,6 +33,8 @@ pandas = "*"
 seaborn = "*"
 bump2version = "*"
 python-dotenv = "*"
+sklearn = "*"
+scikit-learn = "*"
 
 [requires]
 python_version = "3.9"
