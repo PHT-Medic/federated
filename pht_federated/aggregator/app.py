@@ -10,6 +10,7 @@ from starlette.middleware.cors import CORSMiddleware
 from pht_federated.aggregator.api.api import api_router
 from pht_federated.aggregator.socket.connection_manager import ConnectionManager, TrainConnectionManager
 #from pht_federated.aggregator.socket.socket_app import socket_app
+from pht_federated.aggregator.storage.db.setup_db import setup_db
 
 app = FastAPI(
     title="PHT - Federated", docs_url="/api/docs", redoc_url="/api/redoc", openapi_url="/api/v1/openapi.json"
@@ -57,6 +58,10 @@ async def train_socket_endpoint(web_socket: WebSocket, train_id: str):
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.on_event("startup")
+async def startup_event():
+    setup_db()
 
 if __name__ == '__main__':
     uvicorn.run("pht_federated.aggregator.app:app", host="127.0.0.1", port=8000, reload=True)
