@@ -13,4 +13,5 @@ def reset_db():
 
 if __name__ == '__main__':
     # Base.metadata.drop_all(bind=engine)
-    setup_db()
+    # setup_db()
+    reset_db()

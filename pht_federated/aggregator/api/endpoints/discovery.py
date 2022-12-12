@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pht_federated.aggregator.api.schemas.dataset_statistics import *
-from pht_federated.aggregator.api.schemas.proposals import *
+from pht_federated.aggregator.api.schemas.proposal import *
 from pht_federated.aggregator.api.crud.crud_dataset_statistics import datasets
 from pht_federated.aggregator.api.crud.crud_proposals import proposals
 from pht_federated.aggregator.api.discoveries.utility_functions import *
@@ -57,8 +57,8 @@ def post_discovery_statistics(proposal_id: str, create_msg: StatisticsCreate,
     return discovery_statistics
 
 
-@router.post("/{proposal_id}", response_model=Proposals)
-def post_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) -> Proposals:
+@router.post("/{proposal_id}", response_model=Proposal)
+def post_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) -> Proposal:
 
     proposal_schema = {
         "id": proposal_id,
@@ -66,7 +66,7 @@ def post_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) 
         "created_at": datetime.now().replace(second=0, microsecond=0),
         "updated_at": datetime.now().replace(second=0, microsecond=0)
     }
-    proposal = ProposalsCreate(**proposal_schema)
+    proposal = ProposalCreate(**proposal_schema)
     proposal = proposals.create(db, obj_in=proposal)
     if not proposal:
         raise HTTPException(status_code=400,

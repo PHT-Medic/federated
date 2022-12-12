@@ -21,6 +21,7 @@ class DataDiscovery(Base):
 class DiscoverySummary(Base):
     __tablename__ = "discovery_summary"
     id = Column(Integer, primary_key=True, index=True)
+    discovery_id = Column(Integer, ForeignKey('data_discovery.id', ondelete="CASCADE"))
     proposal_id = Column(Integer, default=0)
     station_id = Column(Integer, default=0)
     item_count = Column(Integer, default=0)

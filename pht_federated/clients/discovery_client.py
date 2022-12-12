@@ -5,7 +5,7 @@ from uuid import uuid4
 from requests.models import Response
 from loguru import logger
 from pht_federated.aggregator.api.schemas.dataset_statistics import DiscoveryStatistics
-from pht_federated.aggregator.api.schemas.proposals import Proposals
+from pht_federated.aggregator.api.schemas.proposal import Proposal
 from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary
 
 
@@ -24,7 +24,7 @@ class DiscoveryClient:
 
         logger.info("Establishing connection to API url : {}".format(self.api_url))
 
-    def post_proposal(self, proposal_id: uuid4 = None) -> Proposals:
+    def post_proposal(self, proposal_id: uuid4 = None) -> Proposal:
         """
         Sending POST request to create a proposal entry in the database with defined proposal_id
         :param proposal_id: uuid4 value that identifies proposal
@@ -36,7 +36,7 @@ class DiscoveryClient:
         request.raise_for_status()
 
         result = request.json()
-        result = Proposals(**result)
+        result = Proposal(**result)
 
         return result
 

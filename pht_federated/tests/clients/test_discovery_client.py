@@ -3,7 +3,7 @@ from pht_federated.aggregator.api.discoveries import statistics
 from pht_federated.clients.discovery_client import DiscoveryClient
 from uuid import uuid4
 from pht_federated.aggregator.api.schemas.dataset_statistics import DiscoveryStatistics
-from pht_federated.aggregator.api.schemas.proposals import Proposals
+from pht_federated.aggregator.api.schemas.proposal import Proposal
 from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary
 from datetime import datetime
 import sklearn
@@ -23,9 +23,9 @@ def test_post_proposal():
     response_mix = discovery_client.post_proposal(proposal_id=PROPOSAL_ID_MIXED)
     response_num = discovery_client.post_proposal(proposal_id=PROPOSAL_ID_NUMERIC)
 
-    assert type(response_mix) == Proposals
+    assert type(response_mix) == Proposal
     assert response_mix.created_at == datetime.now().replace(second=0, microsecond=0)
-    assert type(response_num) == Proposals
+    assert type(response_num) == Proposal
     assert response_num.created_at == datetime.now().replace(second=0, microsecond=0)
 
 

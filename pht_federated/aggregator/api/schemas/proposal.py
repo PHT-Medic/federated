@@ -5,7 +5,7 @@ import uuid
 
 
 
-class Proposals(BaseModel):
+class Proposal(BaseModel):
     id: Optional[uuid.UUID]
     name: Optional[str]
     created_at: Optional[datetime]
@@ -15,9 +15,9 @@ class Proposals(BaseModel):
         orm_mode = True
 
 
-class ProposalsCreate(Proposals):
+class ProposalCreate(Proposal):
     pass
 
 
-class ProposalsUpdate(Proposals):
+class ProposalUpdate(Proposal):
     pass

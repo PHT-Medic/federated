@@ -61,6 +61,8 @@ async def root():
 
 @app.on_event("startup")
 async def startup_event():
+    logger.info("Starting up...")
+    logger.info("Setting up database...")
     setup_db()
 
 if __name__ == '__main__':
