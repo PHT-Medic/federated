@@ -54,6 +54,7 @@ jobs:
         env:
           AGGREGATOR_TEST_DB: postgresql+psycopg2://admin:admin@localhost:5442/postgres
         run: |
+          pipenv run pip install .
           pipenv run coverage run -m pytest tests
           pipenv run coverage xml
       - name: Upload coverage to Codecov
