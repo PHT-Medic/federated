@@ -62,7 +62,7 @@ class DatasetStatistics(BaseModel):
 
 class DiscoveryStatistics(DatasetStatistics):
     id: Optional[uuid.UUID]
-    proposal_id: Optional[uuid.UUID]
+    discovery_id: Optional[Union[int, uuid.UUID, str]]
 
     class Config:
         orm_mode = True
