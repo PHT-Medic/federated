@@ -2,9 +2,9 @@ from fastapi.encoders import jsonable_encoder
 from pht_federated.aggregator.api.discoveries import statistics
 from pht_federated.clients.discovery_client import DiscoveryClient
 from uuid import uuid4
-from pht_federated.aggregator.api.schemas.dataset_statistics import DiscoveryStatistics
-from pht_federated.aggregator.api.schemas.proposal import Proposal
-from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary
+from pht_federated.aggregator.schemas.dataset_statistics import DiscoveryStatistics
+from pht_federated.aggregator.schemas.proposal import Proposal
+from pht_federated.aggregator.schemas.discovery import DiscoverySummary
 from datetime import datetime
 import sklearn
 import pandas as pd

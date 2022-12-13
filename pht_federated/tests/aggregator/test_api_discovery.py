@@ -10,6 +10,7 @@ from pht_federated.aggregator.api.discoveries import statistics
 from pht_federated.aggregator.api.discoveries.plots import *
 from sklearn.datasets import load_breast_cancer
 from uuid import uuid4
+import pytest
 
 from pht_federated.tests.aggregator.test_db import override_get_db
 
@@ -23,9 +24,7 @@ PROPOSAL_ID_MIXED = uuid4()
 FEATURE_NAME_NUMERIC = "bmi"
 FEATURE_NAME_NUMERIC2 = "Age"
 FEATURE_NAME_CATEGORICAL = 'Embarked'
-SELECTED_FEATURES = "Age,Sex,Embarked"
 SELECTED_FEATURES = "age,sex,bmi"
-
 
 
 def test_discovery_create_numeric():
@@ -41,7 +40,7 @@ def test_discovery_create_numeric():
     stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}")
+    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_NUMERIC,"name": "Test Proposal"})
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
@@ -78,7 +77,7 @@ def test_discovery_create_numeric2():
     stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}")
+    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_NUMERIC2,"name": "Test Proposal"})
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/discovery", json={
@@ -114,7 +113,7 @@ def test_discovery_create_mixed():
 
     print("PROPOSAL ID MIXED : {}".format(PROPOSAL_ID_MIXED))
 
-    response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}")
+    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_MIXED,"name": "Test Proposal"})
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={

@@ -1,7 +1,7 @@
 from typing import Optional, Any, List, Union, Dict, Literal
 from typing_extensions import Annotated
-from pht_federated.aggregator.api.schemas.figures import *
-from pht_federated.aggregator.api.schemas.dataset_statistics import *
+from pht_federated.aggregator.schemas.figures import *
+from pht_federated.aggregator.schemas.dataset_statistics import *
 
 
 class DiscoveryUniqueColumn(DatasetUniqueColumn):

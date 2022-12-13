@@ -4,9 +4,9 @@ from typing import Union
 from uuid import uuid4
 from requests.models import Response
 from loguru import logger
-from pht_federated.aggregator.api.schemas.dataset_statistics import DiscoveryStatistics
-from pht_federated.aggregator.api.schemas.proposal import Proposal
-from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary
+from pht_federated.aggregator.schemas.dataset_statistics import DiscoveryStatistics
+from pht_federated.aggregator.schemas.proposal import Proposal
+from pht_federated.aggregator.schemas.discovery import DiscoverySummary
 
 
 class DiscoveryClient:

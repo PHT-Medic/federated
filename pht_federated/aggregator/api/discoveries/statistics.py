@@ -1,8 +1,8 @@
 from typing import Optional
 from pandas.api.types import is_numeric_dtype, is_bool_dtype
 import plotly.io
-from pht_federated.aggregator.api.schemas.discovery import DiscoverySummary, DiscoveryFigure
-from pht_federated.aggregator.api.schemas.dataset_statistics import DatasetStatistics
+from pht_federated.aggregator.schemas.discovery import DiscoverySummary, DiscoveryFigure
+from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
 from pht_federated.aggregator.api.discoveries.plots import *
 
 
