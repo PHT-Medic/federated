@@ -2,7 +2,7 @@ import plotly.express as px
 import plotly.io
 from plotly.graph_objects import Figure
 import json
-from pht_federated.aggregator.api.schemas.discovery import DiscoveryFigure
+from pht_federated.aggregator.schemas.discovery import DiscoveryFigure
 import plotly.graph_objects as go
 import pandas as pd
 

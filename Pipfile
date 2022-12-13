@@ -24,6 +24,8 @@ loguru = "*"
 python-socketio = {extras = ["asyncio_client"], version = "*"}
 aioredis = "*"
 tenseal = "*"
+plotly = "*"
+alembic = "*"
 
 [dev-packages]
 pytest = "*"
@@ -33,6 +35,7 @@ pandas = "*"
 seaborn = "*"
 bump2version = "*"
 python-dotenv = "*"
+scikit-learn = "*"
 
 [requires]
 python_version = "3.9"

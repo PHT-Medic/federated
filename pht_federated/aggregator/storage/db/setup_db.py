@@ -1,5 +1,5 @@
 from pht_federated.aggregator.storage.db.session import engine
-from pht_federated.aggregator.storage.db.base import Base
+from pht_federated.aggregator.db.base import Base
 
 
 def setup_db():
@@ -13,4 +13,5 @@ def reset_db():
 
 if __name__ == '__main__':
     # Base.metadata.drop_all(bind=engine)
-    setup_db()
+    # setup_db()
+    reset_db()

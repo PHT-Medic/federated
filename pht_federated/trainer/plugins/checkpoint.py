@@ -8,7 +8,7 @@ from pytorch_lightning.utilities.types import _PATH
 import torch
 
 from s3fs import S3FileSystem
-from pht_federated.client.storage import MinioBuckets, get_minio_fs
+from pht_federated.clients.storage import MinioBuckets, get_minio_fs
 
 
 class MinioCheckpointIO(TorchCheckpointIO):
