@@ -13,7 +13,7 @@ class Proposal(Base):
     name = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, nullable=True)
-    discoveries = relationship("DataDiscovery", back_populates="proposal", cascade="all, delete, delete-orphan")
-    protocols = relationship("AggregationProtocol", back_populates="proposal", cascade="all, delete, delete-orphan")
+    discoveries = relationship("DataDiscovery", back_populates="proposal", cascade="all, delete, delete-orphan", lazy="dynamic")
+    protocols = relationship("AggregationProtocol", back_populates="proposal", cascade="all, delete, delete-orphan", lazy="dynamic")
 
 

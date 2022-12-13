@@ -11,7 +11,7 @@ class DataDiscovery(Base):
     __tablename__ = "data_discovery"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=True)
-    proposal_id = Column(UUID, ForeignKey('proposals.id', ondelete="CASCADE"))
+    proposal_id = Column(UUID(as_uuid=True), ForeignKey('proposals.id', ondelete="CASCADE"))
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, nullable=True)
     proposal = relationship("Proposal", back_populates="discoveries")

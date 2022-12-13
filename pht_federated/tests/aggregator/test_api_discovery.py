@@ -27,6 +27,103 @@ FEATURE_NAME_CATEGORICAL = 'Embarked'
 SELECTED_FEATURES = "age,sex,bmi"
 
 
+@pytest.fixture
+def proposal_id():
+    return str(uuid4())
+
+
+def create_proposal_and_discovery():
+    response = client.post(f"/api/proposal", data={"id": str(uuid4()), "name": "Discovery test proposal"})
+    proposal_id = response.json()['id']
+    response = client.post(
+        f"/api/proposal/{proposal_id}/discoveries",
+        json={
+            "query": {"hello": "world"},
+        }
+    )
+    discovery_id = response.json()['id']
+    return proposal_id, discovery_id
+
+
+def test_create_discovery(proposal_id):
+    response = client.post(f"/api/proposal", data={"id": proposal_id, "name": "Discovery test proposal"})
+    print(response.json())
+    response = client.post(
+        f"/api/proposal/{response.json()['id']}/discoveries",
+        json={
+            "query": {"hello": "world"},
+        }
+    )
+    assert response.status_code == 200, response.text
+    print(response.json())
+
+
+def test_get_discovery(proposal_id):
+    proposal_id, discovery_id = create_proposal_and_discovery()
+
+    response = client.get(f"/api/proposal/{proposal_id}/discoveries/{discovery_id}")
+
+    assert response.status_code == 200, response.text
+    assert response.json()["query"] == {"hello": "world"}
+
+    # 404 if proposal does not exist
+    response = client.get(f"/api/proposal/{uuid4()}/discoveries/{discovery_id}")
+    assert response.status_code == 404, response.text
+
+    # 404 if discovery does not exist
+    response = client.get(f"/api/proposal/{proposal_id}/discoveries/{99999}")
+    assert response.status_code == 404, response.text
+
+
+def test_get_all_discoveries():
+    response = client.post(f"/api/proposal", data={"id": str(uuid4()), "name": "Discovery test proposal"})
+    proposal_id = response.json()['id']
+    response = client.post(
+        f"/api/proposal/{proposal_id}/discoveries",
+        json={
+            "query": {"hello": "world"},
+        }
+    )
+    response = client.get(f"/api/proposal/{proposal_id}/discoveries")
+    assert response.status_code == 200, response.text
+    assert len(response.json()) >= 1
+
+    # 404 if proposal does not exist
+    response = client.get(f"/api/proposal/{uuid4()}/discoveries")
+    assert response.status_code == 404, response.text
+
+
+def test_update_discovery():
+    proposal_id, discovery_id = create_proposal_and_discovery()
+    response = client.put(f"/api/proposal/{proposal_id}/discoveries/{discovery_id}",
+                          json={"query": {"hello": "world2"}})
+    assert response.status_code == 200, response.text
+    assert response.json()["query"] == {"hello": "world2"}
+
+    # 404 if proposal does not exist
+    response = client.put(f"/api/proposal/{uuid4()}/discoveries/{discovery_id}", json={"query": {"hello": "world2"}})
+    assert response.status_code == 404, response.text
+
+    # 404 if discovery does not exist
+    response = client.put(f"/api/proposal/{proposal_id}/discoveries/{99999}", json={"query": {"hello": "world2"}})
+    assert response.status_code == 404, response.text
+
+
+def test_delete_discovery():
+    proposal_id, discovery_id = create_proposal_and_discovery()
+
+    response = client.delete(f"/api/proposal/{proposal_id}/discoveries/{discovery_id}")
+    assert response.status_code == 200, response.text
+
+    # 404 if proposal does not exist
+    response = client.delete(f"/api/proposal/{uuid4()}/discoveries/{discovery_id}")
+    assert response.status_code == 404, response.text
+
+    # 404 if discovery does not exist
+    response = client.delete(f"/api/proposal/{proposal_id}/discoveries/{99999}")
+    assert response.status_code == 404, response.text
+
+
 def test_discovery_create_numeric():
     diabetes_dataset = sklearn.datasets.load_diabetes(return_X_y=False, as_frame=False)
 
@@ -40,7 +137,7 @@ def test_discovery_create_numeric():
     stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
-    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_NUMERIC,"name": "Test Proposal"})
+    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_NUMERIC, "name": "Test Proposal"})
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery", json={
@@ -77,7 +174,7 @@ def test_discovery_create_numeric2():
     stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
-    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_NUMERIC2,"name": "Test Proposal"})
+    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_NUMERIC2, "name": "Test Proposal"})
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_NUMERIC2}/discovery", json={
@@ -113,7 +210,7 @@ def test_discovery_create_mixed():
 
     print("PROPOSAL ID MIXED : {}".format(PROPOSAL_ID_MIXED))
 
-    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_MIXED,"name": "Test Proposal"})
+    response = client.post(f"/api/proposal", data={"id": PROPOSAL_ID_MIXED, "name": "Test Proposal"})
     assert response.status_code == 200, response.text
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
@@ -122,7 +219,6 @@ def test_discovery_create_mixed():
         "column_information": stats1_json['column_information']
     })
     assert response.status_code == 200, response.text
-
 
     response = client.post(f"/api/proposal/{PROPOSAL_ID_MIXED}/discovery", json={
         "item_count": stats2_json['item_count'],
@@ -148,7 +244,6 @@ def test_discovery_get_all():
     df_titanic = pd.read_csv('./data/train_data_titanic.csv')
     stats_df = statistics.get_discovery_statistics(df_titanic)
 
-
     assert stats_df.item_count == response['item_count']
     assert stats_df.feature_count == response['feature_count']
 
@@ -159,9 +254,9 @@ def test_discovery_get_all():
 
     assert stats_df.column_information[4].number_categories == response['column_information'][4]['number_categories']
     assert stats_df.column_information[4].value_counts == response['column_information'][4]['value_counts']
-    assert stats_df.column_information[4].most_frequent_element == response['column_information'][4]['most_frequent_element']
+    assert stats_df.column_information[4].most_frequent_element == response['column_information'][4][
+        'most_frequent_element']
     assert stats_df.column_information[4].frequency == response['column_information'][4]['frequency']
-
 
 
 def test_discovery_get_selected():
@@ -174,7 +269,6 @@ def test_discovery_get_selected():
     df = pd.DataFrame(diabetes_dataset['data'], columns=diabetes_dataset['feature_names'])
     df['target'] = diabetes_dataset['target']
     stats_df = statistics.get_discovery_statistics(df)
-
 
     assert stats_df.item_count == response['item_count']
     assert stats_df.feature_count == response['feature_count']
@@ -205,11 +299,5 @@ def test_plot_discovery():
             print(f"Feature {data['title']} does not have figure_data available.")
 
     for figure in figure_data_lst:
-        #plot_figure_json(figure)
+        # plot_figure_json(figure)
         print("Plotting is commented out in 'test_plot_discovery_summary_selected_features'!")
-
-
-def test_delete_discovery():
-    response = client.delete(f"/api/proposal/{PROPOSAL_ID_NUMERIC}/discovery")
-    assert response.status_code == 200, response.text
-

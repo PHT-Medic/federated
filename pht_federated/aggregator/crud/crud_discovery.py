@@ -3,15 +3,12 @@ from fastapi import Depends
 from .base import CRUDBase
 from typing import List
 from pht_federated.aggregator.models.discovery import DiscoverySummary, DataDiscovery
-from pht_federated.aggregator.schemas.discovery import SummaryCreate, SummaryUpdate
+from pht_federated.aggregator.schemas.discovery import SummaryCreate, SummaryUpdate, DataDiscoveryCreate, DataDiscoveryUpdate
 
 
-class CRUDDiscovery(CRUDBase[DataDiscovery, SummaryCreate, SummaryUpdate]):
+class CRUDDiscovery(CRUDBase[DataDiscovery, DataDiscoveryCreate, DataDiscoveryUpdate]):
+    pass
 
-    def get_all_by_proposal_id(self, proposal_id: str, db: Session) -> List[
-        DataDiscovery]:
-        discovery = db.query(DiscoverySummary).filter(DiscoverySummary.proposal_id == proposal_id).all()
-        return discovery
 
 
 class CRUDDiscoverySummary(CRUDBase[DiscoverySummary, SummaryCreate, SummaryUpdate]):
@@ -27,3 +24,5 @@ class CRUDDiscoverySummary(CRUDBase[DiscoverySummary, SummaryCreate, SummaryUpda
 
 
 discovery_summaries = CRUDDiscoverySummary(DiscoverySummary)
+
+discoveries = CRUDDiscovery(DataDiscovery)
