@@ -1,21 +1,32 @@
+import os
+
 from fastapi.encoders import jsonable_encoder
-from pht_federated.aggregator.services.discovery import statistics
-from pht_federated.clients.discovery_client import DiscoveryClient
 from uuid import uuid4
-from pht_federated.aggregator.schemas.dataset_statistics import DiscoveryStatistics
-from pht_federated.aggregator.schemas.proposal import Proposal
-from pht_federated.aggregator.schemas.discovery import DiscoverySummary
 from datetime import datetime
 import sklearn
 import pandas as pd
 import numpy as np
 import json
+from dotenv import load_dotenv, find_dotenv
+
+
+from pht_federated.aggregator.schemas.dataset_statistics import DiscoveryStatistics
+from pht_federated.aggregator.schemas.proposal import Proposal
+from pht_federated.aggregator.schemas.discovery import DiscoverySummary
+from pht_federated.aggregator.services.discovery import statistics
+from pht_federated.clients.discovery_client import DiscoveryClient
+
 
 PROPOSAL_ID_NUMERIC = uuid4()
 PROPOSAL_ID_MIXED = uuid4()
 SELECTED_FEATURES = "age,sex,bmi"
 
-discovery_client = DiscoveryClient(api_url="http://127.0.0.1:8000")
+load_dotenv(find_dotenv())
+
+
+
+
+discovery_client = DiscoveryClient(api_url=os.getenv("AGGREGATOR_URL", "http://127.0.0.1:8000"))
 
 
 def test_post_proposal():
