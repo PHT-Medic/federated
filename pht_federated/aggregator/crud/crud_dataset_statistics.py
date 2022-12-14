@@ -8,8 +8,7 @@ from pht_federated.aggregator.schemas.dataset_statistics import StatisticsCreate
 
 class CRUDDatasetStatistics(CRUDBase[DatasetStatistics, StatisticsCreate, StatisticsUpdate]):
 
-    def get_all_by_discovery_id(self, discovery_id: int, db: Session) -> List[
-        DatasetStatistics]:
+    def get_all_by_discovery_id(self, discovery_id: int, db: Session) -> List[DatasetStatistics]:
         dataset = db.query(DatasetStatistics).filter(DatasetStatistics.discovery_id == discovery_id).all()
         return dataset
 
