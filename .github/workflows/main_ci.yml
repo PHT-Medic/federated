@@ -43,7 +43,7 @@ jobs:
 
       - name: Build and run aggregator
         run: |
-          docker build $GITHUB_WORKSPACE -t aggregator -f $GITHUB_WORKSPACE/pht_federated/aggregator/Dockerfile
+          docker build . -t aggregator -f ./docker/Dockerfile_aggregator
           docker run -d --name aggregator -e "AGGREGATOR_DB=postgresql+psycopg2://admin:admin@postgres:5432/postgres" -p 8000:8000 aggregator
 
       - name: Lint with flake8
