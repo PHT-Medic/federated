@@ -27,6 +27,8 @@ tenseal = "*"
 plotly = "*"
 alembic = "*"
 httpx = "*"
+pandas = "*"
+pendulum = "*"
 
 [dev-packages]
 pytest = "*"

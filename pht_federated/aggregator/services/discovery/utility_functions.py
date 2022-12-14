@@ -1,9 +1,13 @@
-from pht_federated.aggregator.api.discoveries.statistics import *
 from typing import Union
 from collections import Counter
-from pht_federated.aggregator.api.discoveries.plots import *
 import json
 from fastapi.encoders import jsonable_encoder
+import plotly.io
+
+from pht_federated.aggregator.schemas.discovery import DiscoverySummary
+from pht_federated.aggregator.schemas.figures import DiscoveryFigure
+from pht_federated.aggregator.services.discovery.plots import create_dot_plot, create_barplot
+from pht_federated.aggregator.services.discovery.statistics import calc_combined_std
 
 
 def aggregate_proposal_features(response: list, proposal_id: str, features: Union[str, None]) -> DiscoverySummary:

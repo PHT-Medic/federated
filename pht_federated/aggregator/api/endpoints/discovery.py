@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+
+from sqlalchemy.orm import Session
+
 from pht_federated.aggregator.schemas.dataset_statistics import *
 from pht_federated.aggregator.schemas.discovery import DiscoverySummary, DataDiscovery, DataDiscoveryCreate, \
     DataDiscoveryUpdate
 from pht_federated.aggregator.crud.crud_dataset_statistics import dataset_statistics
 from pht_federated.aggregator.crud.crud_proposals import proposals
 from pht_federated.aggregator.crud.crud_discovery import discoveries
-from pht_federated.aggregator.api.discoveries.utility_functions import *
 from pht_federated.aggregator.api import dependencies
-from sqlalchemy.orm import Session
+from pht_federated.aggregator.services.discovery.utility_functions import aggregate_proposal_features
 
 router = APIRouter()
 

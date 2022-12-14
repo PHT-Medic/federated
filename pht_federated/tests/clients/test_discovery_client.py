@@ -1,5 +1,5 @@
 from fastapi.encoders import jsonable_encoder
-from pht_federated.aggregator.api.discoveries import statistics
+from pht_federated.aggregator.services.discovery import statistics
 from pht_federated.clients.discovery_client import DiscoveryClient
 from uuid import uuid4
 from pht_federated.aggregator.schemas.dataset_statistics import DiscoveryStatistics

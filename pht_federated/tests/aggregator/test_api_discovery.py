@@ -1,16 +1,16 @@
 import sklearn
 import numpy as np
 import pandas as pd
+from fastapi.encoders import jsonable_encoder
 from sklearn.datasets import load_diabetes
 from fastapi.testclient import TestClient
 from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.dependencies import get_db
-from pht_federated.aggregator.api.endpoints.discovery import *
-from pht_federated.aggregator.api.discoveries import statistics
-from pht_federated.aggregator.api.discoveries.plots import *
+from pht_federated.aggregator.services.discovery import statistics
 from sklearn.datasets import load_breast_cancer
 from uuid import uuid4
 import pytest
+import pathlib
 
 from pht_federated.tests.aggregator.test_db import override_get_db
 
@@ -210,7 +210,8 @@ def test_discovery_create_numeric2():
 
 
 def test_discovery_create_mixed():
-    df_titanic = pd.read_csv('./data/train_data_titanic.csv')
+    data_path = pathlib.Path(__file__).parent / "data" / "train_data_titanic.csv"
+    df_titanic = pd.read_csv(data_path)
     df_split = np.array_split(df_titanic, 3)
 
     stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
@@ -245,7 +246,8 @@ def test_discovery_create_mixed():
 
 
 def test_discovery_get_all():
-    df_titanic = pd.read_csv('./data/train_data_titanic.csv')
+    data_path = pathlib.Path(__file__).parent / "data" / "train_data_titanic.csv"
+    df_titanic = pd.read_csv(data_path)
     df_split = np.array_split(df_titanic, 3)
 
     stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
@@ -283,7 +285,7 @@ def test_discovery_get_all():
 
     response = response.json()
 
-    df_titanic = pd.read_csv('./data/train_data_titanic.csv')
+    # df_titanic = pd.read_csv('./data/train_data_titanic.csv')
     stats_df = statistics.get_discovery_statistics(df_titanic)
 
     assert stats_df.item_count == response['item_count']

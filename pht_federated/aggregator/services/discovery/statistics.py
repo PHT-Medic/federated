@@ -1,9 +1,11 @@
 from typing import Optional
 from pandas.api.types import is_numeric_dtype, is_bool_dtype
 import plotly.io
-from pht_federated.aggregator.schemas.discovery import DiscoverySummary, DiscoveryFigure
+from plotly.graph_objs import Figure
+
+from pht_federated.aggregator.schemas.discovery import DiscoveryFigure
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
-from pht_federated.aggregator.api.discoveries.plots import *
+import pandas as pd
 
 
 def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatistics]:
