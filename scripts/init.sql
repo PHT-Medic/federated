@@ -1,0 +1,4 @@
+CREATE DATABASE aggregator;
+CREATE DATABASE aggregator_test;
+GRANT ALL PRIVILEGES ON DATABASE aggregator TO admin;
+GRANT ALL PRIVILEGES ON DATABASE aggregator_test TO admin;

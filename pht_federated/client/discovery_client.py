@@ -19,12 +19,12 @@ class DiscoveryClient:
         self.api_url = api_url if api_url else os.getenv("AGGREGATOR_API_URL")
         if not self.api_url.startswith("http://"):
             self.api_url = "http://" + self.api_url
-        if not self.api_url.endswith("/api/proposal"):
-            self.api_url = self.api_url + "/api/proposal"
+        if not self.api_url.endswith("/api"):
+            self.api_url = self.api_url + "/api"
 
         logger.info("Establishing connection to API url : {}".format(self.api_url))
 
-    def post_proposal(self, proposal_id: uuid4 = None) -> Proposal:
+    def create_proposal(self, proposal_id: uuid4 = None) -> Proposal:
         """
         Sending POST request to create a proposal entry in the database with defined proposal_id
         :param proposal_id: uuid4 value that identifies proposal
@@ -57,7 +57,8 @@ class DiscoveryClient:
 
         return result
 
-    def get_aggregated_discovery_results(self, proposal_id: uuid4 = None,
+    def get_aggregated_discovery_results(self,
+                                         proposal_id: uuid4 = None,
                                          features: Union[str, None] = None) -> DiscoverySummary:
         """
         Sending GET request to get a aggregated DiscoverySummary object over objects in database for corresponding

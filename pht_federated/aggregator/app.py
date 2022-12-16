@@ -55,12 +55,13 @@ async def train_socket_endpoint(web_socket: WebSocket, train_id: str):
         await train_manager.disconnect(web_socket, train_id)
 '''
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/healthcheck")
+async def health_check():
+    return {"status": "healthy"}
 
 @app.on_event("startup")
 async def startup_event():
+    # todo run migrations
     logger.info("Starting up...")
     logger.info("Setting up database...")
     setup_db()
