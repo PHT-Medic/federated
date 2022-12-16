@@ -1,5 +1,7 @@
 [![CI](https://github.com/PHT-Medic/federated/actions/workflows/main_ci.yml/badge.svg)](https://github.com/PHT-Medic/federated/actions/workflows/main_ci.yml)
-# PHT Medic Federated Learning
+[![codecov](https://codecov.io/gh/PHT-Medic/federated/branch/main/graph/badge.svg?token=Q2JA1VOYK9)](https://codecov.io/gh/PHT-Medic/federated)
+
+# PHT Medic Federated
 
 This project contains all python code for the PHT-Medic Federated Learning project grouped into several modules.
 - `protocol`: contains the crypto code for the aggregation protocol
