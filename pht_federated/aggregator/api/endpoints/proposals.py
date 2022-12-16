@@ -35,7 +35,6 @@ def get_proposal(proposal_id: str, db: Session = Depends(dependencies.get_db)) -
 @router.put("/{proposal_id}", response_model=Proposal)
 def update_proposal(proposal_id: str, proposal: ProposalUpdate, db: Session = Depends(dependencies.get_db)) -> Proposal:
     db_proposal = proposals.get(db, proposal_id)
-    print(db_proposal.__dict__)
     if not db_proposal:
         raise HTTPException(status_code=404, detail=f"Proposal - {proposal_id} - not found")
 

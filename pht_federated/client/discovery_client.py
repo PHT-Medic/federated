@@ -57,7 +57,8 @@ class DiscoveryClient:
 
         return result
 
-    def get_aggregated_discovery_results(self, proposal_id: uuid4 = None,
+    def get_aggregated_discovery_results(self,
+                                         proposal_id: uuid4 = None,
                                          features: Union[str, None] = None) -> DiscoverySummary:
         """
         Sending GET request to get a aggregated DiscoverySummary object over objects in database for corresponding
