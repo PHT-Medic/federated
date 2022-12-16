@@ -10,5 +10,6 @@ COPY . /opt/federated/
 
 RUN pip install .
 
+HEALTHCHECK --interval=12s --timeout=12s CMD curl --fail http://localhost:8000/healthcheck || exit 1
 
 CMD ["uvicorn",  "pht_federated.aggregator.app:app", "--port", "8000", "--host", "0.0.0.0"]

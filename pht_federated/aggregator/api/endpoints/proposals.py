@@ -37,6 +37,7 @@ def update_proposal(proposal_id: str, proposal: ProposalUpdate, db: Session = De
     db_proposal = proposals.get(db, proposal_id)
     if not db_proposal:
         raise HTTPException(status_code=404, detail=f"Proposal - {proposal_id} - not found")
+
     proposal = proposals.update(db, db_obj=db_proposal, obj_in=proposal)
     return proposal
 

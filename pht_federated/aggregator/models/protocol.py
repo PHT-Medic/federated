@@ -16,6 +16,9 @@ class AggregationProtocol(Base):
     proposal_id = Column(ForeignKey('proposals.id', ondelete="CASCADE"), nullable=True)
     proposal = relationship("Proposal", back_populates="protocols")
     rounds = relationship("ProtocolRound", back_populates="protocol", cascade="all, delete, delete-orphan")
+    discovery_id = Column(ForeignKey('data_discovery.id', ondelete="CASCADE"), nullable=True)
+    discovery = relationship("DataDiscovery", back_populates="protocols")
+
 
 
 class ProtocolRound(Base):

@@ -106,7 +106,7 @@ def get_discovery_summary(
         raise HTTPException(status_code=404, detail=f"Discovery of proposal with id '{proposal_id}' not found.")
 
     discovery_summary = aggregate_proposal_features(response, proposal_id, features)
-
+    discovery_summary.discovery_id = discovery_id
     # print("DISCOVERY SUMMARY : {}".format(discovery_summary))
 
     return discovery_summary

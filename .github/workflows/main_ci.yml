@@ -41,14 +41,6 @@ jobs:
         run: pip install pipenv
       - run: pipenv install --dev
 
-      - name: Build and run aggregator
-        run: |
-          docker build . -t aggregator -f ./docker/Dockerfile_aggregator
-          docker run -d --name aggregator -e "AGGREGATOR_DB=postgresql+psycopg2://admin:admin@postgres:5432/postgres" -p 8000:8000 aggregator
-          docker ps -a
-      - name: Wait for aggregator
-        run: sleep 10s
-        shell: bash
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -68,11 +60,6 @@ jobs:
           pipenv run coverage run -m pytest ./pht_federated/tests
           pipenv run coverage xml
 
-      - name: Stop containers
-        if: always()
-        run: |
-          docker stop aggregator
-          docker rm aggregator
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
