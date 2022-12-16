@@ -60,11 +60,6 @@ jobs:
           pipenv run coverage run -m pytest ./pht_federated/tests
           pipenv run coverage xml
 
-      - name: Stop containers
-        if: always()
-        run: |
-          docker stop aggregator
-          docker rm aggregator
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
