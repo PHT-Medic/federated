@@ -14,7 +14,7 @@ from pht_federated.aggregator.schemas.dataset_statistics import DiscoveryStatist
 from pht_federated.aggregator.schemas.proposal import Proposal
 from pht_federated.aggregator.schemas.discovery import DiscoverySummary
 from pht_federated.aggregator.services.discovery import statistics
-from pht_federated.clients.discovery_client import DiscoveryClient
+from pht_federated.client.discovery_client import DiscoveryClient
 
 
 PROPOSAL_ID_NUMERIC = uuid4()
@@ -31,8 +31,8 @@ discovery_client = DiscoveryClient(api_url=os.getenv("AGGREGATOR_URL", "http://1
 
 def test_post_proposal():
 
-    response_mix = discovery_client.post_proposal(proposal_id=PROPOSAL_ID_MIXED)
-    response_num = discovery_client.post_proposal(proposal_id=PROPOSAL_ID_NUMERIC)
+    response_mix = discovery_client.create_proposal(proposal_id=PROPOSAL_ID_MIXED)
+    response_num = discovery_client.create_proposal(proposal_id=PROPOSAL_ID_NUMERIC)
 
     assert type(response_mix) == Proposal
     assert response_mix.created_at == datetime.now().replace(second=0, microsecond=0)

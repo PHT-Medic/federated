@@ -17,6 +17,7 @@ class DataDiscovery(Base):
     proposal = relationship("Proposal", back_populates="discoveries")
     query = Column(JSON, nullable=True)
     dataset_statistics = relationship("DatasetStatistics", back_populates="discovery", cascade="all, delete, delete-orphan")
+    protocols = relationship("AggregationProtocol", back_populates="discovery", cascade="all, delete, delete-orphan")
 
 class DiscoverySummary(Base):
     __tablename__ = "discovery_summary"
