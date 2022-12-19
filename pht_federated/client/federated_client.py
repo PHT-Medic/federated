@@ -2,15 +2,15 @@ import httpx
 import pendulum
 import warnings
 
-from pht_federated.client.discovery_client import DiscoveryClient
 from pht_federated.client.protocol_clients import ProtocolClient
 from pht_federated.client.resources.proposal import ProposalClient
+from pht_federated.client.resources.discovery import DiscoveryClient
 
 
 class Client:
     proposals: ProposalClient
-    discoveries: DiscoveryClient
     protocols: ProtocolClient
+    discoveries: DiscoveryClient
 
     def __init__(
             self,

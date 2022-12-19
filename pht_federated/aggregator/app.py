@@ -4,12 +4,10 @@ import uvicorn
 
 from loguru import logger
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from pht_federated.aggregator.api.api import api_router
-from pht_federated.aggregator.socket.connection_manager import ConnectionManager, TrainConnectionManager
-#from pht_federated.aggregator.socket.socket_app import socket_app
 from pht_federated.aggregator.storage.db.setup_db import setup_db
 
 app = FastAPI(

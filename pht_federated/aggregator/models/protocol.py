@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import uuid
 from sqlalchemy import Column, Integer, JSON, String, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -9,8 +9,8 @@ from pht_federated.aggregator.db.base_class import Base
 
 class AggregationProtocol(Base):
     __tablename__ = "aggregation_protocols"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True)
+    name = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, nullable=True)
     proposal_id = Column(ForeignKey('proposals.id', ondelete="CASCADE"), nullable=True)
@@ -18,21 +18,22 @@ class AggregationProtocol(Base):
     rounds = relationship("ProtocolRound", back_populates="protocol", cascade="all, delete, delete-orphan")
     discovery_id = Column(ForeignKey('data_discovery.id', ondelete="CASCADE"), nullable=True)
     discovery = relationship("DataDiscovery", back_populates="protocols")
+    num_rounds = Column(Integer, default=0)
+    active_round = Column(Integer, default=0)
 
 
 
 class ProtocolRound(Base):
     __tablename__ = "protocol_rounds"
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True)
-    created_at = Column(DateTime, default=datetime.now())
     round = Column(Integer, default=0)
-    updated_at = Column(DateTime, nullable=True)
     protocol_id = Column(ForeignKey('aggregation_protocols.id', ondelete="CASCADE"), nullable=True)
     protocol = relationship("AggregationProtocol", back_populates="rounds")
-    round_number = Column(Integer, default=0)
+    step = Column(Integer, default=0)
     client_key_broadcasts = relationship("ClientKeyBroadcast", back_populates="round", cascade="all, delete, delete-orphan")
     client_key_shares = relationship("ClientKeyShares", back_populates="round", cascade="all, delete, delete-orphan")
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, nullable=True)
 
 
 class ClientKeyBroadcast(Base):
