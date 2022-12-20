@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List
-from pht_federated.protocol.models import HexString
+from pht_federated.protocols.secure_aggregation.models import HexString
 import numpy as np
 
 

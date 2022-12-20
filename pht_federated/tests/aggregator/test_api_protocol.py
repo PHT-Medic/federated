@@ -3,6 +3,8 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
+
+from pht_federated.protocols.secure_aggregation.client.client_protocol import ClientProtocol
 from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.tests.aggregator.test_db import override_get_db
@@ -40,6 +42,16 @@ def test_create_protocol(proposal_id, discovery_id):
     response = client.post("/api/protocol", json=data)
     assert response.status_code == 200, response.text
     assert response.json()["discovery_id"] == discovery_id
+
+    # create a protocol with invalid proposal id
+    data = {"name": "Test Protocol Proposal", "proposal_id": str(uuid.uuid4())}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 404, response.text
+
+    # create a protocol with invalid discovery id
+    data = {"name": "Test Protocol Discovery", "discovery_id": 999999}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 404, response.text
 
 
 def test_get_many_protocols(proposal_id, discovery_id):
@@ -171,6 +183,37 @@ def test_protocol_delete():
     # invalid protocol
     response = client.delete(f"/api/protocol/{uuid.uuid4()}")
     assert response.status_code == 404, response.text
+
+
+
+def test_register_for_protocol():
+
+    # create a protocol
+    data = {"name": "Test Protocol"}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 200, response.text
+
+    protocol_id = response.json()["id"]
+
+    client_protocol = ClientProtocol()
+    keys, broadcast = client_protocol.setup()
+
+    # register for the protocol
+    response = client.post(f"/api/protocol/{protocol_id}/register", json=broadcast.dict())
+    print(response.text)
+    assert response.status_code == 200, response.text
+
+    # invalid protocol
+    response = client.post(f"/api/protocol/{uuid.uuid4()}/register", json=broadcast.dict())
+    assert response.status_code == 404, response.text
+
+    keys_2, broadcast_2 = client_protocol.setup()
+    response = client.post(f"/api/protocol/{protocol_id}/register", json=broadcast_2.dict())
+    assert response.status_code == 200, response.text
+
+    assert response.json()["currently_registered"] == 2
+
+
 
 
 

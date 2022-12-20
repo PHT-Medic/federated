@@ -3,10 +3,10 @@ import os
 import pytest
 from cryptography.hazmat.primitives import serialization
 
-from pht_federated.protocol.models import HexString
-from pht_federated.protocol.models.client_keys import ClientKeys
-from pht_federated.protocol.secrets.secret_sharing import combine_key_shares, create_seed_shares, combine_seed_shares, \
-    create_secret_shares
+from pht_federated.protocols.secure_aggregation.models import HexString
+from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
+from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import combine_key_shares, create_seed_shares, \
+    combine_seed_shares, create_secret_shares
 
 from Crypto.Protocol.SecretSharing import Shamir
 

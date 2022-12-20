@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.hazmat.primitives import serialization
 
 
-from pht_federated.protocol.models.secrets import SecretShares, KeyShare, SeedShare
+from pht_federated.protocols.secure_aggregation.models.secrets import SecretShares, KeyShare, SeedShare
 
 # Number of sharing key chunks
 NUM_KEY_CHUNKS = 20

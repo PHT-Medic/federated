@@ -1,17 +1,22 @@
 from datetime import datetime
 import uuid
-from sqlalchemy import Column, Integer, JSON, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, JSON, String, DateTime, ForeignKey, Enum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from pht_federated.aggregator.db.base_class import Base
 
 
+status_options = ('initialized', 'active', 'inactive', 'finished', 'cancelled')
+
+status_enum = Enum(*status_options, name='status')
+
 class AggregationProtocol(Base):
     __tablename__ = "aggregation_protocols"
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4, unique=True)
     name = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.now())
+    status = Column(status_enum, default='initialized')
     updated_at = Column(DateTime, nullable=True)
     proposal_id = Column(ForeignKey('proposals.id', ondelete="CASCADE"), nullable=True)
     proposal = relationship("Proposal", back_populates="protocols")
@@ -19,7 +24,7 @@ class AggregationProtocol(Base):
     discovery_id = Column(ForeignKey('data_discovery.id', ondelete="CASCADE"), nullable=True)
     discovery = relationship("DataDiscovery", back_populates="protocols")
     num_rounds = Column(Integer, default=0)
-    active_round = Column(Integer, default=0)
+    active_round = Column(Integer, nullable=True)
 
 
 

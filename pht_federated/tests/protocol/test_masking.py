@@ -3,10 +3,10 @@ import os
 import numpy as np
 import pytest
 
-from pht_federated.protocol import ClientProtocol, ServerProtocol
-from pht_federated.protocol.models.server_messages import BroadCastClientKeys, ServerKeyBroadcast
-from pht_federated.protocol.secrets.masking import (generate_random_seed, integer_seed_from_hex,
-                                                    _generate_private_mask, create_mask, expand_seed, generate_shared_mask)
+from pht_federated.protocols.secure_aggregation import ClientProtocol, ServerProtocol
+from pht_federated.protocols.secure_aggregation.models.server_messages import BroadCastClientKeys, ServerKeyBroadcast
+from pht_federated.protocols.secure_aggregation.secrets.masking import (generate_random_seed, integer_seed_from_hex,
+                                                              _generate_private_mask, create_mask, expand_seed, generate_shared_mask)
 
 
 @pytest.fixture

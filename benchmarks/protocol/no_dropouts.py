@@ -6,10 +6,10 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from datetime import datetime
 
-from pht_federated.protocol import ClientProtocol, ServerProtocol
+from pht_federated.protocols.secure_aggregation import ClientProtocol, ServerProtocol
 from time import perf_counter
 
-from pht_federated.protocol.models.server_messages import BroadCastClientKeys
+from pht_federated.protocols.secure_aggregation.models.server_messages import BroadCastClientKeys
 
 
 def benchmark(n_clients: int = 100, input_size: int = 10000, iterations: int = 100):

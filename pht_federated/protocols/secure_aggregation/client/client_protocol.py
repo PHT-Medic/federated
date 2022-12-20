@@ -2,17 +2,17 @@ from typing import Tuple, List
 
 import numpy as np
 
-from pht_federated.protocol.models import HexString
-from pht_federated.protocol.models.client_keys import ClientKeys
-from pht_federated.protocol.models.secrets import SecretShares, EncryptedCipher, Cipher
-from pht_federated.protocol.models.server_messages import (ServerKeyBroadcast, ServerCipherBroadcast, BroadCastClientKeys,
-                                                           ServerUnmaskBroadCast, UserCipher)
-from pht_federated.protocol.secrets.secret_sharing import create_secret_shares
-from pht_federated.protocol.models.client_messages import (ClientKeyBroadCast, ShareKeysMessage, MaskedInput, UnmaskShares,
-                                                           UnmaskSeedShare, UnmaskKeyShare)
-from pht_federated.protocol.secrets.ciphers import generate_encrypted_cipher, decrypt_cipher
-from pht_federated.protocol.secrets.util import load_public_key
-from pht_federated.protocol.secrets.masking import generate_random_seed, create_mask
+from pht_federated.protocols.secure_aggregation.models import HexString
+from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
+from pht_federated.protocols.secure_aggregation.models.secrets import SecretShares, EncryptedCipher, Cipher
+from pht_federated.protocols.secure_aggregation.models.server_messages import (ServerKeyBroadcast, ServerCipherBroadcast, BroadCastClientKeys,
+                                                                     ServerUnmaskBroadCast, UserCipher)
+from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import create_secret_shares
+from pht_federated.protocols.secure_aggregation.models.client_messages import (ClientKeyBroadCast, ShareKeysMessage, MaskedInput, UnmaskShares,
+                                                                     UnmaskSeedShare, UnmaskKeyShare)
+from pht_federated.protocols.secure_aggregation.secrets.ciphers import generate_encrypted_cipher, decrypt_cipher
+from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
+from pht_federated.protocols.secure_aggregation.secrets.masking import generate_random_seed, create_mask
 
 
 class ClientProtocol:

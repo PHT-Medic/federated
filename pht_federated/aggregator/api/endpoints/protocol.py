@@ -6,11 +6,13 @@ from loguru import logger
 
 from pht_federated.aggregator.api import dependencies
 from pht_federated.aggregator.schemas.protocol import AggregationProtocol, AggregationProtocolCreate, \
-    AggregationProtocolUpdate
+    AggregationProtocolUpdate, RegistrationResponse
 
 from pht_federated.aggregator.crud.crud_protocol import protocols
 from pht_federated.aggregator.crud.crud_proposals import proposals
 from pht_federated.aggregator.crud.crud_discovery import discoveries
+from pht_federated.aggregator.services.secure_aggregation.service import secure_aggregation
+from pht_federated.protocols.secure_aggregation.models import client_messages
 
 router = APIRouter()
 
@@ -79,3 +81,30 @@ def delete_protocol(protocol_id: str, db: Session = Depends(dependencies.get_db)
         raise HTTPException(status_code=404, detail=f"Protocol - {protocol_id} - not found")
     protocol = protocols.remove(db, id=protocol_id)
     return protocol
+
+
+@router.get("/{protocol_id}/status")
+def get_protocol_status(protocol_id: str, db: Session = Depends(dependencies.get_db)) -> dict:
+    protocol = protocols.get(db, protocol_id)
+    if not protocol:
+        raise HTTPException(status_code=404, detail=f"Protocol - {protocol_id} - not found")
+
+    status = secure_aggregation.protocol_status(protocol, db)
+    return status
+
+
+@router.post("/{protocol_id}/register", response_model=RegistrationResponse)
+def register_for_protocol(protocol_id: str,
+                          key_broadcast: client_messages.ClientKeyBroadCast,
+                          db: Session = Depends(dependencies.get_db)) -> RegistrationResponse:
+
+
+    protocol = protocols.get(db, protocol_id)
+    if not protocol:
+        raise HTTPException(status_code=404, detail=f"Protocol - {protocol_id} - not found")
+
+    try:
+        response = secure_aggregation.process_registration(db, key_broadcast, protocol)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return response

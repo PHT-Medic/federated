@@ -4,8 +4,8 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKeyWithSerialization as ECPubKey
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKeyWithSerialization as ECPrivateKey
 
-from pht_federated.protocol.models.secrets import Cipher, KeyShare, SeedShare
-from pht_federated.protocol.secrets.key_agreement import derive_shared_key
+from pht_federated.protocols.secure_aggregation.models.secrets import Cipher, KeyShare, SeedShare
+from pht_federated.protocols.secure_aggregation.secrets.key_agreement import derive_shared_key
 
 
 def generate_encrypted_cipher(sender: str,

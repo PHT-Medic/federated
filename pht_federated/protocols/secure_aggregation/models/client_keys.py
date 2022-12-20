@@ -5,9 +5,9 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from pydantic import BaseModel
 
-from pht_federated.protocol.models.client_messages import ClientKeyBroadCast
-from pht_federated.protocol.models import HexString
-from pht_federated.protocol.secrets import create_key_shares
+from pht_federated.protocols.secure_aggregation.models.client_messages import ClientKeyBroadCast
+from pht_federated.protocols.secure_aggregation.models import HexString
+from pht_federated.protocols.secure_aggregation.secrets import create_key_shares
 
 
 class KeyShare(BaseModel):

@@ -2,12 +2,12 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from pht_federated.protocol.secrets.masking import integer_seed_from_hex, expand_seed, generate_shared_mask
-from pht_federated.protocol.secrets.secret_sharing import combine_key_shares, combine_seed_shares
-from pht_federated.protocol.models.server_messages import (ServerKeyBroadcast, BroadCastClientKeys, ServerCipherBroadcast, UserCipher,
-                                                           Round4Participant, ServerUnmaskBroadCast, AggregatedParameters)
-from pht_federated.protocol.models.client_messages import ShareKeysMessage, MaskedInput, UnmaskShares, UnmaskSeedShare, UnmaskKeyShare
-from pht_federated.protocol.secrets.util import load_public_key
+from pht_federated.protocols.secure_aggregation.secrets.masking import integer_seed_from_hex, expand_seed, generate_shared_mask
+from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import combine_key_shares, combine_seed_shares
+from pht_federated.protocols.secure_aggregation.models.server_messages import (ServerKeyBroadcast, BroadCastClientKeys, ServerCipherBroadcast, UserCipher,
+                                                                     Round4Participant, ServerUnmaskBroadCast, AggregatedParameters)
+from pht_federated.protocols.secure_aggregation.models.client_messages import ShareKeysMessage, MaskedInput, UnmaskShares, UnmaskSeedShare, UnmaskKeyShare
+from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
 
 
 def _recover_shared_masks(user_key_shares: dict,

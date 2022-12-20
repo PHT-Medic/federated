@@ -4,7 +4,7 @@ import requests
 import pendulum
 # todo use httpx
 
-from pht_federated.protocol.models import client_messages, server_messages
+from pht_federated.protocols.secure_aggregation.models import client_messages, server_messages
 
 
 class ProtocolClient:

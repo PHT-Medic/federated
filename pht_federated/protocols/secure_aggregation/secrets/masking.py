@@ -4,10 +4,10 @@ from typing import List
 import numpy as np
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey, EllipticCurvePublicKey
 
-from pht_federated.protocol.models.client_keys import ClientKeys
-from pht_federated.protocol.models.server_messages import BroadCastClientKeys
-from pht_federated.protocol.secrets.key_agreement import derive_shared_key
-from pht_federated.protocol.secrets.util import load_public_key
+from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
+from pht_federated.protocols.secure_aggregation.models.server_messages import BroadCastClientKeys
+from pht_federated.protocols.secure_aggregation.secrets.key_agreement import derive_shared_key
+from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
 
 
 def create_mask(user_id: str, user_keys: ClientKeys, participants: List[BroadCastClientKeys], seed: str,

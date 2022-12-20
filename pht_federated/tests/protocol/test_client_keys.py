@@ -1,5 +1,5 @@
 import pytest
-from pht_federated.protocol.models.client_keys import ClientKeys
+from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
 

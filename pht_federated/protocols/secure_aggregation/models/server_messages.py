@@ -1,8 +1,8 @@
 from typing import Optional, List, Union
 
 from pydantic import BaseModel
-from pht_federated.protocol.models.client_messages import ClientKeyBroadCast
-from pht_federated.protocol.models import HexString
+from pht_federated.protocols.secure_aggregation.models.client_messages import ClientKeyBroadCast
+from pht_federated.protocols.secure_aggregation.models import HexString
 
 
 class BroadCastClientKeys(BaseModel):
