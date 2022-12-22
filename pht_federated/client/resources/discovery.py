@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from httpx import Client
 
 from pht_federated.aggregator.schemas import discovery as schemas
+from pht_federated.aggregator.schemas.dataset_statistics import StatisticsCreate, StatisticsUpdate, DiscoveryStatistics
 
 
 class DiscoveryClient:
@@ -73,14 +74,14 @@ class DiscoveryClient:
         self,
         proposal_id: typing.Union[str, UUID],
         discovery_id: typing.Any,
-        statistics: schemas.StatisticsCreate,
-    ) -> schemas.DiscoveryStatistics:
+        statistics: StatisticsCreate,
+    ) -> DiscoveryStatistics:
         response = self.client.post(
             f"{self.prefix}/{proposal_id}/discoveries/{discovery_id}/stats",
             json=jsonable_encoder(statistics),
         )
         response.raise_for_status()
-        return schemas.DiscoveryStatistics(**response.json())
+        return DiscoveryStatistics(**response.json())
 
     def get_aggregated_results(
         self,

@@ -13,13 +13,13 @@ lightning-bolts = "*"
 minio = "*"
 torchvision = "*"
 s3fs = "*"
-fsspec = {extras = ["s3"], version = "*"}
+fsspec = { extras = ["s3"], version = "*" }
 SQLAlchemy = "*"
 psycopg2-binary = ""
 fastapi = "*"
-uvicorn = {extras = ["standard"], version = "*"}
+uvicorn = { extras = ["standard"], version = "*" }
 loguru = "*"
-python-socketio = {extras = ["asyncio_client"], version = "*"}
+python-socketio = { extras = ["asyncio_client"], version = "*" }
 aioredis = "*"
 tenseal = "*"
 plotly = "*"
@@ -37,7 +37,7 @@ seaborn = "*"
 bump2version = "*"
 python-dotenv = "*"
 scikit-learn = "*"
-black = "*"
+black = { extras = ["d"], version = "*" }
 isort = "*"
 autoflake = "*"
 

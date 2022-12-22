@@ -40,7 +40,8 @@ jobs:
       - name: Install pipenv
         run: pip install pipenv
       - run: pipenv install --dev
-
+      - name: Black formatting
+        uses: psf/black@stable
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names

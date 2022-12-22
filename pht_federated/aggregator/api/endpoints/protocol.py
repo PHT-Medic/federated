@@ -12,6 +12,8 @@ from pht_federated.aggregator.schemas.protocol import (
     AggregationProtocolCreate,
     AggregationProtocolUpdate,
     RegistrationResponse,
+    ProtocolSettings,
+    ProtocolSettingsUpdate,
 )
 from pht_federated.aggregator.services.secure_aggregation.service import (
     secure_aggregation,
@@ -125,13 +127,44 @@ def get_protocol_status(
     return status
 
 
+@router.get("/{protocol_id}/settings", response_model=ProtocolSettings)
+def get_protocol_settings(
+    protocol_id: str, db: Session = Depends(dependencies.get_db)
+) -> dict:
+    protocol = protocols.get(db, protocol_id)
+    if not protocol:
+        raise HTTPException(
+            status_code=404, detail=f"Protocol - {protocol_id} - not found"
+        )
+
+    settings = protocol.settings
+    return settings
+
+
+@router.put("/{protocol_id}/settings", response_model=ProtocolSettings)
+def update_protocol_settings(
+    protocol_id: str,
+    settings_update: ProtocolSettingsUpdate,
+    db: Session = Depends(dependencies.get_db),
+) -> dict:
+    protocol = protocols.get(db, protocol_id)
+    if not protocol:
+        raise HTTPException(
+            status_code=404, detail=f"Protocol - {protocol_id} - not found"
+        )
+
+    settings = protocols.update_proposal_settings(
+        db, db_obj=protocol, obj_in=settings_update
+    )
+    return settings
+
+
 @router.post("/{protocol_id}/register", response_model=RegistrationResponse)
 def register_for_protocol(
     protocol_id: str,
     key_broadcast: client_messages.ClientKeyBroadCast,
     db: Session = Depends(dependencies.get_db),
 ) -> RegistrationResponse:
-
     protocol = protocols.get(db, protocol_id)
     if not protocol:
         raise HTTPException(

@@ -16,6 +16,7 @@ app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
+
 @pytest.fixture
 def proposal_id():
     response = client.post("/api/proposal", json={"name": "Protocol test"})
@@ -32,7 +33,6 @@ def discovery_id(proposal_id):
 
 
 def test_create_protocol(proposal_id, discovery_id):
-
     # create a protocol
     data = {"name": "Test Protocol"}
     response = client.post("/api/protocol", json=data)
@@ -110,7 +110,6 @@ def test_get_many_protocols(proposal_id, discovery_id):
 
 
 def test_get_one_protocol():
-
     # create a protocol
     data = {"name": "Test Protocol"}
     response = client.post("/api/protocol", json=data)
@@ -128,7 +127,6 @@ def test_get_one_protocol():
 
 
 def test_update_protocol(proposal_id, discovery_id):
-
     data = {"name": "Test Protocol"}
     response = client.post("/api/protocol", json=data)
     assert response.status_code == 200, response.text
@@ -171,7 +169,6 @@ def test_update_protocol(proposal_id, discovery_id):
 
 
 def test_protocol_delete():
-
     # create a protocol
     data = {"name": "Test Protocol"}
     response = client.post("/api/protocol", json=data)
@@ -189,7 +186,6 @@ def test_protocol_delete():
 
 
 def test_register_for_protocol():
-
     # create a protocol
     data = {"name": "Test Protocol"}
     response = client.post("/api/protocol", json=data)
@@ -220,3 +216,41 @@ def test_register_for_protocol():
     assert response.status_code == 200, response.text
 
     assert response.json()["currently_registered"] == 2
+
+
+def test_get_protocol_settings():
+    # create a protocol
+    data = {"name": "Test Protocol"}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 200, response.text
+
+    protocol_id = response.json()["id"]
+
+    # get the protocol settings
+    response = client.get(f"/api/protocol/{protocol_id}/settings")
+    assert response.status_code == 200, response.text
+    print(response.json())
+
+    # invalid protocol
+    response = client.get(f"/api/protocol/{uuid.uuid4()}/settings")
+    assert response.status_code == 404, response.text
+
+
+def test_update_protocol_settings():
+    # create a protocol
+    data = {"name": "Test Protocol"}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 200, response.text
+
+    protocol_id = response.json()["id"]
+
+    # update the protocol settings
+    data = {"min_participants": 5}
+    response = client.put(f"/api/protocol/{protocol_id}/settings", json=data)
+    assert response.status_code == 200, response.text
+    assert response.json()["min_participants"] == 5
+
+    # invalid protocol
+    data = {"name": "Test Protocol Updated"}
+    response = client.put(f"/api/protocol/{uuid.uuid4()}/settings", json=data)
+    assert response.status_code == 404, response.text

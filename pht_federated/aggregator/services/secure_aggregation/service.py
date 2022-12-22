@@ -25,6 +25,90 @@ class SecureAggregation:
     def __init__(self):
         self.protocol = ServerProtocol()
 
+    def update_protocol_on_client_input(
+        self, db: Session, protocol: models.AggregationProtocol
+    ):
+
+        settings: models.ProtocolSettings = protocol.settings
+        active_round = self._get_active_round(db, protocol)
+
+        if active_round.step == 0:
+            key_broadcasts = get_key_broadcasts_for_round(db, active_round.id)
+            if (
+                settings.auto_advance
+                and len(key_broadcasts) >= settings.auto_advance_min
+            ):
+                logging.protocol_info(
+                    protocol.id,
+                    f"Auto advancing round {active_round.id} to step 1 - Key sharing",
+                )
+                self.advance_round(db, protocol)
+
+        else:
+            raise NotImplementedError("Not implemented yet")
+
+    def advance_round(
+        self, db: Session, protocol: models.AggregationProtocol
+    ) -> schemas.ProtocolStatus:
+        """
+        Advance the current round of the given protocol
+        :param db: sqlalchemy session
+        :param protocol: protocol object
+        :return: updated protocol status
+        """
+        current_round = self._get_active_round(db, protocol)
+        if not current_round:
+            raise ValueError("No active round found")
+
+        if self._check_advance_requirements(db, protocol, current_round):
+            logging.protocol_info(
+                protocol.id,
+                f"Advancing round {current_round.round} from step {current_round.step} to step {current_round.step + 1}",
+            )
+            current_round.step += 1
+            db.add(current_round)
+            db.commit()
+        else:
+            logging.protocol_warning(
+                protocol.id,
+                f"Round {current_round.round} step {current_round.step} requirements not met",
+            )
+            raise ValueError("Advancement requirements not met")
+        return self.protocol_status(db, protocol)
+
+    def _check_advance_requirements(
+        self,
+        db: Session,
+        protocol: models.AggregationProtocol,
+        db_round: models.ProtocolRound,
+    ) -> bool:
+        """
+        Check if the requirements for advancing to the next round are met
+        :param db: sqlalchemy session
+        :param protocol: protocol object
+        :param db_round: round object
+        :return:
+        """
+        settings: models.ProtocolSettings = protocol.settings
+
+        if db_round.step == 0:
+            return (
+                len(get_key_broadcasts_for_round(db, db_round.id))
+                >= settings.min_participants
+            )
+
+        elif db_round.step == 1:
+            raise NotImplementedError("Not implemented yet")
+
+        elif db_round.step == 2:
+            raise NotImplementedError("Not implemented yet")
+
+        elif db_round.step == 3:
+            raise NotImplementedError("Not implemented yet")
+
+        else:
+            raise ValueError("Invalid step number")
+
     def start_new_round(
         self, db: Session, db_protocol: models.AggregationProtocol, activate=True
     ) -> models.ProtocolRound:

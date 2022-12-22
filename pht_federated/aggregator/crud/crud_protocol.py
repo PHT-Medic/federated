@@ -1,5 +1,6 @@
 from typing import List, Union
 
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from pht_federated.aggregator.crud import crud_discovery, crud_proposals
@@ -33,7 +34,7 @@ class CRUDProtocol(
         *,
         obj_in: Union[
             schemas.AggregationProtocolCreate, schemas.AggregationProtocolUpdate
-        ]
+        ],
     ) -> schemas.AggregationProtocolCreate:
 
         # validate discovery
@@ -71,6 +72,27 @@ class CRUDProtocol(
             .limit(limit)
             .all()
         )
+
+    def update_proposal_settings(
+        self,
+        db: Session,
+        *,
+        db_obj: protocol.AggregationProtocol,
+        obj_in: schemas.ProtocolSettingsUpdate,
+    ) -> protocol.AggregationProtocol:
+
+        db_settings = db_obj.settings
+        obj_data = jsonable_encoder(db_settings)
+
+        update_data = obj_in.dict(exclude_unset=True)
+        for field in obj_data:
+            if field in update_data:
+                setattr(db_obj.settings, field, update_data[field])
+
+        db.add(db_settings)
+        db.commit()
+        db.refresh(db_settings)
+        return db_settings
 
 
 protocols = CRUDProtocol(protocol.AggregationProtocol)
