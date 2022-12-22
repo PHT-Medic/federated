@@ -50,6 +50,14 @@ def proposal_id():
     return proposal.id
 
 
+def test_init():
+    client = DiscoveryClient(api_client, prefix="api/proposal")
+    assert client.prefix == "/api/proposal"
+
+    client = DiscoveryClient(api_client, prefix="/api/proposal/")
+    assert client.prefix == "/api/proposal"
+
+
 def test_create_discovery(proposal_id, discovery_client):
     discover = DataDiscoveryCreate(query={"hello": "world"})
     response = discovery_client.create(proposal_id, discover)
@@ -188,6 +196,18 @@ def test_post_discovery_statistics_numeric(discovery_client):
     )
     print(aggregate_response)
     assert aggregate_response.discovery_id == discovery.id
+
+    aggregate_with_features_response = discovery_client.get_aggregated_results(
+        proposal_id, discovery.id, features=["age", "sex", "bmi"]
+    )
+
+    assert aggregate_with_features_response.discovery_id == discovery.id
+
+    aggregate_with_features_response = discovery_client.get_aggregated_results(
+        proposal_id, discovery.id, features=",".join(["age", "sex", "bmi"])
+    )
+
+    assert aggregate_with_features_response.discovery_id == discovery.id
 
 
 #

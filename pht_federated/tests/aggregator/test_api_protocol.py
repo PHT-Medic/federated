@@ -279,7 +279,10 @@ def test_protocol_advance():
     )
     assert response.status_code == 200, response.text
 
-    time.sleep(1)
+    # error not enough participants
+    response = client.post(f"/api/protocol/{protocol_id}/advance")
+    assert response.status_code == 400, response.text
+
     for _ in range(4):
         keys, broadcast = client_protocol.setup()
         response = client.post(
@@ -290,4 +293,38 @@ def test_protocol_advance():
     response = client.post(f"/api/protocol/{protocol_id}/advance")
     assert response.status_code == 200, response.text
     assert response.json()["round_status"]["step"] == 1
-    print(response.json())
+
+    keys, broadcast = client_protocol.setup()
+
+    response = client.post(
+        f"/api/protocol/{protocol_id}/register", json=broadcast.dict()
+    )
+    print(response.text)
+
+
+def test_protocol_auto_advance():
+    # create a protocol
+    data = {"name": "Test Auto Advance Protocol"}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 200, response.text
+
+    protocol_id = response.json()["id"]
+
+    # set  auto advance
+    data = {"auto_advance": True}
+    response = client.put(f"/api/protocol/{protocol_id}/settings", json=data)
+    assert response.status_code == 200, response.text
+    assert response.json()["auto_advance"] == True
+
+    client_protocol = ClientProtocol()
+
+    for _ in range(6):
+        keys, broadcast = client_protocol.setup()
+        response = client.post(
+            f"/api/protocol/{protocol_id}/register", json=broadcast.dict()
+        )
+        assert response.status_code == 200, response.text
+
+    status = client.get(f"/api/protocol/{protocol_id}/status").json()
+    assert status["round_status"]["step"] == 1
+    print(status)

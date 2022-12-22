@@ -4,8 +4,8 @@
 # PHT Medic Federated
 
 This project contains all python code for the PHT-Medic Federated Learning project grouped into several packages.
-- `protocol`: contains the cryptographic functionality required for the aggregation protocol
-- `aggregator`: contains the aggregator REST API implementation
+- `protocols`: contains the cryptographic functionality required for the supported protocols
+- `aggregator`: contains the aggregator REST API implementation, and server side storage for running protocols
 - `client`: implements a client to be used with the aggregator API
 - `trainer`: contains the code for the client side training of models
 
@@ -26,6 +26,7 @@ Install the dependencies with `pipenv install --dev`.
 
 ### Start development services
 to spin up all services run `docker compose up -d` in the root folder.
+
 ```shell
 docker compose up -d
 ```
@@ -51,18 +52,27 @@ uvicorn pht_federated.aggregator.app:app --reload --port 8000 --host 0.0.0.0
 
 ## Contributing
 
-Create a branch/fork the repository and create a pull request to the `main` branch.
+Create a branch/fork the repository and create a pull request to the `main` branch to contribute to the project.
+The CI pipeline will run all tests and checks on the code, before it can be merged.
 
 ### pre-commit hooks
 To ensure a consistent code style and to prevent common mistakes, we use [pre-commit](https://pre-commit.com/) hooks.
-To install the hooks run `pre-commit install` in the root folder of the project with the dev dependencies installed.
-
+To install the hooks run `pre-commit install` in the root folder of the project with the virtual environment activated
+and the dev dependencies installed.
 
 ### Code style
 This project uses [black](https://black.readthedocs.io/) for code formatting.
-To format the code run `black .` in the root folder.
+Run to format your code before pushing it to the remote repository.
+```shell
+black .
+```
+
 Linting is done with [flake8](https://flake8.pycqa.org/en/latest/).
-To lint the code run `flake8 .` in the root folder.
+Linting is configured in the pre-commit hooks and will be run automatically before commiting.
+if you want to run the linter manually run
+```shell
+flake8 . --max-line-length=127 --ignore=E203,W503
+```
 
 
 ## Protocol

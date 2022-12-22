@@ -139,7 +139,7 @@ def get_protocol_status(
             status_code=404, detail=f"Protocol - {protocol_id} - not found"
         )
 
-    status = secure_aggregation.protocol_status(protocol, db, round_id)
+    status = secure_aggregation.protocol_status(db, protocol, round_id)
     return status
 
 
