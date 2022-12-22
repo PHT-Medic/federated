@@ -1,6 +1,4 @@
-from pht_federated.protocols.secure_aggregation.models import (
-    client_messages,
-)
+from pht_federated.protocols.secure_aggregation.models import client_messages
 
 
 class ProtocolClient:

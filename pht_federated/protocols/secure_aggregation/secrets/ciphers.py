@@ -1,21 +1,15 @@
 import base64
 
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey,
-)
-from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePublicKeyWithSerialization as ECPubKey,
-)
+from cryptography.hazmat.primitives.asymmetric.ec import \
+    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey
+from cryptography.hazmat.primitives.asymmetric.ec import \
+    EllipticCurvePublicKeyWithSerialization as ECPubKey
 
 from pht_federated.protocols.secure_aggregation.models.secrets import (
-    Cipher,
-    KeyShare,
-    SeedShare,
-)
-from pht_federated.protocols.secure_aggregation.secrets.key_agreement import (
-    derive_shared_key,
-)
+    Cipher, KeyShare, SeedShare)
+from pht_federated.protocols.secure_aggregation.secrets.key_agreement import \
+    derive_shared_key
 
 
 def generate_encrypted_cipher(

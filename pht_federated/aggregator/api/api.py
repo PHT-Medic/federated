@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
-from pht_federated.aggregator.api.endpoints import discovery, proposals, protocol
+from pht_federated.aggregator.api.endpoints import (discovery, proposals,
+                                                    protocol)
 
 api_router = APIRouter()
 

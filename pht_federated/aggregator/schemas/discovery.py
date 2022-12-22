@@ -2,8 +2,8 @@ from datetime import datetime
 from typing import List, Optional, Union
 from uuid import UUID
 
-from typing_extensions import Annotated
 from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 from pht_federated.aggregator.schemas import dataset_statistics as ds
 from pht_federated.aggregator.schemas.figures import DiscoveryFigure

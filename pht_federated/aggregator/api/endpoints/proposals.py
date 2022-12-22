@@ -5,11 +5,9 @@ from sqlalchemy.orm import Session
 
 from pht_federated.aggregator.api import dependencies
 from pht_federated.aggregator.crud.crud_proposals import proposals
-from pht_federated.aggregator.schemas.proposal import (
-    Proposal,
-    ProposalCreate,
-    ProposalUpdate,
-)
+from pht_federated.aggregator.schemas.proposal import (Proposal,
+                                                       ProposalCreate,
+                                                       ProposalUpdate)
 
 router = APIRouter()
 

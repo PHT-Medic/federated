@@ -2,19 +2,17 @@ from typing import List, Union
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey,
-)
-from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePublicKeyWithSerialization as ECPubKey,
-)
+from cryptography.hazmat.primitives.asymmetric.ec import \
+    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey
+from cryptography.hazmat.primitives.asymmetric.ec import \
+    EllipticCurvePublicKeyWithSerialization as ECPubKey
 from pydantic import BaseModel
 
 from pht_federated.protocols.secure_aggregation.models import HexString
-from pht_federated.protocols.secure_aggregation.models.client_messages import (
-    ClientKeyBroadCast,
-)
-from pht_federated.protocols.secure_aggregation.secrets import create_key_shares
+from pht_federated.protocols.secure_aggregation.models.client_messages import \
+    ClientKeyBroadCast
+from pht_federated.protocols.secure_aggregation.secrets import \
+    create_key_shares
 
 
 class KeyShare(BaseModel):

@@ -2,7 +2,8 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
+from pht_federated.protocols.secure_aggregation.models.client_keys import \
+    ClientKeys
 
 
 def test_client_keys_init():

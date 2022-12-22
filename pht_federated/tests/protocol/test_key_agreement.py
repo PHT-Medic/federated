@@ -1,7 +1,7 @@
-from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
-from pht_federated.protocols.secure_aggregation.secrets.key_agreement import (
-    derive_shared_key,
-)
+from pht_federated.protocols.secure_aggregation.models.client_keys import \
+    ClientKeys
+from pht_federated.protocols.secure_aggregation.secrets.key_agreement import \
+    derive_shared_key
 
 
 def test_key_derivation():

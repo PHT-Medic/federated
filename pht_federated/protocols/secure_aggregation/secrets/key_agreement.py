@@ -1,9 +1,7 @@
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePrivateKey,
-    EllipticCurvePublicKey,
-)
+    EllipticCurvePrivateKey, EllipticCurvePublicKey)
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 

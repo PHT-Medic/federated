@@ -3,39 +3,24 @@ from typing import List, Tuple
 import numpy as np
 
 from pht_federated.protocols.secure_aggregation.models import HexString
-from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
+from pht_federated.protocols.secure_aggregation.models.client_keys import \
+    ClientKeys
 from pht_federated.protocols.secure_aggregation.models.client_messages import (
-    ClientKeyBroadCast,
-    MaskedInput,
-    ShareKeysMessage,
-    UnmaskKeyShare,
-    UnmaskSeedShare,
-    UnmaskShares,
-)
+    ClientKeyBroadCast, MaskedInput, ShareKeysMessage, UnmaskKeyShare,
+    UnmaskSeedShare, UnmaskShares)
 from pht_federated.protocols.secure_aggregation.models.secrets import (
-    Cipher,
-    EncryptedCipher,
-    SecretShares,
-)
+    Cipher, EncryptedCipher, SecretShares)
 from pht_federated.protocols.secure_aggregation.models.server_messages import (
-    BroadCastClientKeys,
-    ServerCipherBroadcast,
-    ServerKeyBroadcast,
-    ServerUnmaskBroadCast,
-    UserCipher,
-)
+    BroadCastClientKeys, ServerCipherBroadcast, ServerKeyBroadcast,
+    ServerUnmaskBroadCast, UserCipher)
 from pht_federated.protocols.secure_aggregation.secrets.ciphers import (
-    decrypt_cipher,
-    generate_encrypted_cipher,
-)
+    decrypt_cipher, generate_encrypted_cipher)
 from pht_federated.protocols.secure_aggregation.secrets.masking import (
-    create_mask,
-    generate_random_seed,
-)
-from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import (
-    create_secret_shares,
-)
-from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
+    create_mask, generate_random_seed)
+from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import \
+    create_secret_shares
+from pht_federated.protocols.secure_aggregation.secrets.util import \
+    load_public_key
 
 
 class ClientProtocol:

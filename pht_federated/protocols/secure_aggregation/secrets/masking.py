@@ -3,18 +3,16 @@ from typing import List
 
 import numpy as np
 from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePrivateKey,
-    EllipticCurvePublicKey,
-)
+    EllipticCurvePrivateKey, EllipticCurvePublicKey)
 
-from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
-from pht_federated.protocols.secure_aggregation.models.server_messages import (
-    BroadCastClientKeys,
-)
-from pht_federated.protocols.secure_aggregation.secrets.key_agreement import (
-    derive_shared_key,
-)
-from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
+from pht_federated.protocols.secure_aggregation.models.client_keys import \
+    ClientKeys
+from pht_federated.protocols.secure_aggregation.models.server_messages import \
+    BroadCastClientKeys
+from pht_federated.protocols.secure_aggregation.secrets.key_agreement import \
+    derive_shared_key
+from pht_federated.protocols.secure_aggregation.secrets.util import \
+    load_public_key
 
 
 def create_mask(

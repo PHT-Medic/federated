@@ -3,31 +3,18 @@ from typing import List, Tuple, Union
 import numpy as np
 
 from pht_federated.protocols.secure_aggregation.models.client_messages import (
-    MaskedInput,
-    ShareKeysMessage,
-    UnmaskKeyShare,
-    UnmaskSeedShare,
-    UnmaskShares,
-)
+    MaskedInput, ShareKeysMessage, UnmaskKeyShare, UnmaskSeedShare,
+    UnmaskShares)
 from pht_federated.protocols.secure_aggregation.models.server_messages import (
-    AggregatedParameters,
-    BroadCastClientKeys,
-    Round4Participant,
-    ServerCipherBroadcast,
-    ServerKeyBroadcast,
-    ServerUnmaskBroadCast,
-    UserCipher,
-)
+    AggregatedParameters, BroadCastClientKeys, Round4Participant,
+    ServerCipherBroadcast, ServerKeyBroadcast, ServerUnmaskBroadCast,
+    UserCipher)
 from pht_federated.protocols.secure_aggregation.secrets.masking import (
-    expand_seed,
-    generate_shared_mask,
-    integer_seed_from_hex,
-)
+    expand_seed, generate_shared_mask, integer_seed_from_hex)
 from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import (
-    combine_key_shares,
-    combine_seed_shares,
-)
-from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
+    combine_key_shares, combine_seed_shares)
+from pht_federated.protocols.secure_aggregation.secrets.util import \
+    load_public_key
 
 
 def _recover_shared_masks(

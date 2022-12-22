@@ -1,10 +1,10 @@
 from pht_federated.protocols.secure_aggregation import ClientProtocol
 from pht_federated.protocols.secure_aggregation.models.server_messages import (
-    BroadCastClientKeys,
-    ServerKeyBroadcast,
-)
-from pht_federated.protocols.secure_aggregation.secrets.ciphers import decrypt_cipher
-from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
+    BroadCastClientKeys, ServerKeyBroadcast)
+from pht_federated.protocols.secure_aggregation.secrets.ciphers import \
+    decrypt_cipher
+from pht_federated.protocols.secure_aggregation.secrets.util import \
+    load_public_key
 
 
 def test_ciphers():

@@ -13,18 +13,13 @@ from fastapi.testclient import TestClient
 from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.aggregator.app import app
 from pht_federated.aggregator.schemas.dataset_statistics import (
-    DiscoveryStatistics,
-    StatisticsCreate,
-)
-from pht_federated.aggregator.schemas.discovery import (
-    DataDiscoveryCreate,
-    DataDiscoveryUpdate,
-    DiscoverySummary,
-)
+    DiscoveryStatistics, StatisticsCreate)
+from pht_federated.aggregator.schemas.discovery import (DataDiscoveryCreate,
+                                                        DataDiscoveryUpdate,
+                                                        DiscoverySummary)
 from pht_federated.aggregator.schemas.proposal import Proposal, ProposalCreate
 from pht_federated.aggregator.services.discovery import statistics
 from pht_federated.client.resources import ProposalClient
-
 # from pht_federated.client.discovery_client import DiscoveryClient
 from pht_federated.client.resources.discovery import DiscoveryClient
 from pht_federated.tests.aggregator.test_db import override_get_db

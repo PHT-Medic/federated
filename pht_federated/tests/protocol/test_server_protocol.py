@@ -1,9 +1,8 @@
 from pht_federated.protocols.secure_aggregation import ServerProtocol
-from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
+from pht_federated.protocols.secure_aggregation.models.client_keys import \
+    ClientKeys
 from pht_federated.protocols.secure_aggregation.models.server_messages import (
-    BroadCastClientKeys,
-    ServerKeyBroadcast,
-)
+    BroadCastClientKeys, ServerKeyBroadcast)
 
 
 def test_server_protocol_broadcast_keys():
