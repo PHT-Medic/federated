@@ -1,10 +1,9 @@
-from typing import Union
 from datetime import datetime
+from typing import Union
 
 from sqlalchemy.orm import Session
 
-
-from pht_federated.aggregator.models.protocol import ProtocolRound, AggregationProtocol
+from pht_federated.aggregator.models.protocol import AggregationProtocol, ProtocolRound
 
 
 def start_new_round(

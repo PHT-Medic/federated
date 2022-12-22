@@ -1,21 +1,21 @@
-from sqlalchemy.orm import Session
 from loguru import logger
+from sqlalchemy.orm import Session
 
 from pht_federated.aggregator.models import protocol as models
 from pht_federated.aggregator.schemas import protocol as schemas
 from pht_federated.aggregator.services.secure_aggregation import logging
+from pht_federated.aggregator.services.secure_aggregation.db import rounds
 from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts import (
     get_key_broadcasts_for_round,
     store_key_broadcast,
 )
-from pht_federated.aggregator.services.secure_aggregation.db import rounds
+from pht_federated.aggregator.services.secure_aggregation.steps import registration
 from pht_federated.protocols.secure_aggregation.models.client_messages import (
     ClientKeyBroadCast,
 )
 from pht_federated.protocols.secure_aggregation.server.server_protocol import (
     ServerProtocol,
 )
-from pht_federated.aggregator.services.secure_aggregation.steps import registration
 
 
 class SecureAggregation:
