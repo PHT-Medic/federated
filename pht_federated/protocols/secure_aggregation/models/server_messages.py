@@ -3,8 +3,9 @@ from typing import List, Optional, Union
 from pydantic import BaseModel
 
 from pht_federated.protocols.secure_aggregation.models import HexString
-from pht_federated.protocols.secure_aggregation.models.client_messages import \
-    ClientKeyBroadCast
+from pht_federated.protocols.secure_aggregation.models.client_messages import (
+    ClientKeyBroadCast,
+)
 
 
 class BroadCastClientKeys(BaseModel):

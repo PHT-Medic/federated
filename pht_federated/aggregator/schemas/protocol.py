@@ -7,7 +7,9 @@ from pydantic import BaseModel
 from pht_federated.aggregator.schemas.discovery import DataDiscovery
 from pht_federated.aggregator.schemas.proposal import Proposal
 from pht_federated.protocols.secure_aggregation.models.client_messages import (
-    ClientKeyBroadCast, ShareKeysMessage)
+    ClientKeyBroadCast,
+    ShareKeysMessage,
+)
 
 
 class ProtocolSettingsBase(BaseModel):

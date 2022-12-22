@@ -3,7 +3,10 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from pht_federated.protocols.secure_aggregation.models.secrets import (
-    EncryptedCipher, KeyShare, SeedShare)
+    EncryptedCipher,
+    KeyShare,
+    SeedShare,
+)
 
 
 class ClientKeyBroadCast(BaseModel):

@@ -7,10 +7,11 @@ from fastapi.encoders import jsonable_encoder
 
 from pht_federated.aggregator.schemas.discovery import DiscoverySummary
 from pht_federated.aggregator.schemas.figures import DiscoveryFigure
-from pht_federated.aggregator.services.discovery.plots import (create_barplot,
-                                                               create_dot_plot)
-from pht_federated.aggregator.services.discovery.statistics import \
-    calc_combined_std
+from pht_federated.aggregator.services.discovery.plots import (
+    create_barplot,
+    create_dot_plot,
+)
+from pht_federated.aggregator.services.discovery.statistics import calc_combined_std
 
 
 def aggregate_proposal_features(

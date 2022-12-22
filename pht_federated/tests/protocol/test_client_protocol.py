@@ -3,16 +3,16 @@
 import numpy as np
 import pytest
 
-from pht_federated.protocols.secure_aggregation import (ClientProtocol,
-                                                        ServerProtocol)
+from pht_federated.protocols.secure_aggregation import ClientProtocol, ServerProtocol
 from pht_federated.protocols.secure_aggregation.models.server_messages import (
-    BroadCastClientKeys, ServerKeyBroadcast)
-from pht_federated.protocols.secure_aggregation.secrets.ciphers import \
-    decrypt_cipher
-from pht_federated.protocols.secure_aggregation.secrets.masking import \
-    _generate_private_mask
-from pht_federated.protocols.secure_aggregation.secrets.util import \
-    load_public_key
+    BroadCastClientKeys,
+    ServerKeyBroadcast,
+)
+from pht_federated.protocols.secure_aggregation.secrets.ciphers import decrypt_cipher
+from pht_federated.protocols.secure_aggregation.secrets.masking import (
+    _generate_private_mask,
+)
+from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
 
 
 @pytest.fixture

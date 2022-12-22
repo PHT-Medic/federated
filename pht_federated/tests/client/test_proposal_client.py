@@ -7,9 +7,11 @@ from fastapi.testclient import TestClient
 
 from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.aggregator.app import app
-from pht_federated.aggregator.schemas.proposal import (Proposal,
-                                                       ProposalCreate,
-                                                       ProposalUpdate)
+from pht_federated.aggregator.schemas.proposal import (
+    Proposal,
+    ProposalCreate,
+    ProposalUpdate,
+)
 from pht_federated.client.resources import ProposalClient
 from pht_federated.tests.aggregator.test_db import override_get_db
 

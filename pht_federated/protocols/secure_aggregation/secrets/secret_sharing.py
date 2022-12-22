@@ -2,11 +2,15 @@ from typing import List, Tuple
 
 from Crypto.Protocol.SecretSharing import Shamir
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ec import \
-    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey,
+)
 
 from pht_federated.protocols.secure_aggregation.models.secrets import (
-    KeyShare, SecretShares, SeedShare)
+    KeyShare,
+    SecretShares,
+    SeedShare,
+)
 
 # Number of sharing key chunks
 NUM_KEY_CHUNKS = 20

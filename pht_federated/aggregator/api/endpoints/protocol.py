@@ -8,11 +8,17 @@ from pht_federated.aggregator.crud.crud_discovery import discoveries
 from pht_federated.aggregator.crud.crud_proposals import proposals
 from pht_federated.aggregator.crud.crud_protocol import protocols
 from pht_federated.aggregator.schemas.protocol import (
-    AggregationProtocol, AggregationProtocolCreate, AggregationProtocolUpdate,
-    ProtocolSettings, ProtocolSettingsUpdate, ProtocolStatus,
-    RegistrationResponse)
-from pht_federated.aggregator.services.secure_aggregation.service import \
-    secure_aggregation
+    AggregationProtocol,
+    AggregationProtocolCreate,
+    AggregationProtocolUpdate,
+    ProtocolSettings,
+    ProtocolSettingsUpdate,
+    ProtocolStatus,
+    RegistrationResponse,
+)
+from pht_federated.aggregator.services.secure_aggregation.service import (
+    secure_aggregation,
+)
 from pht_federated.protocols.secure_aggregation.models import client_messages
 
 router = APIRouter()

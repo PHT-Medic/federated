@@ -1,7 +1,11 @@
 from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePrivateKey, EllipticCurvePublicKey)
-from cryptography.hazmat.primitives.serialization import (load_pem_private_key,
-                                                          load_pem_public_key)
+    EllipticCurvePrivateKey,
+    EllipticCurvePublicKey,
+)
+from cryptography.hazmat.primitives.serialization import (
+    load_pem_private_key,
+    load_pem_public_key,
+)
 
 
 def load_public_key(public_key_hex: str) -> EllipticCurvePublicKey:

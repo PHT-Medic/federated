@@ -5,8 +5,7 @@ import plotly.io
 from pandas.api.types import is_bool_dtype, is_numeric_dtype
 from plotly.graph_objs import Figure
 
-from pht_federated.aggregator.schemas.dataset_statistics import \
-    DatasetStatistics
+from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
 from pht_federated.aggregator.schemas.discovery import DiscoveryFigure
 
 

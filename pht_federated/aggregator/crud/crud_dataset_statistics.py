@@ -2,10 +2,11 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from pht_federated.aggregator.models.dataset_statistics import \
-    DatasetStatistics
+from pht_federated.aggregator.models.dataset_statistics import DatasetStatistics
 from pht_federated.aggregator.schemas.dataset_statistics import (
-    StatisticsCreate, StatisticsUpdate)
+    StatisticsCreate,
+    StatisticsUpdate,
+)
 
 from .base import CRUDBase
 

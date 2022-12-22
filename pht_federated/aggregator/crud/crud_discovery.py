@@ -1,6 +1,8 @@
 from pht_federated.aggregator.models.discovery import DataDiscovery
-from pht_federated.aggregator.schemas.discovery import (DataDiscoveryCreate,
-                                                        DataDiscoveryUpdate)
+from pht_federated.aggregator.schemas.discovery import (
+    DataDiscoveryCreate,
+    DataDiscoveryUpdate,
+)
 
 from .base import CRUDBase
 

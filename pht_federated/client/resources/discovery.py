@@ -6,7 +6,9 @@ from httpx import Client
 
 from pht_federated.aggregator.schemas import discovery as schemas
 from pht_federated.aggregator.schemas.dataset_statistics import (
-    DiscoveryStatistics, StatisticsCreate)
+    DiscoveryStatistics,
+    StatisticsCreate,
+)
 
 
 class DiscoveryClient:

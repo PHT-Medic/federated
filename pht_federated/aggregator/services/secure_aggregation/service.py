@@ -6,12 +6,15 @@ from sqlalchemy.orm import Session
 from pht_federated.aggregator.models import protocol as models
 from pht_federated.aggregator.schemas import protocol as schemas
 from pht_federated.aggregator.services.secure_aggregation import logging
-from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts import \
-    get_key_broadcasts_for_round
-from pht_federated.protocols.secure_aggregation.models.client_messages import \
-    ClientKeyBroadCast
-from pht_federated.protocols.secure_aggregation.server.server_protocol import \
-    ServerProtocol
+from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts import (
+    get_key_broadcasts_for_round,
+)
+from pht_federated.protocols.secure_aggregation.models.client_messages import (
+    ClientKeyBroadCast,
+)
+from pht_federated.protocols.secure_aggregation.server.server_protocol import (
+    ServerProtocol,
+)
 
 
 class SecureAggregation:
