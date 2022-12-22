@@ -51,7 +51,7 @@ jobs:
           # stop the build if there are Python syntax errors or undefined names
           pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          pipenv run flake8 . --count --max-complexity=13 --max-line-length=127 --statistics --ignore=E203,W503
       - name: Tests and coverage report
         env:
           AGGREGATOR_TEST_DB: postgresql+psycopg2://admin:admin@localhost:5442/postgres
