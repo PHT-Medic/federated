@@ -43,7 +43,7 @@ jobs:
       - name: Black formatting
         uses: psf/black@stable
         with:
-          args: "--check --verbose"
+          options: "--check --verbose"
           src: "./pht_federated"
 
       - name: Lint with flake8
@@ -52,11 +52,6 @@ jobs:
           pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           pipenv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-#      - name: Tests
-#
-#        run:  |
-#          pipenv run pip install .
-#          pipenv run pytest tests
       - name: Tests and coverage report
         env:
           AGGREGATOR_TEST_DB: postgresql+psycopg2://admin:admin@localhost:5442/postgres
