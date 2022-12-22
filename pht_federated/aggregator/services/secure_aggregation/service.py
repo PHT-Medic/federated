@@ -6,15 +6,12 @@ from sqlalchemy.orm import Session
 from pht_federated.aggregator.models import protocol as models
 from pht_federated.aggregator.schemas import protocol as schemas
 from pht_federated.aggregator.services.secure_aggregation import logging
-from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts import (
-    get_key_broadcasts_for_round,
-)
-from pht_federated.protocols.secure_aggregation.models.client_messages import (
-    ClientKeyBroadCast,
-)
-from pht_federated.protocols.secure_aggregation.server.server_protocol import (
-    ServerProtocol,
-)
+from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts import \
+    get_key_broadcasts_for_round
+from pht_federated.protocols.secure_aggregation.models.client_messages import \
+    ClientKeyBroadCast
+from pht_federated.protocols.secure_aggregation.server.server_protocol import \
+    ServerProtocol
 
 
 class SecureAggregation:
@@ -49,7 +46,7 @@ class SecureAggregation:
 
     def advance_round(
         self, db: Session, protocol: models.AggregationProtocol
-    ) -> schemas.ProtocolStatus:
+    ) -> schemas.ProtocolRound:
         """
         Advance the current round of the given protocol
         :param db: sqlalchemy session
@@ -63,18 +60,23 @@ class SecureAggregation:
         if self._check_advance_requirements(db, protocol, current_round):
             logging.protocol_info(
                 protocol.id,
-                f"Advancing round {current_round.round} from step {current_round.step} to step {current_round.step + 1}",
+                f"Advancing round {current_round.round} from step {current_round.step} "
+                f"to step {current_round.step + 1}",
             )
+            if protocol.status != "active":
+                protocol.status = "active"
+                db.add(protocol)
             current_round.step += 1
             db.add(current_round)
             db.commit()
+            db.refresh(current_round)
+            return current_round
         else:
             logging.protocol_warning(
                 protocol.id,
                 f"Round {current_round.round} step {current_round.step} requirements not met",
             )
             raise ValueError("Advancement requirements not met")
-        return self.protocol_status(db, protocol)
 
     def _check_advance_requirements(
         self,
@@ -92,6 +94,7 @@ class SecureAggregation:
         settings: models.ProtocolSettings = protocol.settings
 
         if db_round.step == 0:
+            # check if the minimum number of key broadcasts is reached
             return (
                 len(get_key_broadcasts_for_round(db, db_round.id))
                 >= settings.min_participants
@@ -137,7 +140,7 @@ class SecureAggregation:
 
         db.add(db_protocol)
         db.commit()
-
+        db.refresh(db_protocol)
         return db_round
 
     def process_registration(
@@ -191,6 +194,11 @@ class SecureAggregation:
 
         participants = get_key_broadcasts_for_round(db, db_round.id)
 
+        logging.protocol_info(
+            protocol.id,
+            f"Registered client no. {len(participants)} for round {db_round.round}",
+        )
+
         response = schemas.RegistrationResponse(
             round_id=db_round.id,
             protocol_id=protocol.id,
@@ -201,26 +209,35 @@ class SecureAggregation:
         return response
 
     def protocol_status(
-        self, db: Session, protocol: models.AggregationProtocol
+        self, db: Session, protocol: models.AggregationProtocol, round_id: int = None
     ) -> schemas.ProtocolStatus:
-        current_round = self._get_active_round(db, protocol)
+        current_round = self._get_round(
+            db, round_number=round_id if round_id else protocol.active_round
+        )
         if not current_round:
             raise ValueError("No active round found")
         logging.protocol_info(
             protocol.id,
             f"Status: {protocol.status}, Current round: {current_round.round}",
         )
+
         key_broadcasts = get_key_broadcasts_for_round(db, current_round.id)
+        # get the round status
         round_status = schemas.RoundStatus(
             step=current_round.step,
             registered=len(key_broadcasts),
         )
+
+        # get the protocol status
         status = schemas.ProtocolStatus(
             protocol_id=protocol.id,
             status=protocol.status,
             num_rounds=protocol.num_rounds,
             active_round=protocol.active_round,
             round_status=round_status,
+        )
+        logging.protocol_debug(
+            protocol.id, f"Protocol status: \n{status.json(indent=2)}"
         )
         return status
 
@@ -250,7 +267,7 @@ class SecureAggregation:
     def _get_round(db: Session, round_number: int) -> models.ProtocolRound:
         db_round = (
             db.query(models.ProtocolRound)
-            .filter(models.ProtocolRound.round == round_number)
+            .filter(models.ProtocolRound.id == round_number)
             .first()
         )
         return db_round

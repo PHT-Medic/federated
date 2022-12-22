@@ -5,7 +5,8 @@ from fastapi.encoders import jsonable_encoder
 from httpx import Client
 
 from pht_federated.aggregator.schemas import discovery as schemas
-from pht_federated.aggregator.schemas.dataset_statistics import StatisticsCreate, StatisticsUpdate, DiscoveryStatistics
+from pht_federated.aggregator.schemas.dataset_statistics import (
+    DiscoveryStatistics, StatisticsCreate)
 
 
 class DiscoveryClient:

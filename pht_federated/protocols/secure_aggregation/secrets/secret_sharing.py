@@ -2,15 +2,11 @@ from typing import List, Tuple
 
 from Crypto.Protocol.SecretSharing import Shamir
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.ec import (
-    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey,
-)
+from cryptography.hazmat.primitives.asymmetric.ec import \
+    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey
 
 from pht_federated.protocols.secure_aggregation.models.secrets import (
-    KeyShare,
-    SecretShares,
-    SeedShare,
-)
+    KeyShare, SecretShares, SeedShare)
 
 # Number of sharing key chunks
 NUM_KEY_CHUNKS = 20
@@ -190,7 +186,7 @@ def _chunk_key_bytes(key_bytes: bytes) -> List[bytes]:
     """
     chunks = []
     for i in range(0, len(key_bytes), SHAMIR_SIZE):
-        chunks.append(key_bytes[i: i + SHAMIR_SIZE])
+        chunks.append(key_bytes[i : i + SHAMIR_SIZE])
     # add padding to last chunk
     if len(chunks[-1]) < SHAMIR_SIZE:
         # fill the empty space with zero bytes

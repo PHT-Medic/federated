@@ -4,23 +4,18 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from pht_federated.aggregator.api import dependencies
-from pht_federated.aggregator.crud.crud_dataset_statistics import dataset_statistics
+from pht_federated.aggregator.crud.crud_dataset_statistics import \
+    dataset_statistics
 from pht_federated.aggregator.crud.crud_discovery import discoveries
 from pht_federated.aggregator.crud.crud_proposals import proposals
 from pht_federated.aggregator.schemas.dataset_statistics import (
-    DatasetStatistics,
-    DiscoveryStatistics,
-    StatisticsCreate,
-)
-from pht_federated.aggregator.schemas.discovery import (
-    DataDiscovery,
-    DataDiscoveryCreate,
-    DataDiscoveryUpdate,
-    DiscoverySummary,
-)
-from pht_federated.aggregator.services.discovery.utility_functions import (
-    aggregate_proposal_features,
-)
+    DatasetStatistics, DiscoveryStatistics, StatisticsCreate)
+from pht_federated.aggregator.schemas.discovery import (DataDiscovery,
+                                                        DataDiscoveryCreate,
+                                                        DataDiscoveryUpdate,
+                                                        DiscoverySummary)
+from pht_federated.aggregator.services.discovery.utility_functions import \
+    aggregate_proposal_features
 
 router = APIRouter()
 
@@ -56,7 +51,7 @@ def get_all_discoveries(
             status_code=404, detail=f"Proposal with id {proposal_id} does not exist"
         )
 
-    return db_proposal.discoveries[skip: skip + limit]
+    return db_proposal.discoveries[skip : skip + limit]
 
 
 @router.get("/{proposal_id}/discoveries/{discovery_id}", response_model=DataDiscovery)

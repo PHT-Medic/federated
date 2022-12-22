@@ -1,5 +1,5 @@
 # flake8: noqa
-
+import time
 import uuid
 
 import pytest
@@ -7,9 +7,8 @@ from fastapi.testclient import TestClient
 
 from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.aggregator.app import app
-from pht_federated.protocols.secure_aggregation.client.client_protocol import (
-    ClientProtocol,
-)
+from pht_federated.protocols.secure_aggregation.client.client_protocol import \
+    ClientProtocol
 from pht_federated.tests.aggregator.test_db import override_get_db
 
 app.dependency_overrides[get_db] = override_get_db
@@ -254,3 +253,40 @@ def test_update_protocol_settings():
     data = {"name": "Test Protocol Updated"}
     response = client.put(f"/api/protocol/{uuid.uuid4()}/settings", json=data)
     assert response.status_code == 404, response.text
+
+
+def test_protocol_advance():
+    # create a protocol
+    data = {"name": "Test Advance Protocol"}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 200, response.text
+
+    protocol_id = response.json()["id"]
+
+    # error not enough participants
+    response = client.post(f"/api/protocol/{protocol_id}/advance")
+    assert response.status_code == 400, response.text
+
+    # invalid protocol
+    response = client.post(f"/api/protocol/{uuid.uuid4()}/advance")
+    assert response.status_code == 404, response.text
+
+    client_protocol = ClientProtocol()
+    keys, broadcast = client_protocol.setup()
+    response = client.post(
+        f"/api/protocol/{protocol_id}/register", json=broadcast.dict()
+    )
+    assert response.status_code == 200, response.text
+
+    time.sleep(1)
+    for _ in range(4):
+        keys, broadcast = client_protocol.setup()
+        response = client.post(
+            f"/api/protocol/{protocol_id}/register", json=broadcast.dict()
+        )
+        assert response.status_code == 200, response.text
+
+    response = client.post(f"/api/protocol/{protocol_id}/advance")
+    assert response.status_code == 200, response.text
+    assert response.json()["round_status"]["step"] == 1
+    print(response.json())

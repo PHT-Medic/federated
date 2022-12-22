@@ -7,9 +7,7 @@ from pydantic import BaseModel
 from pht_federated.aggregator.schemas.discovery import DataDiscovery
 from pht_federated.aggregator.schemas.proposal import Proposal
 from pht_federated.protocols.secure_aggregation.models.client_messages import (
-    ClientKeyBroadCast,
-    ShareKeysMessage,
-)
+    ClientKeyBroadCast, ShareKeysMessage)
 
 
 class ProtocolSettingsBase(BaseModel):
@@ -20,6 +18,7 @@ class ProtocolSettingsBase(BaseModel):
     auto_advance: Optional[bool] = False
     auto_advance_min: Optional[int] = 5
     min_participants: Optional[int] = 3
+    max_participants: Optional[int] = 50
 
 
 class ProtocolSettingsCreate(ProtocolSettingsBase):

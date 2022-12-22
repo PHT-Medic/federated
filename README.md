@@ -1,6 +1,6 @@
 [![CI](https://github.com/PHT-Medic/federated/actions/workflows/main_ci.yml/badge.svg)](https://github.com/PHT-Medic/federated/actions/workflows/main_ci.yml)
 [![codecov](https://codecov.io/gh/PHT-Medic/federated/branch/main/graph/badge.svg?token=Q2JA1VOYK9)](https://codecov.io/gh/PHT-Medic/federated)
-
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 # PHT Medic Federated
 
 This project contains all python code for the PHT-Medic Federated Learning project grouped into several packages.
@@ -47,6 +47,22 @@ The aggregator can be started in development mode with hot reloading using the f
 ```shell
 uvicorn pht_federated.aggregator.app:app --reload --port 8000 --host 0.0.0.0
 ```
+
+
+## Contributing
+
+Create a branch/fork the repository and create a pull request to the `main` branch.
+
+### pre-commit hooks
+To ensure a consistent code style and to prevent common mistakes, we use [pre-commit](https://pre-commit.com/) hooks.
+To install the hooks run `pre-commit install` in the root folder of the project with the dev dependencies installed.
+
+
+### Code style
+This project uses [black](https://black.readthedocs.io/) for code formatting.
+To format the code run `black .` in the root folder.
+Linting is done with [flake8](https://flake8.pycqa.org/en/latest/).
+To lint the code run `flake8 .` in the root folder.
 
 
 ## Protocol

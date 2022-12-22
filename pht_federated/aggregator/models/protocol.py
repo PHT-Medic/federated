@@ -1,16 +1,8 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import (
-    JSON,
-    Boolean,
-    Column,
-    DateTime,
-    Enum,
-    ForeignKey,
-    Integer,
-    String,
-)
+from sqlalchemy import (JSON, Boolean, Column, DateTime, Enum, ForeignKey,
+                        Integer, String)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -69,6 +61,7 @@ class ProtocolSettings(Base):
     auto_advance = Column(Boolean, default=False)
     auto_advance_min = Column(Integer, default=5)
     min_participants = Column(Integer, default=3)
+    max_participants = Column(Integer, default=50)
 
 
 class ProtocolRound(Base):

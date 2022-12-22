@@ -8,16 +8,11 @@ from pht_federated.aggregator.crud.crud_discovery import discoveries
 from pht_federated.aggregator.crud.crud_proposals import proposals
 from pht_federated.aggregator.crud.crud_protocol import protocols
 from pht_federated.aggregator.schemas.protocol import (
-    AggregationProtocol,
-    AggregationProtocolCreate,
-    AggregationProtocolUpdate,
-    RegistrationResponse,
-    ProtocolSettings,
-    ProtocolSettingsUpdate,
-)
-from pht_federated.aggregator.services.secure_aggregation.service import (
-    secure_aggregation,
-)
+    AggregationProtocol, AggregationProtocolCreate, AggregationProtocolUpdate,
+    ProtocolSettings, ProtocolSettingsUpdate, ProtocolStatus,
+    RegistrationResponse)
+from pht_federated.aggregator.services.secure_aggregation.service import \
+    secure_aggregation
 from pht_federated.protocols.secure_aggregation.models import client_messages
 
 router = APIRouter()
@@ -113,9 +108,24 @@ def delete_protocol(
     return protocol
 
 
-@router.get("/{protocol_id}/status")
+@router.post("/{protocol_id}/advance", response_model=ProtocolStatus)
+def advance_protocol(protocol_id: str, db: Session = Depends(dependencies.get_db)):
+    protocol = protocols.get(db, protocol_id)
+    if not protocol:
+        raise HTTPException(
+            status_code=404, detail=f"Protocol - {protocol_id} - not found"
+        )
+    try:
+        round = secure_aggregation.advance_round(db, protocol)
+        status = secure_aggregation.protocol_status(db, protocol, round.id)
+        return status
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/{protocol_id}/status", response_model=ProtocolStatus)
 def get_protocol_status(
-    protocol_id: str, db: Session = Depends(dependencies.get_db)
+    protocol_id: str, db: Session = Depends(dependencies.get_db), round_id: int = None
 ) -> dict:
     protocol = protocols.get(db, protocol_id)
     if not protocol:
@@ -123,7 +133,7 @@ def get_protocol_status(
             status_code=404, detail=f"Protocol - {protocol_id} - not found"
         )
 
-    status = secure_aggregation.protocol_status(protocol, db)
+    status = secure_aggregation.protocol_status(protocol, db, round_id)
     return status
 
 
