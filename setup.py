@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     author="Michael Graf",
@@ -14,13 +14,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    install_requires=[
-        "pydantic",
-        "cryptography",
-        "numpy",
-        "pycryptodome",
-        "sqlmodel"
-    ],
+    install_requires=["pydantic", "cryptography", "numpy", "pycryptodome", "sqlmodel"],
     version="0.0.1",
     license="MIT license",
     packages=find_packages(),

@@ -1,14 +1,16 @@
-import abc
-
-import requests
-import pendulum
-# todo use httpx
-
-from pht_federated.protocols.secure_aggregation.models import client_messages, server_messages
+from pht_federated.protocols.secure_aggregation.models import (
+    client_messages,
+)
 
 
 class ProtocolClient:
-    def __init__(self, aggregator_url: str, auth_url: str = None, client_id: str = None, client_secret: str = None):
+    def __init__(
+        self,
+        aggregator_url: str,
+        auth_url: str = None,
+        client_id: str = None,
+        client_secret: str = None,
+    ):
         self.client_secret = client_secret
         self.client_id = client_id
         self.token_url = auth_url
@@ -29,11 +31,9 @@ class ProtocolClient:
 
         return {"Authorization": f"Bearer {token}"}
 
-
-
-    def register(self, key_broadcast: client_messages.ClientKeyBroadCast, aggregation_id: str = None):
+    def register(
+        self,
+        key_broadcast: client_messages.ClientKeyBroadCast,
+        aggregation_id: str = None,
+    ):
         pass
-
-
-
-

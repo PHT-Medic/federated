@@ -1,12 +1,19 @@
-from typing import Union, List
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKeyWithSerialization as ECPubKey
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKeyWithSerialization as ECPrivateKey
+from typing import List, Union
+
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey,
+)
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePublicKeyWithSerialization as ECPubKey,
+)
 from pydantic import BaseModel
 
-from pht_federated.protocols.secure_aggregation.models.client_messages import ClientKeyBroadCast
 from pht_federated.protocols.secure_aggregation.models import HexString
+from pht_federated.protocols.secure_aggregation.models.client_messages import (
+    ClientKeyBroadCast,
+)
 from pht_federated.protocols.secure_aggregation.secrets import create_key_shares
 
 
@@ -14,6 +21,7 @@ class KeyShare(BaseModel):
     """
     A key share for a participant
     """
+
     recipient: Union[int, str]
     segments: List[HexString]
 
@@ -28,11 +36,13 @@ class ClientKeys:
     signing_key: ECPrivateKey = None
     verification_keys: List[ECPubKey] = None  # todo this needs certificates
 
-    def __init__(self,
-                 cipher_key: Union[ECPrivateKey, str] = None,
-                 sharing_key: Union[ECPrivateKey, str] = None,
-                 signing_key: Union[ECPrivateKey, str] = None,
-                 verification_keys: List[Union[ECPubKey, str]] = None):
+    def __init__(
+        self,
+        cipher_key: Union[ECPrivateKey, str] = None,
+        sharing_key: Union[ECPrivateKey, str] = None,
+        signing_key: Union[ECPrivateKey, str] = None,
+        verification_keys: List[Union[ECPubKey, str]] = None,
+    ):
 
         # validate signing and verification key arguments
         if not (signing_key or verification_keys):
@@ -62,7 +72,7 @@ class ClientKeys:
 
         broadcast_dict = {
             "cipher_public_key": self.hex_cipher_key_public,
-            "sharing_public_key": self.hex_sharing_key_public
+            "sharing_public_key": self.hex_sharing_key_public,
         }
         if self.signing_key and self.verification_keys:
             # todo
@@ -76,7 +86,9 @@ class ClientKeys:
         shares = create_key_shares(self.hex_sharing_key, n, k)
         return shares
 
-    def _process_key_parameter(self, input_key: Union[ECPrivateKey, str]) -> ECPrivateKey:
+    def _process_key_parameter(
+        self, input_key: Union[ECPrivateKey, str]
+    ) -> ECPrivateKey:
         # parse from hex string
         if isinstance(input_key, str):
             return self._load_private_key_from_hex(input_key)
@@ -128,7 +140,9 @@ class ClientKeys:
 
     @staticmethod
     def _load_private_key_from_hex(key: str):
-        private_key = serialization.load_pem_private_key(bytes.fromhex(key), password=None)
+        private_key = serialization.load_pem_private_key(
+            bytes.fromhex(key), password=None
+        )
         return private_key
 
     @staticmethod
@@ -136,12 +150,12 @@ class ClientKeys:
         return key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption()
+            encryption_algorithm=serialization.NoEncryption(),
         ).hex()
 
     @staticmethod
     def _serialize_public_key_to_hex(key: ECPubKey) -> str:
         return key.public_bytes(
             encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         ).hex()

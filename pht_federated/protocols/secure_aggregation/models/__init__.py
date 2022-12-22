@@ -1,1 +1,1 @@
-from .util import HexString
+from .util import HexString  # noqa: F401

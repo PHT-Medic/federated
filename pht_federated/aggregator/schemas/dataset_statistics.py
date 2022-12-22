@@ -1,23 +1,24 @@
-from pydantic import BaseModel, Field
-from typing import Optional, Any, List, Union, Dict, Literal
-from typing_extensions import Annotated
 import uuid
+from typing import Dict, List, Literal, Optional, Union
+
+from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 
 class DatasetUniqueColumn(BaseModel):
-    type: Literal['unique']
+    type: Literal["unique"]
     title: Optional[str]
     number_of_duplicates: Optional[int]
 
 
 class DatasetEqualColumn(BaseModel):
-    type: Literal['equal']
+    type: Literal["equal"]
     title: Optional[str]
     value: Optional[str]
 
 
 class DatasetCategoricalColumn(BaseModel):
-    type: Literal['categorical']
+    type: Literal["categorical"]
     title: Optional[str]
     not_na_elements: Optional[int]
     number_categories: Optional[int]
@@ -27,7 +28,7 @@ class DatasetCategoricalColumn(BaseModel):
 
 
 class DatasetNumericalColumn(BaseModel):
-    type: Literal['numeric']
+    type: Literal["numeric"]
     title: Optional[str]
     not_na_elements: Optional[int]
     mean: Optional[float]
@@ -37,7 +38,7 @@ class DatasetNumericalColumn(BaseModel):
 
 
 class DatasetUnstructuredData(BaseModel):
-    type: Literal['unstructured']
+    type: Literal["unstructured"]
     title: Optional[str]
     not_na_elements: Optional[int]
     number_targets: Optional[int]
@@ -49,12 +50,20 @@ class DatasetUnstructuredData(BaseModel):
 class DatasetStatistics(BaseModel):
     item_count: Optional[int]
     feature_count: Optional[int]
-    column_information: Optional[List[Annotated[Union[DatasetCategoricalColumn,
-                                                      DatasetNumericalColumn,
-                                                      DatasetUnstructuredData,
-                                                      DatasetEqualColumn,
-                                                      DatasetUniqueColumn],
-                                                Field(discriminator='type')]]]
+    column_information: Optional[
+        List[
+            Annotated[
+                Union[
+                    DatasetCategoricalColumn,
+                    DatasetNumericalColumn,
+                    DatasetUnstructuredData,
+                    DatasetEqualColumn,
+                    DatasetUniqueColumn,
+                ],
+                Field(discriminator="type"),
+            ]
+        ]
+    ]
 
     class Config:
         orm_mode = True

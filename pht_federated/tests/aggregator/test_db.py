@@ -1,7 +1,9 @@
 import os
-from dotenv import load_dotenv, find_dotenv
+
+from dotenv import find_dotenv, load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from pht_federated.aggregator.db.base_class import Base
 
 # Create new sqlite database for testing
@@ -10,7 +12,7 @@ from pht_federated.aggregator.db.base_class import Base
 load_dotenv(find_dotenv())
 
 if os.getenv("AGGREGATOR_TEST_DB"):
-    SQLALCHEMY_DATABASE_URL = os.getenv('AGGREGATOR_TEST_DB')
+    SQLALCHEMY_DATABASE_URL = os.getenv("AGGREGATOR_TEST_DB")
 else:
     SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://test:test@localhost:5442/test_db"
 

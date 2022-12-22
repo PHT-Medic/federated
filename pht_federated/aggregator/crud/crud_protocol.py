@@ -1,23 +1,39 @@
-from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Union
 
 from sqlalchemy.orm import Session
 
-from pht_federated.aggregator.crud.base import CRUDBase
+from pht_federated.aggregator.crud import crud_discovery, crud_proposals
+from pht_federated.aggregator.crud.base import CreateSchemaType, CRUDBase
 from pht_federated.aggregator.models import protocol
 from pht_federated.aggregator.schemas import protocol as schemas
-from pht_federated.protocols.secure_aggregation.models.client_messages import ShareKeysMessage, ClientKeyBroadCast
-from pht_federated.aggregator.crud import crud_discovery, crud_proposals
 
 
 class CRUDProtocol(
-    CRUDBase[protocol.AggregationProtocol, schemas.AggregationProtocolCreate, schemas.AggregationProtocolUpdate]):
+    CRUDBase[
+        protocol.AggregationProtocol,
+        schemas.AggregationProtocolCreate,
+        schemas.AggregationProtocolUpdate,
+    ]
+):
+    def create(
+        self, db: Session, *, obj_in: CreateSchemaType
+    ) -> protocol.AggregationProtocol:
+        db_protocol = super().create(db, obj_in=obj_in)
+        # Create default settings for the protocol
+        settings = protocol.ProtocolSettings()
+        settings.protocol_id = db_protocol.id
+        db.add(settings)
+        db.commit()
+        db.refresh(db_protocol)
+        return db_protocol
 
     def validate_create_update(
-            self,
-            db: Session,
-            *,
-            obj_in: Union[schemas.AggregationProtocolCreate, schemas.AggregationProtocolUpdate]
+        self,
+        db: Session,
+        *,
+        obj_in: Union[
+            schemas.AggregationProtocolCreate, schemas.AggregationProtocolUpdate
+        ]
     ) -> schemas.AggregationProtocolCreate:
 
         # validate discovery
@@ -35,27 +51,26 @@ class CRUDProtocol(
         return obj_in
 
     def get_for_proposal(
-            self,
-            db: Session,
-            proposal_id: str,
-            skip: int = 0,
-            limit: int = 100) -> List[protocol.AggregationProtocol]:
-        return db.query(self.model).filter(self.model.proposal_id == proposal_id).offset(skip).limit(limit).all()
+        self, db: Session, proposal_id: str, skip: int = 0, limit: int = 100
+    ) -> List[protocol.AggregationProtocol]:
+        return (
+            db.query(self.model)
+            .filter(self.model.proposal_id == proposal_id)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def get_for_discovery(
-            self,
-            db: Session,
-            discovery_id: str,
-            skip: int = 0,
-            limit: int = 100) -> List[protocol.AggregationProtocol]:
-        return db.query(self.model).filter(self.model.discovery_id == discovery_id).offset(skip).limit(limit).all()
+        self, db: Session, discovery_id: str, skip: int = 0, limit: int = 100
+    ) -> List[protocol.AggregationProtocol]:
+        return (
+            db.query(self.model)
+            .filter(self.model.discovery_id == discovery_id)
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
-
-    def add_client_key_broadcast(self,
-                                 db: Session,
-                                 *,
-                                 db_round: protocol.ProtocolRound,
-                                 client_key_broadcast: ClientKeyBroadCast) -> protocol.ProtocolRound:
-        pass
 
 protocols = CRUDProtocol(protocol.AggregationProtocol)

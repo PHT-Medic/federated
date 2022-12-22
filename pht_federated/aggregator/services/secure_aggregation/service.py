@@ -1,14 +1,20 @@
+from datetime import datetime
 from typing import Union
 
 from sqlalchemy.orm import Session
-from datetime import datetime
 
-from pht_federated.protocols.secure_aggregation.server.server_protocol import ServerProtocol
 from pht_federated.aggregator.models import protocol as models
 from pht_federated.aggregator.schemas import protocol as schemas
-from pht_federated.protocols.secure_aggregation.models.client_messages import ClientKeyBroadCast
 from pht_federated.aggregator.services.secure_aggregation import logging
-from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts import get_key_broadcasts_for_round
+from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts import (
+    get_key_broadcasts_for_round,
+)
+from pht_federated.protocols.secure_aggregation.models.client_messages import (
+    ClientKeyBroadCast,
+)
+from pht_federated.protocols.secure_aggregation.server.server_protocol import (
+    ServerProtocol,
+)
 
 
 class SecureAggregation:
@@ -19,7 +25,9 @@ class SecureAggregation:
     def __init__(self):
         self.protocol = ServerProtocol()
 
-    def start_new_round(self, db: Session, db_protocol: models.AggregationProtocol, activate=True) -> models.ProtocolRound:
+    def start_new_round(
+        self, db: Session, db_protocol: models.AggregationProtocol, activate=True
+    ) -> models.ProtocolRound:
         """
         Start a new round for the given protocol
         :param db: sqlalchemy session
@@ -48,14 +56,16 @@ class SecureAggregation:
 
         return db_round
 
-    def process_registration(self,
-                             db: Session,
-                             key_broadcast: ClientKeyBroadCast,
-                             protocol: models.AggregationProtocol) -> schemas.RegistrationResponse:
+    def process_registration(
+        self,
+        db: Session,
+        key_broadcast: ClientKeyBroadCast,
+        protocol: models.AggregationProtocol,
+    ) -> schemas.RegistrationResponse:
 
         """
-        Process a client registration, if no round exists or the registration for the current round is closed, a new round
-        will be started with the client submission.
+        Process a client registration, if no round exists or the registration for the current round is closed, a new
+        round will be started with the client submission.
 
         :param db: sqlalchemy session
         :param key_broadcast: key broadcast message from the client
@@ -66,7 +76,9 @@ class SecureAggregation:
 
         # if no round exists and the protocol is not finished or cancelled, start a new round
         if not db_round and protocol.status not in ["finished", "cancelled"]:
-            logging.protocol_warning(protocol.id, "No active round found. Creating new round")
+            logging.protocol_warning(
+                protocol.id, "No active round found. Creating new round"
+            )
             db_round = self.start_new_round(db, protocol, activate=True)
 
         # if the round is not in registration phase, start a new round or register to existing next round
@@ -74,15 +86,21 @@ class SecureAggregation:
 
             next_round = self._get_next_round(db, protocol)
             if next_round:
-                logging.protocol_warning(protocol.id, "Registration already finished. Registering for next round.")
+                logging.protocol_warning(
+                    protocol.id,
+                    "Registration already finished. Registering for next round.",
+                )
                 db_round = next_round
             else:
-                logging.protocol_warning(protocol.id, f"Registration for round already finished. Creating new round.")
+
                 db_round = self.start_new_round(db, protocol, activate=True)
+                logging.protocol_warning(
+                    protocol.id,
+                    f"Registration for round already finished. Creating new round ({db_round.round})",
+                )
 
         db_broadcast = models.ClientKeyBroadcast(
-            round_id=db_round.id,
-            **key_broadcast.dict(exclude_none=True)
+            round_id=db_round.id, **key_broadcast.dict(exclude_none=True)
         )
         db.add(db_broadcast)
         db.commit()
@@ -98,35 +116,45 @@ class SecureAggregation:
 
         return response
 
-
-    def protocol_status(self, db: Session, protocol: models.AggregationProtocol) -> schemas.ProtocolStatus:
+    def protocol_status(
+        self, db: Session, protocol: models.AggregationProtocol
+    ) -> schemas.ProtocolStatus:
         current_round = self._get_active_round(db, protocol)
         if not current_round:
             raise ValueError("No active round found")
-        logging.protocol_info(protocol.id, f"Status: {protocol.status}, Current round: {current_round.round_number}")
-        key_broadcasts = current_round.client_key_broadcasts
+        logging.protocol_info(
+            protocol.id,
+            f"Status: {protocol.status}, Current round: {current_round.round}",
+        )
+        key_broadcasts = get_key_broadcasts_for_round(db, current_round.id)
         round_status = schemas.RoundStatus(
             step=current_round.step,
             registered=len(key_broadcasts),
-
         )
         status = schemas.ProtocolStatus(
             protocol_id=protocol.id,
             status=protocol.status,
             num_rounds=protocol.num_rounds,
             active_round=protocol.active_round,
+            round_status=round_status,
         )
         return status
 
-    def _get_active_round(self, db: Session, protocol: models.AggregationProtocol) -> models.ProtocolRound:
+    def _get_active_round(
+        self, db: Session, protocol: models.AggregationProtocol
+    ) -> models.ProtocolRound:
         current_round = self._get_round(db, protocol.active_round)
         return current_round
-    def _get_next_round(self, db: Session, protocol: models.AggregationProtocol) -> models.ProtocolRound:
+
+    def _get_next_round(
+        self, db: Session, protocol: models.AggregationProtocol
+    ) -> models.ProtocolRound:
         next_round = self._get_round(db, protocol.num_rounds + 1)
         return next_round
 
-    def _get_previous_round(self, db: Session,
-                            protocol: models.AggregationProtocol) -> Union[None, models.ProtocolRound]:
+    def _get_previous_round(
+        self, db: Session, protocol: models.AggregationProtocol
+    ) -> Union[None, models.ProtocolRound]:
 
         if protocol.num_rounds == 0:
             return None
@@ -134,14 +162,13 @@ class SecureAggregation:
         previous_round = self._get_round(db, protocol.num_rounds - 1)
         return previous_round
 
-
     @staticmethod
     def _get_round(db: Session, round_number: int) -> models.ProtocolRound:
-        db_round = db.query(
-            models.ProtocolRound
-        ).filter(
-            models.ProtocolRound.round == round_number
-        ).first()
+        db_round = (
+            db.query(models.ProtocolRound)
+            .filter(models.ProtocolRound.round == round_number)
+            .first()
+        )
         return db_round
 
 

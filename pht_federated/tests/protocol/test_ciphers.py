@@ -1,6 +1,9 @@
 from pht_federated.protocols.secure_aggregation import ClientProtocol
+from pht_federated.protocols.secure_aggregation.models.server_messages import (
+    BroadCastClientKeys,
+    ServerKeyBroadcast,
+)
 from pht_federated.protocols.secure_aggregation.secrets.ciphers import decrypt_cipher
-from pht_federated.protocols.secure_aggregation.models.server_messages import ServerKeyBroadcast, BroadCastClientKeys
 from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
 
 
@@ -14,19 +17,16 @@ def test_ciphers():
 
     server_broadcast = ServerKeyBroadcast(
         participants=[
-            BroadCastClientKeys(
-                user_id=sender,
-                broadcast=broadcast_1
-            ),
-            BroadCastClientKeys(
-                user_id=receiver,
-                broadcast=broadcast_2
-            ),
-
+            BroadCastClientKeys(user_id=sender, broadcast=broadcast_1),
+            BroadCastClientKeys(user_id=receiver, broadcast=broadcast_2),
         ]
     )
-    seed_1, share_msg_1 = protocol.process_key_broadcast(user_id=sender, keys=keys_1, broadcast=server_broadcast, k=2)
-    seed_2, share_msg_2 = protocol.process_key_broadcast(user_id=receiver, keys=keys_2, broadcast=server_broadcast, k=2)
+    seed_1, share_msg_1 = protocol.process_key_broadcast(
+        user_id=sender, keys=keys_1, broadcast=server_broadcast, k=2
+    )
+    seed_2, share_msg_2 = protocol.process_key_broadcast(
+        user_id=receiver, keys=keys_2, broadcast=server_broadcast, k=2
+    )
 
     cipher = share_msg_1.ciphers[0]
 
@@ -37,7 +37,7 @@ def test_ciphers():
         recipient_key=keys_2.cipher_key,
         sender_key=load_public_key(broadcast_1.cipher_public_key),
         sender=sender,
-        encrypted_cypher=cipher.cipher
+        encrypted_cypher=cipher.cipher,
     )
 
     assert decrypted_cipher.sender == sender

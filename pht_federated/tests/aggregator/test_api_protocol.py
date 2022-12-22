@@ -1,12 +1,15 @@
+# flake8: noqa
+
 import uuid
 
 import pytest
 from fastapi.testclient import TestClient
 
-
-from pht_federated.protocols.secure_aggregation.client.client_protocol import ClientProtocol
-from pht_federated.aggregator.app import app
 from pht_federated.aggregator.api.dependencies import get_db
+from pht_federated.aggregator.app import app
+from pht_federated.protocols.secure_aggregation.client.client_protocol import (
+    ClientProtocol,
+)
 from pht_federated.tests.aggregator.test_db import override_get_db
 
 app.dependency_overrides[get_db] = override_get_db
@@ -18,9 +21,13 @@ def proposal_id():
     response = client.post("/api/proposal", json={"name": "Protocol test"})
     return response.json()["id"]
 
+
 @pytest.fixture
 def discovery_id(proposal_id):
-    response = client.post(f"/api/proposal/{proposal_id}/discoveries", json={"query": {"name": "Test Discovery"}})
+    response = client.post(
+        f"/api/proposal/{proposal_id}/discoveries",
+        json={"query": {"name": "Test Discovery"}},
+    )
     return response.json()["id"]
 
 
@@ -120,7 +127,6 @@ def test_get_one_protocol():
     assert response.status_code == 404, response.text
 
 
-
 def test_update_protocol(proposal_id, discovery_id):
 
     data = {"name": "Test Protocol"}
@@ -135,7 +141,6 @@ def test_update_protocol(proposal_id, discovery_id):
     response = client.put(f"/api/protocol/{protocol_id}", json=data)
     assert response.status_code == 200, response.text
     assert response.json()["name"] == "Test Protocol Updated"
-
 
     # update the protocol with a proposal id
     data = {"name": "Test Protocol Updated", "proposal_id": proposal_id}
@@ -154,7 +159,6 @@ def test_update_protocol(proposal_id, discovery_id):
     response = client.put(f"/api/protocol/{uuid.uuid4()}", json=data)
     assert response.status_code == 404, response.text
 
-
     # invalid proposal
     data = {"name": "Test Protocol Updated", "proposal_id": str(uuid.uuid4())}
     response = client.put(f"/api/protocol/{protocol_id}", json=data)
@@ -164,7 +168,6 @@ def test_update_protocol(proposal_id, discovery_id):
     data = {"name": "Test Protocol Updated", "discovery_id": 999999}
     response = client.put(f"/api/protocol/{protocol_id}", json=data)
     assert response.status_code == 404, response.text
-
 
 
 def test_protocol_delete():
@@ -185,7 +188,6 @@ def test_protocol_delete():
     assert response.status_code == 404, response.text
 
 
-
 def test_register_for_protocol():
 
     # create a protocol
@@ -199,24 +201,22 @@ def test_register_for_protocol():
     keys, broadcast = client_protocol.setup()
 
     # register for the protocol
-    response = client.post(f"/api/protocol/{protocol_id}/register", json=broadcast.dict())
+    response = client.post(
+        f"/api/protocol/{protocol_id}/register", json=broadcast.dict()
+    )
     print(response.text)
     assert response.status_code == 200, response.text
 
     # invalid protocol
-    response = client.post(f"/api/protocol/{uuid.uuid4()}/register", json=broadcast.dict())
+    response = client.post(
+        f"/api/protocol/{uuid.uuid4()}/register", json=broadcast.dict()
+    )
     assert response.status_code == 404, response.text
 
     keys_2, broadcast_2 = client_protocol.setup()
-    response = client.post(f"/api/protocol/{protocol_id}/register", json=broadcast_2.dict())
+    response = client.post(
+        f"/api/protocol/{protocol_id}/register", json=broadcast_2.dict()
+    )
     assert response.status_code == 200, response.text
 
     assert response.json()["currently_registered"] == 2
-
-
-
-
-
-
-
-

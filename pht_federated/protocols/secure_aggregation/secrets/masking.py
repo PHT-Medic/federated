@@ -2,16 +2,28 @@ import os
 from typing import List
 
 import numpy as np
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey, EllipticCurvePublicKey
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePrivateKey,
+    EllipticCurvePublicKey,
+)
 
 from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
-from pht_federated.protocols.secure_aggregation.models.server_messages import BroadCastClientKeys
-from pht_federated.protocols.secure_aggregation.secrets.key_agreement import derive_shared_key
+from pht_federated.protocols.secure_aggregation.models.server_messages import (
+    BroadCastClientKeys,
+)
+from pht_federated.protocols.secure_aggregation.secrets.key_agreement import (
+    derive_shared_key,
+)
 from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
 
 
-def create_mask(user_id: str, user_keys: ClientKeys, participants: List[BroadCastClientKeys], seed: str,
-                n_params: int) -> np.ndarray:
+def create_mask(
+    user_id: str,
+    user_keys: ClientKeys,
+    participants: List[BroadCastClientKeys],
+    seed: str,
+    n_params: int,
+) -> np.ndarray:
     """
     Generate a mask for a user based on the broadcast messages participants and the user's private random seed.
     :param user_id: id of the user
@@ -38,9 +50,13 @@ def _generate_private_mask(seed: str, n_items: int) -> np.ndarray:
     return expand_seed(seed, n_items)
 
 
-def generate_user_masks(private_mask: np.ndarray, user_id: str, user_keys: ClientKeys,
-                        participants: List[BroadCastClientKeys],
-                        n_params: int) -> np.ndarray:
+def generate_user_masks(
+    private_mask: np.ndarray,
+    user_id: str,
+    user_keys: ClientKeys,
+    participants: List[BroadCastClientKeys],
+    n_params: int,
+) -> np.ndarray:
     """
     For each other participant, generate a shared mask with the user's private mask and the participant's public key.
 
@@ -62,15 +78,22 @@ def generate_user_masks(private_mask: np.ndarray, user_id: str, user_keys: Clien
             public_key = load_public_key(participant.broadcast.sharing_public_key)
             # multiplier for mask based on index in list
             if i > user_index:
-                private_mask -= generate_shared_mask(user_keys.sharing_key, public_key, n_params)
+                private_mask -= generate_shared_mask(
+                    user_keys.sharing_key, public_key, n_params
+                )
             else:
-                private_mask += generate_shared_mask(user_keys.sharing_key, public_key, n_params)
+                private_mask += generate_shared_mask(
+                    user_keys.sharing_key, public_key, n_params
+                )
 
     return private_mask
 
 
-def generate_shared_mask(private_key: EllipticCurvePrivateKey, public_key: EllipticCurvePublicKey,
-                         n_items: int) -> np.ndarray:
+def generate_shared_mask(
+    private_key: EllipticCurvePrivateKey,
+    public_key: EllipticCurvePublicKey,
+    n_items: int,
+) -> np.ndarray:
     """
     Generate a shared mask between two users, with the random seed derived from a public and private key
     :param private_key: private key of the user

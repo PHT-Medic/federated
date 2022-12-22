@@ -1,1 +1,1 @@
-from .client_protocol import ClientProtocol
+from .client_protocol import ClientProtocol  # noqa: F401

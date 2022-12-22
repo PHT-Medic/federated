@@ -1,6 +1,9 @@
+# flake8: noqa
+
 import pytest
 
 from pht_federated.client.federated_client import Client
+
 # def test_init():
 #     client = Client("http://localhost:8000")
 #     assert client.aggregator_url == "http://localhost:8000/api"
@@ -10,4 +13,3 @@ from pht_federated.client.federated_client import Client
 #
 #     with pytest.raises(Exception):
 #         client = Client()
-

@@ -1,29 +1,32 @@
-import pytest
-import os
+# flake8: noqa
 
-from fastapi.encoders import jsonable_encoder
 from uuid import uuid4
-from datetime import datetime
-import sklearn
-import pandas as pd
-import numpy as np
-import json
-from dotenv import load_dotenv, find_dotenv
-from fastapi.testclient import TestClient
-import sklearn.datasets
 
-from pht_federated.aggregator.schemas.dataset_statistics import DiscoveryStatistics, StatisticsCreate
-from pht_federated.aggregator.schemas.proposal import Proposal
-from pht_federated.aggregator.schemas.proposal import ProposalCreate
-from pht_federated.aggregator.schemas.discovery import DiscoverySummary
+import numpy as np
+import pandas as pd
+import pytest
+import sklearn
+import sklearn.datasets
+from fastapi.encoders import jsonable_encoder
+from fastapi.testclient import TestClient
+
+from pht_federated.aggregator.api.dependencies import get_db
+from pht_federated.aggregator.app import app
+from pht_federated.aggregator.schemas.dataset_statistics import (
+    DiscoveryStatistics,
+    StatisticsCreate,
+)
+from pht_federated.aggregator.schemas.discovery import (
+    DataDiscoveryCreate,
+    DataDiscoveryUpdate,
+    DiscoverySummary,
+)
+from pht_federated.aggregator.schemas.proposal import Proposal, ProposalCreate
 from pht_federated.aggregator.services.discovery import statistics
+from pht_federated.client.resources import ProposalClient
+
 # from pht_federated.client.discovery_client import DiscoveryClient
 from pht_federated.client.resources.discovery import DiscoveryClient
-from pht_federated.client.resources import ProposalClient
-from pht_federated.aggregator.schemas.discovery import DataDiscoveryCreate, DataDiscoveryUpdate
-
-from pht_federated.aggregator.app import app
-from pht_federated.aggregator.api.dependencies import get_db
 from pht_federated.tests.aggregator.test_db import override_get_db
 
 app.dependency_overrides[get_db] = override_get_db
@@ -40,7 +43,9 @@ def discovery_client():
 
 @pytest.fixture
 def proposal_id():
-    proposal_client = ProposalClient(api_client, schema=Proposal, prefix="/api/proposal")
+    proposal_client = ProposalClient(
+        api_client, schema=Proposal, prefix="/api/proposal"
+    )
     proposal = proposal_client.create(ProposalCreate(name="Test Proposal", id=uuid4()))
     return proposal.id
 
@@ -70,7 +75,9 @@ def test_get_multi_discovery(proposal_id, discovery_client):
 def test_update_discovery(proposal_id, discovery_client):
     discover = DataDiscoveryCreate(query={"hello": "world"})
     response = discovery_client.create(proposal_id, discover)
-    response = discovery_client.update(proposal_id, response.id, DataDiscoveryUpdate(query={"hello": "update"}))
+    response = discovery_client.update(
+        proposal_id, response.id, DataDiscoveryUpdate(query={"hello": "update"})
+    )
     assert response.proposal_id == proposal_id
     assert response.query == {"hello": "update"}
 
@@ -84,7 +91,6 @@ def test_delete_discovery(proposal_id, discovery_client):
 
     with pytest.raises(Exception):
         response = discovery_client.get(proposal_id, response.id)
-
 
 
 # PROPOSAL_ID_NUMERIC = uuid4()
@@ -113,18 +119,23 @@ def test_delete_discovery(proposal_id, discovery_client):
 def test_post_discovery_statistics_numeric(discovery_client):
 
     # setup proposal and discovery
-    proposal_client = ProposalClient(api_client, schema=Proposal, prefix="/api/proposal")
+    proposal_client = ProposalClient(
+        api_client, schema=Proposal, prefix="/api/proposal"
+    )
     proposal = proposal_client.create(ProposalCreate(name="Test Stats", id=uuid4()))
     proposal_id = proposal.id
 
-
-    discovery = discovery_client.create(proposal_id, DataDiscoveryCreate(query={"hello": "world"}))
+    discovery = discovery_client.create(
+        proposal_id, DataDiscoveryCreate(query={"hello": "world"})
+    )
 
     # get stats from diabetes dataset
     diabetes_dataset = sklearn.datasets.load_diabetes(return_X_y=False, as_frame=False)
 
-    df = pd.DataFrame(diabetes_dataset['data'], columns=diabetes_dataset['feature_names'])
-    df['target'] = diabetes_dataset['target']
+    df = pd.DataFrame(
+        diabetes_dataset["data"], columns=diabetes_dataset["feature_names"]
+    )
+    df["target"] = diabetes_dataset["target"]
     df_split = np.array_split(df, 3)
 
     stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
@@ -133,32 +144,38 @@ def test_post_discovery_statistics_numeric(discovery_client):
 
     stats_create_1 = StatisticsCreate(
         **{
-            "item_count": stats1_json['item_count'],
-            "feature_count": stats1_json['feature_count'],
-            "column_information": stats1_json['column_information']
+            "item_count": stats1_json["item_count"],
+            "feature_count": stats1_json["feature_count"],
+            "column_information": stats1_json["column_information"],
         }
     )
 
     stats_create_2 = StatisticsCreate(
         **{
-            "item_count": stats2_json['item_count'],
-            "feature_count": stats2_json['feature_count'],
-            "column_information": stats2_json['column_information']
+            "item_count": stats2_json["item_count"],
+            "feature_count": stats2_json["feature_count"],
+            "column_information": stats2_json["column_information"],
         }
     )
 
     stats_create_3 = StatisticsCreate(
         **{
-            "item_count": stats3_json['item_count'],
-            "feature_count": stats3_json['feature_count'],
-            "column_information": stats3_json['column_information']
+            "item_count": stats3_json["item_count"],
+            "feature_count": stats3_json["feature_count"],
+            "column_information": stats3_json["column_information"],
         }
     )
 
     # post stats to discovery
-    response1 = discovery_client.submit_discovery_statistics(proposal_id, discovery.id, stats_create_1)
-    response2 = discovery_client.submit_discovery_statistics(proposal_id, discovery.id, stats_create_2)
-    response3 = discovery_client.submit_discovery_statistics(proposal_id, discovery.id, stats_create_3)
+    response1 = discovery_client.submit_discovery_statistics(
+        proposal_id, discovery.id, stats_create_1
+    )
+    response2 = discovery_client.submit_discovery_statistics(
+        proposal_id, discovery.id, stats_create_2
+    )
+    response3 = discovery_client.submit_discovery_statistics(
+        proposal_id, discovery.id, stats_create_3
+    )
 
     assert response1.discovery_id == discovery.id
     assert response2.discovery_id == discovery.id
@@ -166,9 +183,12 @@ def test_post_discovery_statistics_numeric(discovery_client):
 
     stats = statistics.get_discovery_statistics(df)
 
-    aggregate_response = discovery_client.get_aggregated_results(proposal_id, discovery.id)
+    aggregate_response = discovery_client.get_aggregated_results(
+        proposal_id, discovery.id
+    )
     print(aggregate_response)
     assert aggregate_response.discovery_id == discovery.id
+
 
 #
 # def test_post_discovery_statistics_mixed():

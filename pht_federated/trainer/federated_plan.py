@@ -45,6 +45,7 @@ class FederatedPlan(BaseModel):
     """
     A federated plan describes the federated training of a model.
     """
+
     id: Optional[str] = None
     hyper_params: Optional[HyperParameters] = None
     federated_params: Optional[FederatedParameters] = None
@@ -54,5 +55,5 @@ class FederatedPlan(BaseModel):
         return cls(
             id=str(uuid.uuid4()),
             hyper_params=HyperParameters.default(),
-            federated_params=FederatedParameters.default()
+            federated_params=FederatedParameters.default(),
         )

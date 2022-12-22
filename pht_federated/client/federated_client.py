@@ -1,10 +1,11 @@
-import httpx
-import pendulum
 import warnings
 
+import httpx
+import pendulum
+
 from pht_federated.client.protocol_clients import ProtocolClient
-from pht_federated.client.resources.proposal import ProposalClient
 from pht_federated.client.resources.discovery import DiscoveryClient
+from pht_federated.client.resources.proposal import ProposalClient
 
 
 class Client:
@@ -13,15 +14,15 @@ class Client:
     discoveries: DiscoveryClient
 
     def __init__(
-            self,
-            aggregator_url: str,
-            token_url: str = None,
-            username: str = None,
-            password: str = None,
-            robot_id: str = None,
-            robot_secret: str = None,
-            headers: dict = None,
-            client: httpx.Client = None,
+        self,
+        aggregator_url: str,
+        token_url: str = None,
+        username: str = None,
+        password: str = None,
+        robot_id: str = None,
+        robot_secret: str = None,
+        headers: dict = None,
+        client: httpx.Client = None,
     ):
 
         self.aggregator_url = self._check_add_http_https(aggregator_url)
@@ -56,11 +57,9 @@ class Client:
 
         return {"Authorization": f"Bearer {token}"}
 
-
     def setup_clients(self):
         self.http.headers.update(self.headers)
         self.proposals = ProposalClient(self, prefix="/proposal")
-
 
     def setup_http(self):
         self.http = httpx.Client(
@@ -71,10 +70,16 @@ class Client:
     def _get_token(self):
         if not self.token or self.token_expiration < pendulum.now():
             if self.username and self.password:
-                r = httpx.post(self.token_url, data={"username": self.username, "password": self.password})
+                r = httpx.post(
+                    self.token_url,
+                    data={"username": self.username, "password": self.password},
+                )
             elif self.robot_id and self.robot_secret:
 
-                r = httpx.post(self.token_url, data={"id": self.robot_id, "secret": self.robot_secret})
+                r = httpx.post(
+                    self.token_url,
+                    data={"id": self.robot_id, "secret": self.robot_secret},
+                )
             else:
                 raise Exception("No credentials provided")
 
@@ -94,4 +99,3 @@ class Client:
         if url.startswith("http://") or url.startswith("https://"):
             return url
         return f"http://{url}"
-

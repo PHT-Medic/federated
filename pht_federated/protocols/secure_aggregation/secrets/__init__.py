@@ -1,1 +1,1 @@
-from .secret_sharing import create_key_shares, combine_key_shares
+from .secret_sharing import combine_key_shares, create_key_shares  # noqa: F401

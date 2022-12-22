@@ -1,7 +1,8 @@
 import pytest
-from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
-from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+
+from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
 
 
 def test_client_keys_init():
@@ -46,22 +47,22 @@ def test_client_keys_hex():
     private_hex_1 = priv_key_1.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
+        encryption_algorithm=serialization.NoEncryption(),
     ).hex()
 
     private_hex_2 = priv_key_2.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
+        encryption_algorithm=serialization.NoEncryption(),
     ).hex()
 
     public_hex_1 = pub_key_1.public_bytes(
         encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
     ).hex()
     public_hex_2 = pub_key_2.public_bytes(
         encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
     ).hex()
 
     assert keys.hex_cipher_key == private_hex_1
@@ -84,5 +85,8 @@ def test_client_keys_key_broadcast():
     assert broadcast.sharing_public_key == keys.hex_sharing_key_public
 
     with pytest.raises(NotImplementedError):
-        keys = ClientKeys(signing_key=ec.generate_private_key(ec.SECP384R1()), verification_keys=["1", "2"])
+        keys = ClientKeys(
+            signing_key=ec.generate_private_key(ec.SECP384R1()),
+            verification_keys=["1", "2"],
+        )
         keys.key_broadcast()

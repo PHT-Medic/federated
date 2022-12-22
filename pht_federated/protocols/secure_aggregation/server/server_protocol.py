@@ -2,16 +2,39 @@ from typing import List, Tuple, Union
 
 import numpy as np
 
-from pht_federated.protocols.secure_aggregation.secrets.masking import integer_seed_from_hex, expand_seed, generate_shared_mask
-from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import combine_key_shares, combine_seed_shares
-from pht_federated.protocols.secure_aggregation.models.server_messages import (ServerKeyBroadcast, BroadCastClientKeys, ServerCipherBroadcast, UserCipher,
-                                                                     Round4Participant, ServerUnmaskBroadCast, AggregatedParameters)
-from pht_federated.protocols.secure_aggregation.models.client_messages import ShareKeysMessage, MaskedInput, UnmaskShares, UnmaskSeedShare, UnmaskKeyShare
+from pht_federated.protocols.secure_aggregation.models.client_messages import (
+    MaskedInput,
+    ShareKeysMessage,
+    UnmaskKeyShare,
+    UnmaskSeedShare,
+    UnmaskShares,
+)
+from pht_federated.protocols.secure_aggregation.models.server_messages import (
+    AggregatedParameters,
+    BroadCastClientKeys,
+    Round4Participant,
+    ServerCipherBroadcast,
+    ServerKeyBroadcast,
+    ServerUnmaskBroadCast,
+    UserCipher,
+)
+from pht_federated.protocols.secure_aggregation.secrets.masking import (
+    expand_seed,
+    generate_shared_mask,
+    integer_seed_from_hex,
+)
+from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import (
+    combine_key_shares,
+    combine_seed_shares,
+)
 from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
 
 
-def _recover_shared_masks(user_key_shares: dict,
-                          client_key_broadcasts: List[BroadCastClientKeys], mask_size: int = 100) -> np.ndarray:
+def _recover_shared_masks(
+    user_key_shares: dict,
+    client_key_broadcasts: List[BroadCastClientKeys],
+    mask_size: int = 100,
+) -> np.ndarray:
     """
     Use a dictionary of key shares to recover the shared masks
     :param user_key_shares: dictionary containing a users key shares key: user_id, value: key shares for that user's
@@ -24,19 +47,25 @@ def _recover_shared_masks(user_key_shares: dict,
     reverse_shared_mask = np.zeros(mask_size)
     for broad_cast in client_key_broadcasts:
         sharing_key_shares = user_key_shares[broad_cast.user_id]
-        recovered_sharing_key = combine_key_shares(sharing_key_shares, k=len(client_key_broadcasts) - 1)
+        recovered_sharing_key = combine_key_shares(
+            sharing_key_shares, k=len(client_key_broadcasts) - 1
+        )
 
         for receiver_broadcast in client_key_broadcasts:
             if receiver_broadcast.user_id != broad_cast.user_id:
-                sharing_public_key = load_public_key(receiver_broadcast.broadcast.sharing_public_key)
-                reverse_shared_mask += generate_shared_mask(private_key=recovered_sharing_key,
-                                                            public_key=sharing_public_key, n_items=mask_size)
+                sharing_public_key = load_public_key(
+                    receiver_broadcast.broadcast.sharing_public_key
+                )
+                reverse_shared_mask += generate_shared_mask(
+                    private_key=recovered_sharing_key,
+                    public_key=sharing_public_key,
+                    n_items=mask_size,
+                )
 
     return reverse_shared_mask
 
 
 class ServerProtocol:
-
     @staticmethod
     def broadcast_keys(client_keys: List[BroadCastClientKeys]) -> ServerKeyBroadcast:
         """
@@ -47,7 +76,9 @@ class ServerProtocol:
         return ServerKeyBroadcast(participants=client_keys)
 
     @staticmethod
-    def broadcast_cyphers(shared_ciphers: List[ShareKeysMessage], user_id: str) -> ServerCipherBroadcast:
+    def broadcast_cyphers(
+        shared_ciphers: List[ShareKeysMessage], user_id: str
+    ) -> ServerCipherBroadcast:
         """
         Broadcast a list of ciphers addressed to a specific user
         :param shared_ciphers: list of ciphers received in round 2
@@ -67,7 +98,7 @@ class ServerProtocol:
                         user_cipher = UserCipher(
                             sender=message.user_id,
                             receiver=user_id,
-                            cipher=cipher.cipher
+                            cipher=cipher.cipher,
                         )
 
                         user_ciphers.append(user_cipher)
@@ -75,7 +106,9 @@ class ServerProtocol:
         return ServerCipherBroadcast(ciphers=user_ciphers)
 
     @staticmethod
-    def broadcast_unmask_participants(masked_inputs: List[MaskedInput]) -> ServerUnmaskBroadCast:
+    def broadcast_unmask_participants(
+        masked_inputs: List[MaskedInput],
+    ) -> ServerUnmaskBroadCast:
         """
         Process a list of masked inputs received in round 3 and broadcast the participants of the unmasking round
         to all users
@@ -83,12 +116,17 @@ class ServerProtocol:
         :return: Unmask broadcast containing the participants of the unmasking round
         """
         # todo add signatures
-        participants = [Round4Participant(user_id=mask_in.user_id) for mask_in in masked_inputs]
+        participants = [
+            Round4Participant(user_id=mask_in.user_id) for mask_in in masked_inputs
+        ]
         return ServerUnmaskBroadCast(participants=participants)
 
-    def aggregate_masked_inputs(self, client_key_broadcasts: List[BroadCastClientKeys],
-                                masked_inputs: List[MaskedInput],
-                                unmask_shares: List[UnmaskShares]) -> AggregatedParameters:
+    def aggregate_masked_inputs(
+        self,
+        client_key_broadcasts: List[BroadCastClientKeys],
+        masked_inputs: List[MaskedInput],
+        unmask_shares: List[UnmaskShares],
+    ) -> AggregatedParameters:
         """
         Aggregate the masked inputs received in round 3 and unmask shares received in round 4. Use this to generate
         reverse masks to aggregate the masked inputs resulting in the unmasked sum of the masked inputs.
@@ -113,8 +151,9 @@ class ServerProtocol:
             masked_sum += masked_input.masked_input
 
         # generate the reverse masks
-        reverse_mask, reverse_shared_mask = self._generate_reverse_mask(seed_shares, key_shares, client_key_broadcasts,
-                                                                        mask_size=input_size)
+        reverse_mask, reverse_shared_mask = self._generate_reverse_mask(
+            seed_shares, key_shares, client_key_broadcasts, mask_size=input_size
+        )
         # subtract the seed based mask
         unmasked_sum = masked_sum - reverse_mask
         # for each dropped out user (if any) add the recovered shared mask
@@ -124,11 +163,12 @@ class ServerProtocol:
         return AggregatedParameters(params=list(unmasked_sum))
 
     @staticmethod
-    def _generate_reverse_mask(seed_shares: List[UnmaskSeedShare],
-                               key_shares: List[UnmaskKeyShare],
-                               client_key_broadcasts: List[BroadCastClientKeys],
-                               mask_size: int = 100
-                               ) -> Tuple[np.ndarray, Union[np.ndarray, None]]:
+    def _generate_reverse_mask(
+        seed_shares: List[UnmaskSeedShare],
+        key_shares: List[UnmaskKeyShare],
+        client_key_broadcasts: List[BroadCastClientKeys],
+        mask_size: int = 100,
+    ) -> Tuple[np.ndarray, Union[np.ndarray, None]]:
         """
         Generate the reverse mask to unmask the sum of masked inputs
         :param seed_shares: shamir shares of the seed for all participants
@@ -147,15 +187,19 @@ class ServerProtocol:
             user_key_shares[share.user_id].append(share.key_share)
 
         # expand the combined random seed into the user masks
-        seeds = [integer_seed_from_hex(combine_seed_shares(shares).hex()) for user_id, shares in
-                 user_seed_shares.items()]
+        seeds = [
+            integer_seed_from_hex(combine_seed_shares(shares).hex())
+            for user_id, shares in user_seed_shares.items()
+        ]
         # subtract the expanded user seeds
         reverse_mask = np.zeros(mask_size)
         for seed in seeds:
             reverse_mask += expand_seed(seed, mask_size)
 
         if len(key_shares) > 0:
-            reverse_shared_mask = _recover_shared_masks(user_key_shares, client_key_broadcasts, mask_size)
+            reverse_shared_mask = _recover_shared_masks(
+                user_key_shares, client_key_broadcasts, mask_size
+            )
             return reverse_mask, reverse_shared_mask
         else:
             return reverse_mask, None

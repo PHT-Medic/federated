@@ -1,3 +1,5 @@
+# flake8: noqa
+
 import pytest
 
 # from protocol.steps import setup_protocol

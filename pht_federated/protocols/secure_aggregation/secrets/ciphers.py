@@ -1,19 +1,31 @@
 import base64
 
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePublicKeyWithSerialization as ECPubKey
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKeyWithSerialization as ECPrivateKey
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey,
+)
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePublicKeyWithSerialization as ECPubKey,
+)
 
-from pht_federated.protocols.secure_aggregation.models.secrets import Cipher, KeyShare, SeedShare
-from pht_federated.protocols.secure_aggregation.secrets.key_agreement import derive_shared_key
+from pht_federated.protocols.secure_aggregation.models.secrets import (
+    Cipher,
+    KeyShare,
+    SeedShare,
+)
+from pht_federated.protocols.secure_aggregation.secrets.key_agreement import (
+    derive_shared_key,
+)
 
 
-def generate_encrypted_cipher(sender: str,
-                              private_key: ECPrivateKey,
-                              recipient: str,
-                              recipient_key: ECPubKey,
-                              key_share: KeyShare,
-                              seed_share: SeedShare) -> str:
+def generate_encrypted_cipher(
+    sender: str,
+    private_key: ECPrivateKey,
+    recipient: str,
+    recipient_key: ECPubKey,
+    key_share: KeyShare,
+    seed_share: SeedShare,
+) -> str:
     """
     Create an encrypted cipher for the recipient. The cipher contains the recipient's secret shares of the sender's
     random seed and private sharing key and is encrypted with a symmetric Fernet key, derived from the
@@ -47,11 +59,13 @@ def generate_encrypted_cipher(sender: str,
     return encrypted_cypher.hex()
 
 
-def decrypt_cipher(recipient: str,
-                   recipient_key: ECPrivateKey,
-                   sender: str,
-                   sender_key: ECPubKey,
-                   encrypted_cypher: str) -> Cipher:
+def decrypt_cipher(
+    recipient: str,
+    recipient_key: ECPrivateKey,
+    sender: str,
+    sender_key: ECPubKey,
+    encrypted_cypher: str,
+) -> Cipher:
     """
     Decrypts an encrypted cipher received from a peer via the server. The cipher is decrypted with a symmetric Fernet
     key, derived from the private key of the recipient and the public key of the sender. Validates that the decrypted
@@ -67,7 +81,6 @@ def decrypt_cipher(recipient: str,
     """
     # derive the shared key with the public key of the recipient and private key of the sender
     secret = derive_shared_key(recipient_key, sender_key)
-
 
     # Setup fernet with the key for symmetric encryption
     fernet = Fernet(base64.b64encode(secret))

@@ -1,14 +1,17 @@
 import os
 
 import pytest
+from Crypto.Protocol.SecretSharing import Shamir
 from cryptography.hazmat.primitives import serialization
 
 from pht_federated.protocols.secure_aggregation.models import HexString
 from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
-from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import combine_key_shares, create_seed_shares, \
-    combine_seed_shares, create_secret_shares
-
-from Crypto.Protocol.SecretSharing import Shamir
+from pht_federated.protocols.secure_aggregation.secrets.secret_sharing import (
+    combine_key_shares,
+    combine_seed_shares,
+    create_secret_shares,
+    create_seed_shares,
+)
 
 
 def test_shamir_library():
@@ -36,11 +39,14 @@ def test_combine_key_shares():
 
     combined_key = combine_key_shares(shares)
 
-    assert combined_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
-    ).hex() == keys.hex_sharing_key
+    assert (
+        combined_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).hex()
+        == keys.hex_sharing_key
+    )
 
     with pytest.raises(ValueError):
         combined_key = combine_key_shares(shares[:2])
@@ -55,11 +61,14 @@ def test_combine_key_shares_invalid_shares():
     assert len(shares) == 10
 
     combined_key = combine_key_shares(shares)
-    assert combined_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.PKCS8,
-        encryption_algorithm=serialization.NoEncryption()
-    ).hex() == keys.hex_sharing_key
+    assert (
+        combined_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).hex()
+        == keys.hex_sharing_key
+    )
 
     # corrupt one of the given secrets
     shares[0].segments[5] = HexString(os.urandom(16).hex())

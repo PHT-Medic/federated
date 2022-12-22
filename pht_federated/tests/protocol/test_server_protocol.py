@@ -1,6 +1,9 @@
 from pht_federated.protocols.secure_aggregation import ServerProtocol
 from pht_federated.protocols.secure_aggregation.models.client_keys import ClientKeys
-from pht_federated.protocols.secure_aggregation.models.server_messages import BroadCastClientKeys, ServerKeyBroadcast
+from pht_federated.protocols.secure_aggregation.models.server_messages import (
+    BroadCastClientKeys,
+    ServerKeyBroadcast,
+)
 
 
 def test_server_protocol_broadcast_keys():
@@ -11,10 +14,7 @@ def test_server_protocol_broadcast_keys():
     for i in range(5):
         keys = ClientKeys()
         broadcast_in = keys.key_broadcast()
-        client_broadcast = BroadCastClientKeys(
-            user_id=i,
-            broadcast=broadcast_in
-        )
+        client_broadcast = BroadCastClientKeys(user_id=i, broadcast=broadcast_in)
         broadcasts.append(client_broadcast)
 
     broadcast = protocol.broadcast_keys(broadcasts)

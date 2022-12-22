@@ -1,13 +1,14 @@
+import os
+
+from dotenv import find_dotenv, load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
-from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
 
 if os.getenv("AGGREGATOR_DB"):
-    SQLALCHEMY_DATABASE_URL = os.getenv('AGGREGATOR_DB')
+    SQLALCHEMY_DATABASE_URL = os.getenv("AGGREGATOR_DB")
 else:
     SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://admin:admin@localhost:5452/dev_db"
 

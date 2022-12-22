@@ -1,9 +1,12 @@
-from typing import Optional, Any, List, Union, Dict, Literal
-from typing_extensions import Annotated
-from pht_federated.aggregator.schemas.figures import *
-from pht_federated.aggregator.schemas.dataset_statistics import *
-from uuid import UUID
 from datetime import datetime
+from typing import List, Optional, Union
+from uuid import UUID
+
+from typing_extensions import Annotated
+from pydantic import BaseModel, Field
+
+from pht_federated.aggregator.schemas import dataset_statistics as ds
+from pht_federated.aggregator.schemas.figures import DiscoveryFigure
 
 
 class DataDiscoveryBase(BaseModel):
@@ -11,7 +14,8 @@ class DataDiscoveryBase(BaseModel):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     query: Optional[dict]
-    statistics: Optional[List[DiscoveryStatistics]]
+    statistics: Optional[List[ds.DiscoveryStatistics]]
+
 
 class DataDiscoveryCreate(DataDiscoveryBase):
     pass
@@ -28,33 +32,41 @@ class DataDiscovery(DataDiscoveryBase):
         orm_mode = True
 
 
-class DiscoveryUniqueColumn(DatasetUniqueColumn):
+class DiscoveryUniqueColumn(ds.DatasetUniqueColumn):
     pass
 
 
-class DiscoveryEqualColumn(DatasetEqualColumn):
+class DiscoveryEqualColumn(ds.DatasetEqualColumn):
     pass
 
 
-class DiscoveryCategoricalColumn(DatasetCategoricalColumn):
+class DiscoveryCategoricalColumn(ds.DatasetCategoricalColumn):
     figure_data: Optional[DiscoveryFigure]
 
 
-class DiscoveryNumericalColumn(DatasetNumericalColumn):
+class DiscoveryNumericalColumn(ds.DatasetNumericalColumn):
     figure_data: Optional[DiscoveryFigure]
 
 
-class DiscoveryUnstructuredData(DatasetUnstructuredData):
+class DiscoveryUnstructuredData(ds.DatasetUnstructuredData):
     figure_data: Optional[DiscoveryFigure]
 
 
-class DiscoverySummary(DiscoveryStatistics):
-    column_information: Optional[List[Annotated[Union[DiscoveryCategoricalColumn,
-    DiscoveryNumericalColumn,
-    DiscoveryUnstructuredData,
-    DiscoveryEqualColumn,
-    DiscoveryUniqueColumn],
-    Field(discriminator='type')]]]
+class DiscoverySummary(ds.DiscoveryStatistics):
+    column_information: Optional[
+        List[
+            Annotated[
+                Union[
+                    DiscoveryCategoricalColumn,
+                    DiscoveryNumericalColumn,
+                    DiscoveryUnstructuredData,
+                    DiscoveryEqualColumn,
+                    DiscoveryUniqueColumn,
+                ],
+                Field(discriminator="type"),
+            ]
+        ]
+    ]
 
     class Config:
         orm_mode = True

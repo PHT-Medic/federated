@@ -1,9 +1,17 @@
+# flake8: noqa
+
 import numpy as np
 import pytest
+
 from pht_federated.protocols.secure_aggregation import ClientProtocol, ServerProtocol
-from pht_federated.protocols.secure_aggregation.models.server_messages import ServerKeyBroadcast, BroadCastClientKeys
+from pht_federated.protocols.secure_aggregation.models.server_messages import (
+    BroadCastClientKeys,
+    ServerKeyBroadcast,
+)
 from pht_federated.protocols.secure_aggregation.secrets.ciphers import decrypt_cipher
-from pht_federated.protocols.secure_aggregation.secrets.masking import _generate_private_mask
+from pht_federated.protocols.secure_aggregation.secrets.masking import (
+    _generate_private_mask,
+)
 from pht_federated.protocols.secure_aggregation.secrets.util import load_public_key
 
 
@@ -15,10 +23,7 @@ def key_broadcast():
     keys = []
     for i in range(5):
         user_keys, msg = protocol.setup()
-        client_broadcast = BroadCastClientKeys(
-            user_id=f"user-{i}",
-            broadcast=msg
-        )
+        client_broadcast = BroadCastClientKeys(user_id=f"user-{i}", broadcast=msg)
         broadcasts.append(client_broadcast)
         keys.append(user_keys)
 
@@ -33,7 +38,9 @@ def cipher_broadcast(key_broadcast):
     seeds = []
     share_messages = []
     for i, key in enumerate(keys):
-        seed, msg = protocol.process_key_broadcast(f"user-{i}", keys[0], broadcast=broadcast)
+        seed, msg = protocol.process_key_broadcast(
+            f"user-{i}", keys[0], broadcast=broadcast
+        )
         seeds.append(seed)
         share_messages.append(msg)
 
@@ -61,8 +68,12 @@ def test_protocol_process_keys_from_server(key_broadcast):
 
     # error when there are duplicate sharing keys
     duplicate_sharing_key_broadcast = server_broadcast.copy()
-    duplicate_sharing_key_broadcast.participants[0].broadcast.sharing_public_key = "abab"
-    duplicate_sharing_key_broadcast.participants[1].broadcast.sharing_public_key = "abab"
+    duplicate_sharing_key_broadcast.participants[
+        0
+    ].broadcast.sharing_public_key = "abab"
+    duplicate_sharing_key_broadcast.participants[
+        1
+    ].broadcast.sharing_public_key = "abab"
 
     with pytest.raises(ValueError):
         protocol.process_key_broadcast("test", keys[0], duplicate_sharing_key_broadcast)
@@ -100,13 +111,14 @@ def test_masking(cipher_broadcast):
 
     server_broadcast = server_protocol.broadcast_cyphers(share_messages, "user-0")
 
-    mask = protocol.process_cipher_broadcast(user_id="user-0",
-                                             keys=user_key_0,
-                                             participants=broadcast.participants,
-                                             input=np.zeros(100),
-                                             cipher_broadcast=server_broadcast,
-                                             seed=seeds[0]
-                                             )
+    mask = protocol.process_cipher_broadcast(
+        user_id="user-0",
+        keys=user_key_0,
+        participants=broadcast.participants,
+        input=np.zeros(100),
+        cipher_broadcast=server_broadcast,
+        seed=seeds[0],
+    )
 
     assert len(mask.masked_input) == 100
 
@@ -128,19 +140,24 @@ def test_create_unmask_shares():
     # step through the server protocol and generate key broadcast
     server_protocol = ServerProtocol()
 
-    client_key_broadcasts = [BroadCastClientKeys(user_id=user_1, broadcast=broadcast_1),
-                             BroadCastClientKeys(user_id=user_2, broadcast=broadcast_2),
-                             BroadCastClientKeys(user_id=user_3, broadcast=broadcast_3)]
+    client_key_broadcasts = [
+        BroadCastClientKeys(user_id=user_1, broadcast=broadcast_1),
+        BroadCastClientKeys(user_id=user_2, broadcast=broadcast_2),
+        BroadCastClientKeys(user_id=user_3, broadcast=broadcast_3),
+    ]
     server_key_broadcast = server_protocol.broadcast_keys(client_key_broadcasts)
 
     assert len(server_key_broadcast.participants) == 3
 
-    seed_1, share_msg_1 = client_protocol.process_key_broadcast(user_id=user_1, keys=keys_1,
-                                                                broadcast=server_key_broadcast, k=2)
-    seed_2, share_msg_2 = client_protocol.process_key_broadcast(user_id=user_2, keys=keys_2,
-                                                                broadcast=server_key_broadcast, k=2)
-    seed_3, share_msg_3 = client_protocol.process_key_broadcast(user_id=user_3, keys=keys_3,
-                                                                broadcast=server_key_broadcast, k=2)
+    seed_1, share_msg_1 = client_protocol.process_key_broadcast(
+        user_id=user_1, keys=keys_1, broadcast=server_key_broadcast, k=2
+    )
+    seed_2, share_msg_2 = client_protocol.process_key_broadcast(
+        user_id=user_2, keys=keys_2, broadcast=server_key_broadcast, k=2
+    )
+    seed_3, share_msg_3 = client_protocol.process_key_broadcast(
+        user_id=user_3, keys=keys_3, broadcast=server_key_broadcast, k=2
+    )
 
     # test cipher decryption based on client messages
     decrypted_cipher = decrypt_cipher(
@@ -148,34 +165,49 @@ def test_create_unmask_shares():
         recipient_key=keys_2.cipher_key,
         sender_key=load_public_key(broadcast_1.cipher_public_key),
         sender=user_1,
-        encrypted_cypher=share_msg_1.ciphers[0].cipher
+        encrypted_cypher=share_msg_1.ciphers[0].cipher,
     )
 
     assert decrypted_cipher
 
     share_messages = [share_msg_1, share_msg_2, share_msg_3]
 
-    server_cipher_broadcast_1 = server_protocol.broadcast_cyphers(shared_ciphers=share_messages, user_id=user_1)
-    server_cipher_broadcast_2 = server_protocol.broadcast_cyphers(shared_ciphers=share_messages, user_id=user_2)
-    server_cipher_broadcast_3 = server_protocol.broadcast_cyphers(shared_ciphers=share_messages, user_id=user_3)
+    server_cipher_broadcast_1 = server_protocol.broadcast_cyphers(
+        shared_ciphers=share_messages, user_id=user_1
+    )
+    server_cipher_broadcast_2 = server_protocol.broadcast_cyphers(
+        shared_ciphers=share_messages, user_id=user_2
+    )
+    server_cipher_broadcast_3 = server_protocol.broadcast_cyphers(
+        shared_ciphers=share_messages, user_id=user_3
+    )
 
-    mask_1 = client_protocol.process_cipher_broadcast(user_id=user_1, keys=keys_1,
-                                                      participants=server_key_broadcast.participants,
-                                                      input=np.zeros(input_size),
-                                                      cipher_broadcast=server_cipher_broadcast_1,
-                                                      seed=seed_1)
+    mask_1 = client_protocol.process_cipher_broadcast(
+        user_id=user_1,
+        keys=keys_1,
+        participants=server_key_broadcast.participants,
+        input=np.zeros(input_size),
+        cipher_broadcast=server_cipher_broadcast_1,
+        seed=seed_1,
+    )
 
-    mask_2 = client_protocol.process_cipher_broadcast(user_id=user_2, keys=keys_2,
-                                                      participants=server_key_broadcast.participants,
-                                                      input=np.zeros(input_size),
-                                                      cipher_broadcast=server_cipher_broadcast_2,
-                                                      seed=seed_2)
+    mask_2 = client_protocol.process_cipher_broadcast(
+        user_id=user_2,
+        keys=keys_2,
+        participants=server_key_broadcast.participants,
+        input=np.zeros(input_size),
+        cipher_broadcast=server_cipher_broadcast_2,
+        seed=seed_2,
+    )
 
-    mask_3 = client_protocol.process_cipher_broadcast(user_id=user_3, keys=keys_3,
-                                                      participants=server_key_broadcast.participants,
-                                                      input=np.zeros(input_size),
-                                                      cipher_broadcast=server_cipher_broadcast_3,
-                                                      seed=seed_3)
+    mask_3 = client_protocol.process_cipher_broadcast(
+        user_id=user_3,
+        keys=keys_3,
+        participants=server_key_broadcast.participants,
+        input=np.zeros(input_size),
+        cipher_broadcast=server_cipher_broadcast_3,
+        seed=seed_3,
+    )
 
     masked_inputs = [mask_1, mask_2, mask_3]
 
@@ -186,7 +218,12 @@ def test_create_unmask_shares():
     user_1_private_mask = _generate_private_mask(seed=seed_1, n_items=input_size)
     user_2_private_mask = _generate_private_mask(seed=seed_2, n_items=input_size)
     user_3_private_mask = _generate_private_mask(seed=seed_3, n_items=input_size)
-    removed_mask = masked_input_sum - user_1_private_mask - user_2_private_mask - user_3_private_mask
+    removed_mask = (
+        masked_input_sum
+        - user_1_private_mask
+        - user_2_private_mask
+        - user_3_private_mask
+    )
 
     print(removed_mask.sum())
 
@@ -202,7 +239,7 @@ def test_create_unmask_shares():
             keys=keys_1,
             participants=server_key_broadcast.participants,
             unmask_broadcast=too_few_unmask,
-            cipher_broadcast=server_cipher_broadcast_1
+            cipher_broadcast=server_cipher_broadcast_1,
         )
 
     unmask_shares_1 = client_protocol.process_unmask_broadcast(
@@ -210,7 +247,7 @@ def test_create_unmask_shares():
         keys=keys_1,
         participants=server_key_broadcast.participants,
         unmask_broadcast=unmask_broadcast,
-        cipher_broadcast=server_cipher_broadcast_1
+        cipher_broadcast=server_cipher_broadcast_1,
     )
     assert len(unmask_shares_1.seed_shares) == 2
 
@@ -219,7 +256,7 @@ def test_create_unmask_shares():
         keys=keys_2,
         participants=server_key_broadcast.participants,
         unmask_broadcast=unmask_broadcast,
-        cipher_broadcast=server_cipher_broadcast_2
+        cipher_broadcast=server_cipher_broadcast_2,
     )
 
     unmask_shares_3 = client_protocol.process_unmask_broadcast(
@@ -227,17 +264,15 @@ def test_create_unmask_shares():
         keys=keys_3,
         participants=server_key_broadcast.participants,
         unmask_broadcast=unmask_broadcast,
-        cipher_broadcast=server_cipher_broadcast_3
+        cipher_broadcast=server_cipher_broadcast_3,
     )
 
     client_unmask_shares = [unmask_shares_1, unmask_shares_2, unmask_shares_3]
 
-
-
-    response = server_protocol.aggregate_masked_inputs(client_key_broadcasts=client_key_broadcasts,
-                                                       masked_inputs=masked_inputs,
-                                                       unmask_shares=client_unmask_shares)
+    response = server_protocol.aggregate_masked_inputs(
+        client_key_broadcasts=client_key_broadcasts,
+        masked_inputs=masked_inputs,
+        unmask_shares=client_unmask_shares,
+    )
 
     assert np.round(np.sum(response.params), 10) == 0.0
-
-

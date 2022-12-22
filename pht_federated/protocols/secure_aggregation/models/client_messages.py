@@ -1,8 +1,12 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
-from pht_federated.protocols.secure_aggregation.models.secrets import EncryptedCipher, KeyShare, SeedShare
+from pht_federated.protocols.secure_aggregation.models.secrets import (
+    EncryptedCipher,
+    KeyShare,
+    SeedShare,
+)
 
 
 class ClientKeyBroadCast(BaseModel):
@@ -11,6 +15,7 @@ class ClientKeyBroadCast(BaseModel):
     The client broadcasts the public keys and an optional signature of the public keys.
     Keys are encoded in hex format
     """
+
     cipher_public_key: str
     sharing_public_key: str
     signature: Optional[str] = None
@@ -20,6 +25,7 @@ class ShareKeysMessage(BaseModel):
     """
     Encrypted ciphers containing the shared keys are sent to the server.
     """
+
     user_id: str
     ciphers: List[EncryptedCipher]
 
@@ -29,6 +35,7 @@ class MaskedInput(BaseModel):
     The masked input message is sent by the client to the server.
     The client sends the masked input to the server.
     """
+
     user_id: str
     masked_input: List[float]
 
@@ -38,6 +45,7 @@ class UnmaskKeyShare(BaseModel):
     The unmask key share message is sent by the client to the server.
     The client sends the key share to the server.
     """
+
     user_id: str
     key_share: KeyShare
 
@@ -47,6 +55,7 @@ class UnmaskSeedShare(BaseModel):
     The unmask key share message is sent by the client to the server.
     The client sends the key share to the server.
     """
+
     user_id: str
     seed_share: SeedShare
 

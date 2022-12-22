@@ -1,1 +1,1 @@
-from .checkpoint import MinioCheckpointIO
+from .checkpoint import MinioCheckpointIO  # noqa: F401

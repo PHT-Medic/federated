@@ -1,1 +1,1 @@
-from .federated import FederatedCallback
+from .federated import FederatedCallback  # noqa: F401

@@ -1,17 +1,17 @@
 import os
 
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
 from pytorch_lightning import Trainer
-from torch.nn import functional as F
-from torch import nn
 from pytorch_lightning.core.lightning import LightningModule
+from torch import nn
+from torch.nn import functional as F
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
 from torchvision import transforms
+from torchvision.datasets import MNIST
 
-from pht_federated.trainer.plugins import MinioCheckpointIO
 from pht_federated.trainer.callbacks import FederatedCallback
+from pht_federated.trainer.plugins import MinioCheckpointIO
 
 
 class LitMNIST(LightningModule):
@@ -49,7 +49,9 @@ class LitMNIST(LightningModule):
     def train_dataloader(self):
         # transforms
         # prepare transforms standard to MNIST
-        transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+        transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+        )
         # data
         mnist_train = MNIST(os.getcwd(), train=True, download=True, transform=transform)
         return DataLoader(mnist_train, batch_size=64)
@@ -65,7 +67,7 @@ class LitMNIST(LightningModule):
     #     return DataLoader(mnist_test, batch_size=64)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     load_dotenv(find_dotenv())
     model = LitMNIST()
     trainer = Trainer(plugins=[MinioCheckpointIO()], callbacks=[FederatedCallback()])

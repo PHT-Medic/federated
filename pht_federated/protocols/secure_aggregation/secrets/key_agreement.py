@@ -1,11 +1,17 @@
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey, EllipticCurvePublicKey
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePrivateKey,
+    EllipticCurvePublicKey,
+)
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 
-def derive_shared_key(private_key: EllipticCurvePrivateKey, public_key: EllipticCurvePublicKey,
-                      length: int = 32) -> bytes:
+def derive_shared_key(
+    private_key: EllipticCurvePrivateKey,
+    public_key: EllipticCurvePublicKey,
+    length: int = 32,
+) -> bytes:
     """
     Derive a shared key of the given length from an elliptic curve private key and a public key.
     :param private_key: elliptic curve private key

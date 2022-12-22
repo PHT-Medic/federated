@@ -14,9 +14,7 @@ minio = "*"
 torchvision = "*"
 s3fs = "*"
 fsspec = {extras = ["s3"], version = "*"}
-grpcio = "*"
-grpcio-tools = "*"
-sqlmodel = ""
+SQLAlchemy = "*"
 psycopg2-binary = ""
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
@@ -39,6 +37,9 @@ seaborn = "*"
 bump2version = "*"
 python-dotenv = "*"
 scikit-learn = "*"
+black = "*"
+isort = "*"
+autoflake = "*"
 
 [requires]
 python_version = "3.9"

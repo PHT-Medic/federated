@@ -1,17 +1,20 @@
-import abc
 import typing
 
-from pydantic import BaseModel
-from httpx import Client
 from fastapi.encoders import jsonable_encoder
+from httpx import Client
+from pydantic import BaseModel
 
-ResourceSchema = typing.TypeVar('ResourceSchema', bound=BaseModel)
+ResourceSchema = typing.TypeVar("ResourceSchema", bound=BaseModel)
 CreateSchemaType = typing.TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = typing.TypeVar("UpdateSchemaType", bound=BaseModel)
 
 
-class ResourceClient(typing.Generic[ResourceSchema, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, client: Client, schema: typing.Type[ResourceSchema], prefix: str = None):
+class ResourceClient(
+    typing.Generic[ResourceSchema, CreateSchemaType, UpdateSchemaType]
+):
+    def __init__(
+        self, client: Client, schema: typing.Type[ResourceSchema], prefix: str = None
+    ):
         """
         A client for a resource from the aggregator API defined as a pydantic model.
         Args:
@@ -57,7 +60,9 @@ class ResourceClient(typing.Generic[ResourceSchema, CreateSchemaType, UpdateSche
         Raises:
             httpx.HTTPError: If the request fails
         """
-        response = self.client.get(f"{self.prefix}", params={"skip": skip, "limit": limit})
+        response = self.client.get(
+            f"{self.prefix}", params={"skip": skip, "limit": limit}
+        )
         response.raise_for_status()
         return [self.schema(**item) for item in response.json()]
 
@@ -77,7 +82,9 @@ class ResourceClient(typing.Generic[ResourceSchema, CreateSchemaType, UpdateSche
         response.raise_for_status()
         return self.schema(**response.json())
 
-    def update(self, resource_id: typing.Any, resource: UpdateSchemaType) -> ResourceSchema:
+    def update(
+        self, resource_id: typing.Any, resource: UpdateSchemaType
+    ) -> ResourceSchema:
         """
         Update a resource on the aggregator
 
@@ -94,7 +101,7 @@ class ResourceClient(typing.Generic[ResourceSchema, CreateSchemaType, UpdateSche
 
         response = self.client.put(
             f"{self.prefix}/{resource_id}",
-            json=jsonable_encoder(resource.dict(exclude_none=True))
+            json=jsonable_encoder(resource.dict(exclude_none=True)),
         )
         response.raise_for_status()
         return self.schema(**response.json())

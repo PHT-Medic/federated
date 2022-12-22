@@ -1,1 +1,1 @@
-from .service import SecureAggregation
+from .service import SecureAggregation  # noqa: F401

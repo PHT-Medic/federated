@@ -57,7 +57,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
 
-        if hasattr(db_obj, 'updated_at'):
+        if hasattr(db_obj, "updated_at"):
             db_obj.updated_at = datetime.now()
         db.add(db_obj)
         db.commit()

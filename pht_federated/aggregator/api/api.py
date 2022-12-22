@@ -1,7 +1,6 @@
 from fastapi import APIRouter
-from pht_federated.aggregator.api.endpoints import discovery
-from pht_federated.aggregator.api.endpoints import proposals
-from pht_federated.aggregator.api.endpoints import protocol
+
+from pht_federated.aggregator.api.endpoints import discovery, proposals, protocol
 
 api_router = APIRouter()
 
@@ -10,5 +9,3 @@ api_router = APIRouter()
 api_router.include_router(discovery.router, prefix="/proposal", tags=["Discovery"])
 api_router.include_router(proposals.router, prefix="/proposal", tags=["Proposal"])
 api_router.include_router(protocol.router, prefix="/protocol", tags=["Protocol"])
-
-

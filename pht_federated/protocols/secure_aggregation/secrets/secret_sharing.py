@@ -1,10 +1,16 @@
 from typing import List, Tuple
+
 from Crypto.Protocol.SecretSharing import Shamir
-from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKeyWithSerialization as ECPrivateKey
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ec import (
+    EllipticCurvePrivateKeyWithSerialization as ECPrivateKey,
+)
 
-
-from pht_federated.protocols.secure_aggregation.models.secrets import SecretShares, KeyShare, SeedShare
+from pht_federated.protocols.secure_aggregation.models.secrets import (
+    KeyShare,
+    SecretShares,
+    SeedShare,
+)
 
 # Number of sharing key chunks
 NUM_KEY_CHUNKS = 20
@@ -13,7 +19,9 @@ KEY_BYTES = 306
 SEED_LENGTH = 4
 
 
-def create_secret_shares(hex_sharing_key: str, hex_seed: str, n: int, k: int = 3) -> SecretShares:
+def create_secret_shares(
+    hex_sharing_key: str, hex_seed: str, n: int, k: int = 3
+) -> SecretShares:
     """
     Create shares to distribute to the server in the second round of the protocol.
     :param hex_sharing_key: hex representation of the EC private sharing key
@@ -60,14 +68,18 @@ def create_seed_shares(seed: str, n: int, k: int = 3) -> List[SeedShare]:
     seed_bytes = bytes.fromhex(seed)
 
     if len(seed_bytes) != SEED_LENGTH:
-        raise ValueError(f"Seed must be {SEED_LENGTH} bytes long (8 hex characters). Found length {len(seed_bytes)}.")
+        raise ValueError(
+            f"Seed must be {SEED_LENGTH} bytes long (8 hex characters). Found length {len(seed_bytes)}."
+        )
 
     # todo remove for better shamir solution
     seed_bytes = seed_bytes + b"\0" * (SHAMIR_SIZE - SEED_LENGTH)
     # create the secret shares
     secret_shares = Shamir.split(k=k, n=n, secret=seed_bytes, ssss=False)
     # convert to list of SeedShare models
-    seed_shares = [SeedShare(shamir_index=i, seed=share.hex()) for i, share in secret_shares]
+    seed_shares = [
+        SeedShare(shamir_index=i, seed=share.hex()) for i, share in secret_shares
+    ]
 
     return seed_shares
 
@@ -80,7 +92,9 @@ def combine_key_shares(shares: List[KeyShare], k: int = 3) -> ECPrivateKey:
     :return:
     """
     if len(shares) < k:
-        raise ValueError(f"Not enough shares to combine. Found {len(shares)} shares, but need at least {k}.")
+        raise ValueError(
+            f"Not enough shares to combine. Found {len(shares)} shares, but need at least {k}."
+        )
 
     segmented_shares = [_process_key_segment(share) for share in shares]
     private_bytes = _process_chunked_shares(segmented_shares)
@@ -117,10 +131,12 @@ def _process_chunked_shares(chunked_shares: List[List[Tuple[int, bytes]]]) -> by
     combined_shares = [list(chunk) for chunk in zipped_shares]
 
     # combine the shares
-    combined_shares = [Shamir.combine(share_list, ssss=False) for share_list in combined_shares]
+    combined_shares = [
+        Shamir.combine(share_list, ssss=False) for share_list in combined_shares
+    ]
     # todo improve this
     # remove the padding
-    combined_shares[-1] = combined_shares[-1][:KEY_BYTES % SHAMIR_SIZE]
+    combined_shares[-1] = combined_shares[-1][: KEY_BYTES % SHAMIR_SIZE]
 
     key = b"".join(list(combined_shares))
     return key
@@ -132,18 +148,24 @@ def _process_key_segment(key_share: KeyShare) -> List[Tuple[int, bytes]]:
     :param key_share: a users key share
     :return: list of tuples representing the shared secrets usy by pycryptodome
     """
-    shamir_shares = [(key_share.shamir_index, segment.get_bytes()) for segment in key_share.segments]
+    shamir_shares = [
+        (key_share.shamir_index, segment.get_bytes()) for segment in key_share.segments
+    ]
     return shamir_shares
 
 
-def _distribute_chunked_shares(chunked_shares: List[List[Tuple[int, bytes]]]) -> List[KeyShare]:
+def _distribute_chunked_shares(
+    chunked_shares: List[List[Tuple[int, bytes]]]
+) -> List[KeyShare]:
     """
     Distribute the chunked shares to the users Key shares
     :param chunked_shares: List of shamir shares
     :return: a list KeyShare objects containing the key segments associated with a participant
     """
     # create dictionary with user ids as key and the hex conversion of the initial share as initial value
-    segment_dict = {user_id: [first_chunk.hex()] for user_id, first_chunk in chunked_shares[0]}
+    segment_dict = {
+        user_id: [first_chunk.hex()] for user_id, first_chunk in chunked_shares[0]
+    }
 
     # Start from index 1 as the first item has already been processed
     for chunk_shares in chunked_shares[1:]:
@@ -168,7 +190,7 @@ def _chunk_key_bytes(key_bytes: bytes) -> List[bytes]:
     """
     chunks = []
     for i in range(0, len(key_bytes), SHAMIR_SIZE):
-        chunks.append(key_bytes[i:i + SHAMIR_SIZE])
+        chunks.append(key_bytes[i: i + SHAMIR_SIZE])
     # add padding to last chunk
     if len(chunks[-1]) < SHAMIR_SIZE:
         # fill the empty space with zero bytes
@@ -176,7 +198,9 @@ def _chunk_key_bytes(key_bytes: bytes) -> List[bytes]:
     return chunks
 
 
-def _create_shares_from_chunks(chunks: List[bytes], n: int, k: int) -> List[List[Tuple[int, bytes]]]:
+def _create_shares_from_chunks(
+    chunks: List[bytes], n: int, k: int
+) -> List[List[Tuple[int, bytes]]]:
     """
     Perform shamir secret sharing on the chunks of the key and return the shares
     :param chunks: a list of 16 byte chunks making up the private sharing key
