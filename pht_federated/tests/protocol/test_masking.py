@@ -28,11 +28,15 @@ def key_broadcast():
     keys = []
     for i in range(5):
         user_keys, msg = protocol.setup()
-        client_broadcast = BroadCastClientKeys(user_id=f"user-{i}", broadcast=msg)
+        client_broadcast = BroadCastClientKeys(client_id=f"user-{i}", broadcast=msg)
         broadcasts.append(client_broadcast)
         keys.append(user_keys)
 
-    server_broadcast = ServerKeyBroadcast(participants=broadcasts)
+    server_broadcast = ServerKeyBroadcast(
+        protocol_id="test",
+        round_id=0,
+        participants=broadcasts
+    )
     return server_broadcast, keys
 
 
@@ -147,12 +151,14 @@ def test_generate_user_mask_removal():
     user_3 = "test-user-3"
 
     client_key_broadcasts = [
-        BroadCastClientKeys(user_id=user_1, broadcast=key_broadcast_1),
-        BroadCastClientKeys(user_id=user_2, broadcast=key_broadcast_2),
-        BroadCastClientKeys(user_id=user_3, broadcast=key_broadcast_3),
+        BroadCastClientKeys(client_id=user_1, broadcast=key_broadcast_1),
+        BroadCastClientKeys(client_id=user_2, broadcast=key_broadcast_2),
+        BroadCastClientKeys(client_id=user_3, broadcast=key_broadcast_3),
     ]
 
     server_key_broadcast = server_protocol.broadcast_keys(
+        protocol_id="test",
+        round_id=0,
         client_keys=client_key_broadcasts
     )
 

@@ -1,3 +1,5 @@
+import uuid
+
 from pht_federated.protocols.secure_aggregation import ClientProtocol
 from pht_federated.protocols.secure_aggregation.models.server_messages import (
     BroadCastClientKeys,
@@ -16,16 +18,18 @@ def test_ciphers():
     receiver = "test-receiver"
 
     server_broadcast = ServerKeyBroadcast(
+        protocol_id=uuid.uuid4(),
+        round_id=0,
         participants=[
-            BroadCastClientKeys(user_id=sender, broadcast=broadcast_1),
-            BroadCastClientKeys(user_id=receiver, broadcast=broadcast_2),
+            BroadCastClientKeys(client_id=sender, broadcast=broadcast_1),
+            BroadCastClientKeys(client_id=receiver, broadcast=broadcast_2),
         ]
     )
     seed_1, share_msg_1 = protocol.process_key_broadcast(
-        user_id=sender, keys=keys_1, broadcast=server_broadcast, k=2
+        client_id=sender, keys=keys_1, broadcast=server_broadcast, k=2
     )
     seed_2, share_msg_2 = protocol.process_key_broadcast(
-        user_id=receiver, keys=keys_2, broadcast=server_broadcast, k=2
+        client_id=receiver, keys=keys_2, broadcast=server_broadcast, k=2
     )
 
     cipher = share_msg_1.ciphers[0]

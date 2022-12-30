@@ -1,3 +1,4 @@
+import uuid
 from typing import List, Optional, Union
 
 from pydantic import BaseModel
@@ -9,7 +10,7 @@ from pht_federated.protocols.secure_aggregation.models.client_messages import (
 
 
 class BroadCastClientKeys(BaseModel):
-    user_id: Union[int, str]
+    client_id: Union[int, str]
     broadcast: ClientKeyBroadCast
 
 
@@ -17,7 +18,8 @@ class ServerKeyBroadcast(BaseModel):
     """
     Broadcast the keys of users registered in round 1 of the protocol.
     """
-
+    protocol_id: Union[uuid.UUID, str]
+    round_id: Union[int, str]
     participants: List[BroadCastClientKeys]
 
 

@@ -9,9 +9,18 @@ from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts impo
     get_key_broadcasts_for_round,
     store_key_broadcast,
 )
+from pht_federated.aggregator.services.secure_aggregation.db.key_shares import (
+    store_key_shares,
+    get_key_shares_for_round,
+)
 from pht_federated.aggregator.services.secure_aggregation.steps import registration
 from pht_federated.protocols.secure_aggregation.models.client_messages import (
     ClientKeyBroadCast,
+    ShareKeysMessage,
+)
+
+from pht_federated.protocols.secure_aggregation.models.server_messages import (
+    ServerKeyBroadcast,
 )
 from pht_federated.protocols.secure_aggregation.server.server_protocol import (
     ServerProtocol,
@@ -217,6 +226,69 @@ class SecureAggregation:
             protocol.id, f"Protocol status: \n{status.json(indent=2)}"
         )
         return status
+
+    def get_key_broadcasts(
+        self, db: Session, protocol: models.AggregationProtocol
+    ) -> ServerKeyBroadcast:
+        """
+        Get all key broadcasts for the given protocol
+        :param db: sqlalchemy session
+        :param protocol: protocol object
+        :return:
+        """
+
+        current_round = rounds.get_active_round(db, protocol)
+        if not current_round:
+            raise ValueError("No active round found")
+
+        key_broadcasts = get_key_broadcasts_for_round(db, current_round.id)
+
+        server_broad_cast = ServerKeyBroadcast(
+            protocol_id=protocol.id,
+            round_id=current_round.id,
+            participants=key_broadcasts,
+        )
+
+        return server_broad_cast
+
+    def process_key_shares(
+        self,
+        db: Session,
+        key_shares: ShareKeysMessage,
+        protocol: models.AggregationProtocol,
+    ):
+        """
+        Process a list of key shares
+        :param db: sqlalchemy session
+        :param key_shares: list of key shares
+        :return:
+        """
+
+        db_round = rounds.get_active_round(db, protocol)
+        if not db_round:
+            raise ValueError("No active round found")
+        if db_round.step != 1:
+            raise ValueError("Invalid round step")
+
+        # store the key shares
+        db_share = store_key_shares(db, key_shares, db_round.id)
+
+        # check if the requirements for advancing to the next round are met
+        if self._check_advance_requirements(db, protocol, db_round):
+            self.advance_round(db, protocol)
+
+        key_shares = get_key_shares_for_round(db, db_round.id)
+        logger.info(
+            f"Protocol - {protocol.id} - Received {len(key_shares)} key shares for round {db_round.round}"
+        )
+
+        response = schemas.KeyShareResponse(
+            round_id=db_round.id,
+            message=f"Successfully submitted key shares for round {db_round.round}",
+            protocol_id=protocol.id,
+            key_shares_submitted=len(key_shares),
+        )
+        return response
 
 
 secure_aggregation = SecureAggregation()

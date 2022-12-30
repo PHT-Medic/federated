@@ -26,7 +26,7 @@ class ShareKeysMessage(BaseModel):
     Encrypted ciphers containing the shared keys are sent to the server.
     """
 
-    user_id: str
+    client_id: str
     ciphers: List[EncryptedCipher]
 
 
