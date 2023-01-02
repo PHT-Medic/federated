@@ -20,6 +20,9 @@ class ClientKeyBroadCast(BaseModel):
     sharing_public_key: str
     signature: Optional[str] = None
 
+    class Config:
+        orm_mode = True
+
 
 class ShareKeysMessage(BaseModel):
     """

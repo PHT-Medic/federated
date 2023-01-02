@@ -227,7 +227,7 @@ class SecureAggregation:
         )
         return status
 
-    def get_key_broadcasts(
+    def aggregate_key_broadcasts(
         self, db: Session, protocol: models.AggregationProtocol
     ) -> ServerKeyBroadcast:
         """
@@ -242,6 +242,7 @@ class SecureAggregation:
             raise ValueError("No active round found")
 
         key_broadcasts = get_key_broadcasts_for_round(db, current_round.id)
+        key_broadcasts = [ClientKeyBroadCast.from_orm(key_broadcast) for key_broadcast in key_broadcasts]
 
         server_broad_cast = ServerKeyBroadcast(
             protocol_id=protocol.id,

@@ -210,7 +210,7 @@ def get_key_broadcasts(
             status_code=404, detail=f"Protocol - {protocol_id} - not found"
         )
 
-    key_broadcasts = secure_aggregation.get_key_broadcasts(db, protocol)
+    key_broadcasts = secure_aggregation.aggregate_key_broadcasts(db, protocol)
     return key_broadcasts
 
 

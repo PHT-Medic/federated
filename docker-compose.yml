@@ -18,3 +18,19 @@ services:
     image: redis:6-alpine
     ports:
       - "6379:6379"
+
+  auth:
+    image: ghcr.io/tada5hi/authup-server:latest
+    container_name: federated-auth
+    volumes:
+      - ./service_data/auth:/usr/src/app/writable
+    ports:
+      - '3010:3010'
+    environment:
+      PORT: 3010
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: start123
+      NODE_ENV: test
+      PUBLIC_URL: http://auth:3010/
+    command:
+      - start
