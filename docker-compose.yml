@@ -5,7 +5,7 @@ volumes:
 
 services:
   postgres:
-    image: postgres:13
+    image: postgres:14
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin

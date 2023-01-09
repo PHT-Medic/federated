@@ -33,9 +33,7 @@ def key_broadcast():
         keys.append(user_keys)
 
     server_broadcast = ServerKeyBroadcast(
-        protocol_id="test",
-        round_id=0,
-        participants=broadcasts
+        protocol_id="test", round_id=0, participants=broadcasts
     )
     return server_broadcast, keys
 
@@ -157,9 +155,7 @@ def test_generate_user_mask_removal():
     ]
 
     server_key_broadcast = server_protocol.broadcast_keys(
-        protocol_id="test",
-        round_id=0,
-        client_keys=client_key_broadcasts
+        protocol_id="test", round_id=0, client_keys=client_key_broadcasts
     )
 
     private_mask_1 = _generate_private_mask(seed_1, 100)

@@ -383,11 +383,14 @@ def test_share_keys():
 
     client_protocol = ClientProtocol()
 
-
     key_broadcast = client.get(f"/api/protocol/{protocol_id}/keyBroadcasts").json()
 
     client_id = "user-1"
-    seed, key_shares = client_protocol.process_key_broadcast(client_id, client_keys[0], key_broadcast, 3)
+    seed, key_shares = client_protocol.process_key_broadcast(
+        client_id, client_keys[0], key_broadcast, 3
+    )
 
     # share keys
-    response = client.post(f"/api/protocol/{protocol_id}/shareKeys", json=key_shares.dict())
+    response = client.post(
+        f"/api/protocol/{protocol_id}/shareKeys", json=key_shares.dict()
+    )

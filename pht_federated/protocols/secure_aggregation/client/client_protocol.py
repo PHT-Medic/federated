@@ -53,7 +53,11 @@ class ClientProtocol:
         return keys, keys.key_broadcast()
 
     def process_key_broadcast(
-        self, client_id: str, keys: ClientKeys, broadcast: ServerKeyBroadcast, k: int = 3
+        self,
+        client_id: str,
+        keys: ClientKeys,
+        broadcast: ServerKeyBroadcast,
+        k: int = 3,
     ) -> Tuple[str, ShareKeysMessage]:
         """
         Process a key broadcast message from the server. It contains the public keys of the participants for one
@@ -222,9 +226,9 @@ class ClientProtocol:
                 raise ValueError(
                     f"Cipher receiver must be the user id. Cipher receiver: {cipher.receiver}, user: {user_id}"
                 )
-            sender_broadcast = [p for p in participants if p.client_id == cipher.sender][
-                0
-            ]
+            sender_broadcast = [
+                p for p in participants if p.client_id == cipher.sender
+            ][0]
             sender_public_key = load_public_key(
                 sender_broadcast.broadcast.cipher_public_key
             )

@@ -32,9 +32,9 @@ from pht_federated.protocols.secure_aggregation.secrets.util import load_public_
 
 
 def _recover_shared_masks(
-        user_key_shares: dict,
-        client_key_broadcasts: List[BroadCastClientKeys],
-        mask_size: int = 100,
+    user_key_shares: dict,
+    client_key_broadcasts: List[BroadCastClientKeys],
+    mask_size: int = 100,
 ) -> np.ndarray:
     """
     Use a dictionary of key shares to recover the shared masks
@@ -69,9 +69,9 @@ def _recover_shared_masks(
 class ServerProtocol:
     @staticmethod
     def broadcast_keys(
-            protocol_id: Union[uuid.UUID, str],
-            round_id: Union[int, str],
-            client_keys: List[BroadCastClientKeys]
+        protocol_id: Union[uuid.UUID, str],
+        round_id: Union[int, str],
+        client_keys: List[BroadCastClientKeys],
     ) -> ServerKeyBroadcast:
         """
         Broadcast a list of client key broadcast messages to all users
@@ -80,12 +80,14 @@ class ServerProtocol:
         :param client_keys: list of client key broadcasts submitted to the server
         :return: server broadcast containing the client keys
         """
-        return ServerKeyBroadcast(protocol_id=protocol_id, round_id=round_id, participants=client_keys)
+        return ServerKeyBroadcast(
+            protocol_id=protocol_id, round_id=round_id, participants=client_keys
+        )
 
     @staticmethod
     def broadcast_cyphers(
-            client_id: str,
-            shared_ciphers: List[ShareKeysMessage],
+        client_id: str,
+        shared_ciphers: List[ShareKeysMessage],
     ) -> ServerCipherBroadcast:
         """
         Broadcast a list of ciphers addressed to a specific user
@@ -115,7 +117,7 @@ class ServerProtocol:
 
     @staticmethod
     def broadcast_unmask_participants(
-            masked_inputs: List[MaskedInput],
+        masked_inputs: List[MaskedInput],
     ) -> ServerUnmaskBroadCast:
         """
         Process a list of masked inputs received in round 3 and broadcast the participants of the unmasking round
@@ -130,10 +132,10 @@ class ServerProtocol:
         return ServerUnmaskBroadCast(participants=participants)
 
     def aggregate_masked_inputs(
-            self,
-            client_key_broadcasts: List[BroadCastClientKeys],
-            masked_inputs: List[MaskedInput],
-            unmask_shares: List[UnmaskShares],
+        self,
+        client_key_broadcasts: List[BroadCastClientKeys],
+        masked_inputs: List[MaskedInput],
+        unmask_shares: List[UnmaskShares],
     ) -> AggregatedParameters:
         """
         Aggregate the masked inputs received in round 3 and unmask shares received in round 4. Use this to generate
@@ -172,10 +174,10 @@ class ServerProtocol:
 
     @staticmethod
     def _generate_reverse_mask(
-            seed_shares: List[UnmaskSeedShare],
-            key_shares: List[UnmaskKeyShare],
-            client_key_broadcasts: List[BroadCastClientKeys],
-            mask_size: int = 100,
+        seed_shares: List[UnmaskSeedShare],
+        key_shares: List[UnmaskKeyShare],
+        client_key_broadcasts: List[BroadCastClientKeys],
+        mask_size: int = 100,
     ) -> Tuple[np.ndarray, Union[np.ndarray, None]]:
         """
         Generate the reverse mask to unmask the sum of masked inputs

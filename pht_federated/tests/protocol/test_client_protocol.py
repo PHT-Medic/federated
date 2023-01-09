@@ -29,9 +29,7 @@ def key_broadcast():
         keys.append(user_keys)
 
     server_broadcast = ServerKeyBroadcast(
-        protocol_id="test",
-        round_id=1,
-        participants=broadcasts
+        protocol_id="test", round_id=1, participants=broadcasts
     )
     return server_broadcast, keys
 
@@ -150,7 +148,9 @@ def test_create_unmask_shares():
         BroadCastClientKeys(client_id=user_2, broadcast=broadcast_2),
         BroadCastClientKeys(client_id=user_3, broadcast=broadcast_3),
     ]
-    server_key_broadcast = server_protocol.broadcast_keys(uuid.uuid4(), 1, client_key_broadcasts)
+    server_key_broadcast = server_protocol.broadcast_keys(
+        uuid.uuid4(), 1, client_key_broadcasts
+    )
 
     assert len(server_key_broadcast.participants) == 3
 

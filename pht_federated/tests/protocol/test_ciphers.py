@@ -23,7 +23,7 @@ def test_ciphers():
         participants=[
             BroadCastClientKeys(client_id=sender, broadcast=broadcast_1),
             BroadCastClientKeys(client_id=receiver, broadcast=broadcast_2),
-        ]
+        ],
     )
     seed_1, share_msg_1 = protocol.process_key_broadcast(
         client_id=sender, keys=keys_1, broadcast=server_broadcast, k=2

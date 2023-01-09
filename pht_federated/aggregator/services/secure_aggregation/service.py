@@ -10,15 +10,14 @@ from pht_federated.aggregator.services.secure_aggregation.db.key_broadcasts impo
     store_key_broadcast,
 )
 from pht_federated.aggregator.services.secure_aggregation.db.key_shares import (
-    store_key_shares,
     get_key_shares_for_round,
+    store_key_shares,
 )
 from pht_federated.aggregator.services.secure_aggregation.steps import registration
 from pht_federated.protocols.secure_aggregation.models.client_messages import (
     ClientKeyBroadCast,
     ShareKeysMessage,
 )
-
 from pht_federated.protocols.secure_aggregation.models.server_messages import (
     ServerKeyBroadcast,
 )
@@ -242,7 +241,10 @@ class SecureAggregation:
             raise ValueError("No active round found")
 
         key_broadcasts = get_key_broadcasts_for_round(db, current_round.id)
-        key_broadcasts = [ClientKeyBroadCast.from_orm(key_broadcast) for key_broadcast in key_broadcasts]
+        key_broadcasts = [
+            ClientKeyBroadCast.from_orm(key_broadcast)
+            for key_broadcast in key_broadcasts
+        ]
 
         server_broad_cast = ServerKeyBroadcast(
             protocol_id=protocol.id,
@@ -273,6 +275,8 @@ class SecureAggregation:
 
         # store the key shares
         db_share = store_key_shares(db, key_shares, db_round.id)
+
+        assert db_share
 
         # check if the requirements for advancing to the next round are met
         if self._check_advance_requirements(db, protocol, db_round):

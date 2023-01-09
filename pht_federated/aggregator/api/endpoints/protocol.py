@@ -11,11 +11,11 @@ from pht_federated.aggregator.schemas.protocol import (
     AggregationProtocol,
     AggregationProtocolCreate,
     AggregationProtocolUpdate,
+    KeyShareResponse,
     ProtocolSettings,
     ProtocolSettingsUpdate,
     ProtocolStatus,
     RegistrationResponse,
-    KeyShareResponse,
 )
 from pht_federated.aggregator.services.secure_aggregation.service import (
     secure_aggregation,
