@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -52,7 +52,9 @@ class DiscoveryUnstructuredData(ds.DatasetUnstructuredData):
     figure_data: Optional[DiscoveryFigure]
 
 
-class DiscoverySummary(ds.DiscoveryStatistics):
+class DiscoveryTabularSummary(BaseModel):
+    item_count: Optional[int]
+    feature_count: Optional[int]
     column_information: Optional[
         List[
             Annotated[
@@ -67,6 +69,30 @@ class DiscoverySummary(ds.DiscoveryStatistics):
             ]
         ]
     ]
+
+class DiscoveryCodeSummary(BaseModel):
+    system: Optional[str]
+    code: Optional[str]
+    code_statistics: Optional[DiscoveryTabularSummary]
+class DiscoveryResourceSummary(BaseModel):
+    resource_name: Optional[str]
+    resource_statistics: Optional[DiscoveryTabularSummary]
+    code_based_statistics: Optional[List[DiscoveryCodeSummary]]
+
+class DiscoveryFHIRSummary(BaseModel):
+    type: Literal['fhir']
+    discovery_resource_types: Optional[List[str]]
+    discovery_server_statistics: Optional[List[DiscoveryResourceSummary]]
+
+class DiscoveryCSVSummary(BaseModel):
+    type: Literal['csv']
+    discovery_csv_summary: Optional[DiscoveryTabularSummary]
+
+
+class DiscoverySummary(ds.DiscoveryStatistics):
+    summary: Optional[List[Annotated[Union[DiscoveryCSVSummary,
+                                        DiscoveryFHIRSummary],
+                                        Field(discriminator='type')]]]
 
     class Config:
         orm_mode = True

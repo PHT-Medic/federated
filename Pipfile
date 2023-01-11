@@ -27,6 +27,7 @@ alembic = "*"
 httpx = "*"
 pandas = "*"
 pendulum = "*"
+fhir-kindling = "*"
 
 [dev-packages]
 pytest = "*"

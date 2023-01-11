@@ -146,31 +146,25 @@ def test_post_discovery_statistics_numeric(discovery_client):
     df["target"] = diabetes_dataset["target"]
     df_split = np.array_split(df, 3)
 
-    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
-    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
-    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0],"csv"))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1],"csv"))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2],"csv"))
 
     stats_create_1 = StatisticsCreate(
         **{
-            "item_count": stats1_json["item_count"],
-            "feature_count": stats1_json["feature_count"],
-            "column_information": stats1_json["column_information"],
+            "statistics":stats1_json["statistics"]
         }
     )
 
     stats_create_2 = StatisticsCreate(
         **{
-            "item_count": stats2_json["item_count"],
-            "feature_count": stats2_json["feature_count"],
-            "column_information": stats2_json["column_information"],
+            "statistics":stats2_json["statistics"]
         }
     )
 
     stats_create_3 = StatisticsCreate(
         **{
-            "item_count": stats3_json["item_count"],
-            "feature_count": stats3_json["feature_count"],
-            "column_information": stats3_json["column_information"],
+            "statistics":stats3_json["statistics"]
         }
     )
 
@@ -189,12 +183,12 @@ def test_post_discovery_statistics_numeric(discovery_client):
     assert response2.discovery_id == discovery.id
     assert response3.discovery_id == discovery.id
 
-    stats = statistics.get_discovery_statistics(df)
+    stats = statistics.get_discovery_statistics(df,"csv")
 
     aggregate_response = discovery_client.get_aggregated_results(
         proposal_id, discovery.id
     )
-    print(aggregate_response)
+    print("hi:",aggregate_response)
     assert aggregate_response.discovery_id == discovery.id
 
     aggregate_with_features_response = discovery_client.get_aggregated_results(

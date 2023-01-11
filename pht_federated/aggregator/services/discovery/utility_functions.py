@@ -5,7 +5,7 @@ from typing import Union
 import plotly.io
 from fastapi.encoders import jsonable_encoder
 
-from pht_federated.aggregator.schemas.discovery import DiscoverySummary
+from pht_federated.aggregator.schemas.discovery import DiscoverySummary, DiscoveryTabularSummary, DiscoveryCSVSummary,DiscoveryResourceSummary,DiscoveryFHIRSummary
 from pht_federated.aggregator.schemas.figures import DiscoveryFigure
 from pht_federated.aggregator.services.discovery.plots import (
     create_barplot,
@@ -13,18 +13,7 @@ from pht_federated.aggregator.services.discovery.plots import (
 )
 from pht_federated.aggregator.services.discovery.statistics import calc_combined_std
 
-
-def aggregate_proposal_features(
-    response: list, proposal_id: str, features: Union[str, None]
-) -> DiscoverySummary:
-    """
-    Aggregates the individual values of >= 2 DatasetStatistics objects
-    :param response: list of DatasetStatistics objects
-    :param proposal_id: integer value of the corresponding proposal
-    :param query: comma seperated list that specifies feature parameter that should be aggregated
-    :return: DiscoverySummary object
-    """
-
+def aggregate_proposal_csv_features(response: list, proposal_id: str, features: Union[str, None]):
     feature_lst = []
     aggregated_feature_lst = []
     discovery_item_count = 0
@@ -37,10 +26,10 @@ def aggregate_proposal_features(
     else:
         for discovery in response:
             discovery = jsonable_encoder(discovery)
-            discovery_item_count += discovery["item_count"]
-            discovery_feature_count += discovery["feature_count"]
+            discovery_item_count += discovery["statistics"][0]["csv_statistics"]["item_count"]
+            discovery_feature_count += discovery["statistics"][0]["csv_statistics"]["feature_count"]
 
-            for feature in discovery["column_information"]:
+            for feature in discovery["statistics"][0]["csv_statistics"]["column_information"]:
                 if features:
                     selected_features = features.split(",")
                     if feature["title"] in selected_features:
@@ -84,16 +73,145 @@ def aggregate_proposal_features(
 
         discovery_feature_count /= len(response)
 
-        discovery_summary_schema = {
-            "proposal_id": proposal_id,
+        discovery_tabular_summary_schema = {
             "item_count": discovery_item_count,
             "feature_count": discovery_feature_count,
             "column_information": aggregated_feature_lst,
         }
+
+        discovery_tabular_summary = DiscoveryTabularSummary(**discovery_tabular_summary_schema)
+        discovery_csv_summary_schema = {
+            "type": "csv",
+            "discovery_csv_summary": discovery_tabular_summary
+        }
+        discovery_csv_summary = DiscoveryCSVSummary(**discovery_csv_summary_schema)
+        discovery_summary_schema = {
+            "proposal_id": proposal_id,
+            "summary":[discovery_csv_summary]
+        }
         discovery_summary = DiscoverySummary(**discovery_summary_schema)
+        return discovery_summary
 
+def aggregate_proposal_fhir_features(response: list, proposal_id: str, features: Union[str, None]):
+    total_resources_names = []
+    total_resources_statistics = []
+
+    if len(response) < 2:
+        raise ValueError(
+            "Not able to aggregate a discovery summary over less than 2 DatasetStatistics. Aborted."
+        )
+    else:
+        for discovery in response:
+            discovery = jsonable_encoder(discovery)
+            disc_res_types = discovery["statistics"][0]["resource_types"]
+            total_resources_names = list(set(total_resources_names)|set(disc_res_types))
+
+        for resource in total_resources_names:
+            number_of_resources = 0
+            resource_feature_lst = []
+            resource_aggregated_feature_lst = []
+            discovery_resource_item_count = 0
+            discovery_resource_feature_count = 0
+            for discovery in response:
+                discovery = jsonable_encoder(discovery)
+                for res_disc in discovery["statistics"][0]["server_statistics"]:
+                    if resource == res_disc["resource_name"]:
+                        number_of_resources+=1
+                        discovery_resource_item_count += res_disc["resource_statistics"]["item_count"]
+                        discovery_resource_feature_count +=res_disc["resource_statistics"]["feature_count"]
+                        for feature in res_disc["resource_statistics"]["column_information"]:
+                            if features:
+                                selected_features = features.split(",")
+                                if feature["title"] in selected_features:
+                                    resource_feature_lst.append(feature)
+                            else:
+                                resource_feature_lst.append(feature)
+
+            for feature in resource_feature_lst:
+                if feature["type"] == "numeric":
+                    discovery_summary_json = aggregate_numerical_columns(
+                        resource_feature_lst, feature
+                    )
+                    resource_aggregated_feature_lst.append(discovery_summary_json)
+
+                elif feature["type"] == "categorical":
+                    discovery_summary_json = aggregate_categorical_columns(
+                        resource_feature_lst, feature, number_of_resources
+                    )
+                    resource_aggregated_feature_lst.append(discovery_summary_json)
+
+                elif feature["type"] == "unstructured":
+                    discovery_summary_json = aggregate_unstructured_data(
+                        resource_feature_lst, feature
+                    )
+                    resource_aggregated_feature_lst.append(discovery_summary_json)
+
+                elif feature["type"] == "unique":
+                    if(resource == "Patient"):
+                        print()
+                    discovery_summary_json = aggregate_unique_columns(
+                        resource_feature_lst, feature, number_of_resources
+                    )
+                    resource_aggregated_feature_lst.append(discovery_summary_json)
+
+                elif feature["type"] == "equal":
+                    discovery_summary_json = aggregate_equal_columns(resource_feature_lst, feature)
+                    resource_aggregated_feature_lst.append(discovery_summary_json)
+
+                resource_feature_lst = [x for x in resource_feature_lst if x["title"] != feature["title"]]
+                if len(resource_feature_lst) == 0:
+                    break
+
+            discovery_resource_feature_count /= number_of_resources
+
+            discovery_tabular_summary_schema = {
+                "item_count": discovery_resource_item_count,
+                "feature_count": discovery_resource_feature_count,
+                "column_information": resource_aggregated_feature_lst,
+            }
+            discovery_tabular_summary = DiscoveryTabularSummary(**discovery_tabular_summary_schema)
+
+            discovery_resource_summary_schema = {
+                "resource_name": resource,
+                "resource_statistics":discovery_tabular_summary
+            }
+            discovery_resource_summary = DiscoveryResourceSummary(**discovery_resource_summary_schema)
+            print()
+            total_resources_statistics.append(discovery_resource_summary)
+
+        print(total_resources_statistics)
+        discovery_fhir_summary_schema = {
+            "type": "fhir",
+            "discovery_resource_types":total_resources_names,
+            "discovery_server_statistics": total_resources_statistics
+        }
+        discovery_fhir_summary = DiscoveryFHIRSummary(**discovery_fhir_summary_schema)
+        discovery_summary_schema = {
+            "proposal_id": proposal_id,
+            "summary":[discovery_fhir_summary]
+        }
+        discovery_summary = DiscoverySummary(**discovery_summary_schema)
+        return discovery_summary
+def aggregate_proposal_features(
+    response: list, proposal_id: str, features: Union[str, None]
+) -> DiscoverySummary:
+    """
+    Aggregates the individual values of >= 2 DatasetStatistics objects
+    :param response: list of DatasetStatistics objects
+    :param proposal_id: integer value of the corresponding proposal
+    :param query: comma seperated list that specifies feature parameter that should be aggregated
+    :return: DiscoverySummary object
+    """
+    test_dataset = jsonable_encoder(response[0])
+    discovery_summary = "Test"
+    print()
+    if test_dataset["statistics"][0]["type"] == "fhir":
+        discovery_summary = aggregate_proposal_fhir_features(response,proposal_id,features)
+    elif test_dataset["statistics"][0]["type"] == "csv":
+        discovery_summary = aggregate_proposal_csv_features(response, proposal_id, features)
+    else:
+        print("Other types needs to be implemented. Only fhir and csv so far!")
     return discovery_summary
-
 
 def aggregate_numerical_columns(feature_lst: list, feature: dict) -> dict:
     """

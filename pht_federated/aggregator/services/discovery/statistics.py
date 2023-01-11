@@ -1,38 +1,84 @@
-from typing import Optional
-
+from typing import Optional, Union
 import pandas as pd
 import plotly.io
 from pandas.api.types import is_bool_dtype, is_numeric_dtype
 from plotly.graph_objs import Figure
 
-from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
+from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics,TabularStatistics,CSVStatistics,FHIRStatistics,ResourceStatistics,DataType
 from pht_federated.aggregator.schemas.discovery import DiscoveryFigure
 
+def do_csvstatistics_calculations(dataframe: pd.DataFrame) -> Optional[CSVStatistics]:
+    tabular_stat = do_tabularstatistics_calculations(dataframe)
+    schema_data = {
+        'type': 'csv',
+        'csv_statistics': tabular_stat
+    }
+    statistics = CSVStatistics(**schema_data)
+    return statistics
 
-def get_discovery_statistics(dataframe: pd.DataFrame) -> Optional[DatasetStatistics]:
-    """
-    Computes statistical information of a dataset
-    :param dataframe: Dataset as dataframe object
-    :return: Dataset statistics
-    """
-    if not (isinstance(dataframe, pd.DataFrame)):
-        raise TypeError(
-            "The given dataset needs to be in pandas DataFrame format in order to get Discovery statistcs."
-        )
+def do_tabularstatistics_calculations(dataframe: pd.DataFrame) -> Optional[TabularStatistics]:
     shape = dataframe.shape
-    description = dataframe.describe(include="all")
+    description = dataframe.describe(include='all')
+
     n_items = shape[0]
     n_features = shape[1]
     columns_inf = get_column_information(dataframe, description)
 
     schema_data = {
-        "item_count": n_items,
-        "feature_count": n_features,
-        "column_information": columns_inf,
+        'item_count': n_items,
+        'feature_count': n_features,
+        'column_information': columns_inf
     }
-
-    statistics = DatasetStatistics(**schema_data)
+    statistics = TabularStatistics(**schema_data)
     return statistics
+
+def do_fhirstatistics_calculations(data: dict):
+    serverList = list()
+    resource_names = []
+    for resource in data:
+        resource_df = data[resource]
+        resource_names.append(resource)
+        if resource == "Patient":
+            print()
+        resource_statistics = do_tabularstatistics_calculations(resource_df)
+        resourceDict = {
+            "resource_name": resource,
+            "resource_statistics": resource_statistics
+        }
+        resourcesStat = ResourceStatistics(**resourceDict)
+        serverList.append(resourcesStat)
+
+    fhirDict = {
+        "type": "fhir",
+        "resource_types": resource_names,
+        "server_statistics": serverList
+    }
+    statistics = FHIRStatistics(**fhirDict)
+    return statistics
+
+def get_discovery_statistics(data: Union[pd.DataFrame,dict],data_type: str) -> Optional[DatasetStatistics]:
+    """
+    Computes statistical information of a dataset
+    :param data: Dataset as dataframe or dict object (depending on csv or fhir)
+    :param data_type: defines which kind of statistics is necessary
+    :return: Dataset statistics
+    """
+    if not (isinstance(data, pd.DataFrame) or isinstance(data, dict)):
+        raise TypeError
+    if data_type == "fhir" and isinstance(data, dict):
+        statistics = do_fhirstatistics_calculations(data)
+        stats = {
+            "type": DataType.FHIR,
+            "statistics": [statistics]
+        }
+    elif data_type != "fhir" and isinstance(data, pd.DataFrame):
+        statistics = do_csvstatistics_calculations(data)
+        stats = {
+            "type": DataType.CSV,
+            "statistics": [statistics]
+        }
+    dataSetStatistics = DatasetStatistics(**stats)
+    return dataSetStatistics
 
 
 def get_column_information(dataframe: pd.DataFrame, description: pd.DataFrame) -> dict:

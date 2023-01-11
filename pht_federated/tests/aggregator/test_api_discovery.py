@@ -17,7 +17,6 @@ from pht_federated.aggregator.services.discovery import statistics
 from pht_federated.tests.aggregator.test_db import override_get_db
 
 app.dependency_overrides[get_db] = override_get_db
-
 client = TestClient(app)
 
 PROPOSAL_ID_NUMERIC = uuid4()
@@ -150,9 +149,9 @@ def test_discovery_create_numeric():
     # print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
 
-    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
-    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
-    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0],"csv"))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1],"csv"))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2],"csv"))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     # proposal_id, discovery_id = create_proposal_and_discovery()
@@ -168,13 +167,10 @@ def test_discovery_create_numeric():
         },
     )
     discovery_id = response.json()["id"]
-
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats1_json["item_count"],
-            "feature_count": stats1_json["feature_count"],
-            "column_information": stats1_json["column_information"],
+            "statistics":stats1_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -182,9 +178,7 @@ def test_discovery_create_numeric():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats2_json["item_count"],
-            "feature_count": stats2_json["feature_count"],
-            "column_information": stats2_json["column_information"],
+            "statistics": stats2_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -192,9 +186,7 @@ def test_discovery_create_numeric():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats3_json["item_count"],
-            "feature_count": stats3_json["feature_count"],
-            "column_information": stats3_json["column_information"],
+            "statistics":stats3_json["statistics"]
         },
     )
 
@@ -210,9 +202,9 @@ def test_discovery_create_numeric2():
     # print("Breast Cancer dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
 
-    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
-    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
-    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0],"csv"))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1],"csv"))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2],"csv"))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     proposal_id, discovery_id = create_proposal_and_discovery()
@@ -220,9 +212,7 @@ def test_discovery_create_numeric2():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats1_json["item_count"],
-            "feature_count": stats1_json["feature_count"],
-            "column_information": stats1_json["column_information"],
+            "statistics": stats1_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -230,9 +220,7 @@ def test_discovery_create_numeric2():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats2_json["item_count"],
-            "feature_count": stats2_json["feature_count"],
-            "column_information": stats2_json["column_information"],
+            "statistics": stats2_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -240,9 +228,7 @@ def test_discovery_create_numeric2():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats3_json["item_count"],
-            "feature_count": stats3_json["feature_count"],
-            "column_information": stats3_json["column_information"],
+            "statistics": stats3_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -253,9 +239,9 @@ def test_discovery_create_mixed():
     df_titanic = pd.read_csv(data_path)
     df_split = np.array_split(df_titanic, 3)
 
-    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
-    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
-    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0],"csv"))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1],"csv"))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2],"csv"))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     print("PROPOSAL ID MIXED : {}".format(PROPOSAL_ID_MIXED))
@@ -265,9 +251,7 @@ def test_discovery_create_mixed():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats1_json["item_count"],
-            "feature_count": stats1_json["feature_count"],
-            "column_information": stats1_json["column_information"],
+            "statistics": stats1_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -275,9 +259,7 @@ def test_discovery_create_mixed():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats2_json["item_count"],
-            "feature_count": stats2_json["feature_count"],
-            "column_information": stats2_json["column_information"],
+            "statistics": stats2_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -285,9 +267,7 @@ def test_discovery_create_mixed():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats3_json["item_count"],
-            "feature_count": stats3_json["feature_count"],
-            "column_information": stats3_json["column_information"],
+            "statistics": stats3_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -298,9 +278,9 @@ def test_discovery_get_all():
     df_titanic = pd.read_csv(data_path)
     df_split = np.array_split(df_titanic, 3)
 
-    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
-    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
-    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0],"csv"))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1],"csv"))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2],"csv"))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     print("PROPOSAL ID MIXED : {}".format(PROPOSAL_ID_MIXED))
@@ -310,9 +290,7 @@ def test_discovery_get_all():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats1_json["item_count"],
-            "feature_count": stats1_json["feature_count"],
-            "column_information": stats1_json["column_information"],
+            "statistics": stats1_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -320,9 +298,7 @@ def test_discovery_get_all():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats2_json["item_count"],
-            "feature_count": stats2_json["feature_count"],
-            "column_information": stats2_json["column_information"],
+            "statistics": stats2_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -330,9 +306,7 @@ def test_discovery_get_all():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats3_json["item_count"],
-            "feature_count": stats3_json["feature_count"],
-            "column_information": stats3_json["column_information"],
+            "statistics": stats3_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -340,45 +314,45 @@ def test_discovery_get_all():
     response = client.get(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/summary"
     )
+    print("Response:",response)
     assert response.status_code == 200, response.text
 
     response = response.json()
+    df_titanic = pd.read_csv('./data/train_data_titanic.csv')
+    stats_df = statistics.get_discovery_statistics(df_titanic,"csv")
 
-    # df_titanic = pd.read_csv('./data/train_data_titanic.csv')
-    stats_df = statistics.get_discovery_statistics(df_titanic)
-
-    assert stats_df.item_count == response["item_count"]
-    assert stats_df.feature_count == response["feature_count"]
-
-    assert (
-        stats_df.column_information[0].mean == response["column_information"][0]["mean"]
-    )
-    assert (
-        stats_df.column_information[0].min == response["column_information"][0]["min"]
-    )
-    assert (
-        stats_df.column_information[0].max == response["column_information"][0]["max"]
-    )
-    assert (
-        stats_df.column_information[0].not_na_elements
-        == response["column_information"][0]["not_na_elements"]
-    )
+    assert stats_df.statistics[0].csv_statistics.item_count == response["summary"][0]["discovery_csv_summary"]["item_count"]
+    assert stats_df.statistics[0].csv_statistics.feature_count == response["summary"][0]["discovery_csv_summary"]["feature_count"]
 
     assert (
-        stats_df.column_information[4].number_categories
-        == response["column_information"][4]["number_categories"]
+        stats_df.statistics[0].csv_statistics.column_information[0].mean == response["summary"][0]["discovery_csv_summary"]["column_information"][0]["mean"]
     )
     assert (
-        stats_df.column_information[4].value_counts
-        == response["column_information"][4]["value_counts"]
+        stats_df.statistics[0].csv_statistics.column_information[0].min == response["summary"][0]["discovery_csv_summary"]["column_information"][0]["min"]
     )
     assert (
-        stats_df.column_information[4].most_frequent_element
-        == response["column_information"][4]["most_frequent_element"]
+        stats_df.statistics[0].csv_statistics.column_information[0].max == response["summary"][0]["discovery_csv_summary"]["column_information"][0]["max"]
     )
     assert (
-        stats_df.column_information[4].frequency
-        == response["column_information"][4]["frequency"]
+        stats_df.statistics[0].csv_statistics.column_information[0].not_na_elements
+        == response["summary"][0]["discovery_csv_summary"]["column_information"][0]["not_na_elements"]
+    )
+
+    assert (
+        stats_df.statistics[0].csv_statistics.column_information[4].number_categories
+        == response["summary"][0]["discovery_csv_summary"]["column_information"][4]["number_categories"]
+    )
+    assert (
+        stats_df.statistics[0].csv_statistics.column_information[4].value_counts
+        == response["summary"][0]["discovery_csv_summary"]["column_information"][4]["value_counts"]
+    )
+    assert (
+        stats_df.statistics[0].csv_statistics.column_information[4].most_frequent_element
+        == response["summary"][0]["discovery_csv_summary"]["column_information"][4]["most_frequent_element"]
+    )
+    assert (
+        stats_df.statistics[0].csv_statistics.column_information[4].frequency
+        == response["summary"][0]["discovery_csv_summary"]["column_information"][4]["frequency"]
     )
 
 
@@ -392,9 +366,9 @@ def test_discovery_get_selected():
     # print("Diabetes dataset pandas : {}".format(tabulate(df, headers='keys', tablefmt='psql')))
     df_split = np.array_split(df, 3)
 
-    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
-    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
-    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
+    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0],"csv"))
+    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1],"csv"))
+    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2],"csv"))
     # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     # proposal_id, discovery_id = create_proposal_and_discovery()
@@ -413,9 +387,7 @@ def test_discovery_get_selected():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats1_json["item_count"],
-            "feature_count": stats1_json["feature_count"],
-            "column_information": stats1_json["column_information"],
+            "statistics": stats1_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -423,9 +395,7 @@ def test_discovery_get_selected():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats2_json["item_count"],
-            "feature_count": stats2_json["feature_count"],
-            "column_information": stats2_json["column_information"],
+            "statistics": stats2_json["statistics"]
         },
     )
     assert response.status_code == 200, response.text
@@ -433,9 +403,7 @@ def test_discovery_get_selected():
     response = client.post(
         f"/api/proposal/{proposal_id}/discoveries/{discovery_id}/stats",
         json={
-            "item_count": stats3_json["item_count"],
-            "feature_count": stats3_json["feature_count"],
-            "column_information": stats3_json["column_information"],
+            "statistics": stats3_json["statistics"]
         },
     )
 
@@ -446,29 +414,30 @@ def test_discovery_get_selected():
     assert response.status_code == 200, response.text
 
     response = response.json()
+    print(response)
 
     diabetes_dataset = sklearn.datasets.load_diabetes(return_X_y=False, as_frame=False)
     df = pd.DataFrame(
         diabetes_dataset["data"], columns=diabetes_dataset["feature_names"]
     )
     df["target"] = diabetes_dataset["target"]
-    stats_df = statistics.get_discovery_statistics(df)
+    stats_df = statistics.get_discovery_statistics(df,"csv")
 
-    assert stats_df.item_count == response["item_count"]
-    assert stats_df.feature_count == response["feature_count"]
+    assert stats_df.statistics[0].csv_statistics.item_count == response["summary"][0]["discovery_csv_summary"]["item_count"]
+    assert stats_df.statistics[0].csv_statistics.feature_count == response["summary"][0]["discovery_csv_summary"]["feature_count"]
 
     assert (
-        stats_df.column_information[0].mean == response["column_information"][0]["mean"]
+        stats_df.statistics[0].csv_statistics.column_information[0].mean == response["summary"][0]["discovery_csv_summary"]["column_information"][0]["mean"]
     )
     assert (
-        stats_df.column_information[0].min == response["column_information"][0]["min"]
+        stats_df.statistics[0].csv_statistics.column_information[0].min == response["summary"][0]["discovery_csv_summary"]["column_information"][0]["min"]
     )
     assert (
-        stats_df.column_information[0].max == response["column_information"][0]["max"]
+        stats_df.statistics[0].csv_statistics.column_information[0].max == response["summary"][0]["discovery_csv_summary"]["column_information"][0]["max"]
     )
     assert (
-        stats_df.column_information[0].not_na_elements
-        == response["column_information"][0]["not_na_elements"]
+        stats_df.statistics[0].csv_statistics.column_information[0].not_na_elements
+        == response["summary"][0]["discovery_csv_summary"]["column_information"][0]["not_na_elements"]
     )
 
 
