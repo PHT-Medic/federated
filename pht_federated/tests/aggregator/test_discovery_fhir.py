@@ -246,3 +246,47 @@ def test_discovery_get_all(fhir_credentials):
                        resources_agg["resource_statistics"]["item_count"]
                 assert resource_stats.resource_statistics.feature_count == \
                        resources_agg["resource_statistics"]["feature_count"]
+
+                if resource_stats.resource_name == "Immunization":
+                    print()
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].type ==
+                            resources_agg["resource_statistics"]["column_information"][0]["type"]
+                    )
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].title ==
+                            resources_agg["resource_statistics"]["column_information"][0]["title"]
+                    )
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].value ==
+                            resources_agg["resource_statistics"]["column_information"][0]["value"]
+                    )
+                if resource_stats.resource_name == "Patient":
+                    print()
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].type ==
+                            resources_agg["resource_statistics"]["column_information"][0]["type"]
+                    )
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].title ==
+                            resources_agg["resource_statistics"]["column_information"][0]["title"]
+                    )
+                    print()
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].number_of_duplicates ==
+                            resources_agg["resource_statistics"]["column_information"][0]["number_of_duplicates"]
+                    )
+                if resource_stats.resource_name == "Condition":
+                    print()
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].type ==
+                            resources_agg["resource_statistics"]["column_information"][0]["type"]
+                    )
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].title ==
+                            resources_agg["resource_statistics"]["column_information"][0]["title"]
+                    )
+                    assert (
+                            resource_stats.resource_statistics.column_information[0].value ==
+                            resources_agg["resource_statistics"]["column_information"][0]["value"]
+                    )
