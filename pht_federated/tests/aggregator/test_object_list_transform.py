@@ -41,6 +41,12 @@ def test_object_to_list():
     masked_example_dict_col = [{k:int(v+10) if type(v) == int else v for k,v in d.items()} for d in masked_example_dict_col]
     masked_example_dict_col = [{k:None if k != "type" and k != "title" and type(v) != int else v for k,v in d.items()} for d in masked_example_dict_col]
 
+    example_object_dict["feature_count"] += 10
+    example_object_dict["item_count"] += 10
+    example_object_dict["column_information"] = masked_example_dict_col
+
+    example_object_masked = DatasetStatistics(**example_object_dict)
+
     #print("Example object dict col : {}".format(example_object_dict["column_information"]))
 
     object_list_int = object_list_transform.object_to_list(example_object)
@@ -54,7 +60,8 @@ def test_object_to_list():
     #print("Example Object dict : {}".format(masked_example_dict_col))
     #print("Object dict masked : {}".format(object_dict_masked["column_information"]))
 
-    assert example_object_dict["feature_count"] + 10 == object_dict_masked["feature_count"]
-    assert example_object_dict["item_count"] + 10 == object_dict_masked["item_count"]
+    assert example_object_dict["feature_count"] == object_dict_masked["feature_count"]
+    assert example_object_dict["item_count"] == object_dict_masked["item_count"]
 
     assert masked_example_dict_col == object_dict_masked["column_information"]
+    assert dataset_statistics_object_masked == example_object_masked

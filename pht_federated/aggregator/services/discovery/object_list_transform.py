@@ -1,13 +1,6 @@
 from pht_federated.aggregator.schemas.dataset_statistics import *
-
-import numpy as np
-import pandas as pd
-import sklearn
-from fastapi.encoders import jsonable_encoder
-from sklearn.datasets import load_breast_cancer
 from operator import itemgetter as i
 from functools import cmp_to_key
-
 from pht_federated.aggregator.services.discovery import statistics
 
 
@@ -135,8 +128,6 @@ def list_to_object(dataset_statistics_list: list, dataset_statistics_object: Dat
 
     dataset_statistics_object = DatasetStatistics(**stats_dict)
 
-    #print("Dataset_Statistics Object : {}".format(dataset_statistics_object))
-
     return dataset_statistics_object
 
 
@@ -158,11 +149,3 @@ def multikeysort(items, columns):
         return next((result for result in comparer_iter if result), 0)
     return sorted(items, key=cmp_to_key(comparer))
 
-
-#object_to_list(get_example_object())
-#list_to_object(object_to_list(get_example_object()))
-#list_int = object_to_list(get_example_object())
-#print("List of integers : {}".format(list_int))
-#list_int_masked = [i + 10 for i in list_int]
-#print("List of integers masked : {}".format(list_int_masked))
-#list_to_object(list_int_masked, get_example_object())
