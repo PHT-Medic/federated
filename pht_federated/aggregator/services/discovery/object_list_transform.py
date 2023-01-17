@@ -5,6 +5,11 @@ from pht_federated.aggregator.services.discovery import statistics
 
 
 def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
+    """
+    Transforms a DatasetStatistics object to python list of integers that contain all numerical values of the object
+    :param dataset_statistics_object: DatasetStatistics
+    :return: list of integers
+    """
 
     object_list_int = []
 
@@ -19,10 +24,7 @@ def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
         object_list_int.append(stats_dict["feature_count"])
 
     stats_columns = stats_dict["column_information"]
-    #print("Stats column information : {} + type : {}".format(stats_columns, type(stats_columns)))
-
     stats_columns_sorted = multikeysort(stats_columns, ["type", "title"])
-    #print("Stats column sorted : {}".format(stats_columns_sorted))
 
     for column in stats_columns_sorted:
         if column["type"] == "categorical":
@@ -57,15 +59,17 @@ def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
             if "frequency" in column:
                 object_list_int.append(column["frequency"])
 
-
-
     return object_list_int
 
 
 def list_to_object(dataset_statistics_list: list, dataset_statistics_object: DatasetStatistics) -> DatasetStatistics:
-
+    """
+    Transforms a python list of integers that contain all masked numerical values back to a DatasetStatistics object
+    :param dataset_statistics_list: list
+    :param dataset_statistics_object: DatasetStatistics
+    :return: DatasetStatistics
+    """
     stats_dict = dataset_statistics_object.dict()
-
     #print("Dataset Statistics Object : {}".format(stats_dict))
 
     if "item_count" in stats_dict:
@@ -124,6 +128,7 @@ def list_to_object(dataset_statistics_list: list, dataset_statistics_object: Dat
 
     stats_dict["column_information"] = stats_columns_sorted
 
+    #Transforms all numerical key-values to integers
     stats_dict["column_information"] = [{k:int(v) if type(v) != str else v for k,v in d.items()} for d in stats_dict["column_information"]]
 
     dataset_statistics_object = DatasetStatistics(**stats_dict)

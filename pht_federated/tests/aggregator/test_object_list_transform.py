@@ -37,8 +37,13 @@ def test_object_to_list():
     example_object_dict_col_sorted = object_list_transform.multikeysort(example_object_dict_col, ["type", "title"])
     example_object_dict["column_information"] = example_object_dict_col_sorted
 
+    #transforms all float64 values of dict to integer
     masked_example_dict_col = [{k:int(v) if type(v) == np.float64 else v for k,v in d.items()} for d in example_object_dict["column_information"]]
+
+    #masks all integer values of dict by adding a scalar=10
     masked_example_dict_col = [{k:int(v+10) if type(v) == int else v for k,v in d.items()} for d in masked_example_dict_col]
+
+    #removes all elements of dict that cannot be masked except for type and title
     masked_example_dict_col = [{k:None if k != "type" and k != "title" and type(v) != int else v for k,v in d.items()} for d in masked_example_dict_col]
 
     example_object_dict["feature_count"] += 10
@@ -47,8 +52,7 @@ def test_object_to_list():
 
     example_object_masked = DatasetStatistics(**example_object_dict)
 
-    #print("Example object dict col : {}".format(example_object_dict["column_information"]))
-
+    #transforms example object via function in object_list_transform.py
     object_list_int = object_list_transform.object_to_list(example_object)
 
     object_list_int_masked = [int(i + 10) for i in object_list_int]
