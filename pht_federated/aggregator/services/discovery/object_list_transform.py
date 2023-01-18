@@ -49,8 +49,7 @@ def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
             if "number_of_duplicates" in column:
                 object_list_int.append(column["number_of_duplicates"])
         elif column["type"] == "equal":
-            if "value" in column:
-                object_list_int.append(column["value"])
+            None
         elif column["type"] == "unstructured":
             if "not_na_elements" in column:
                 object_list_int.append(column["not_na_elements"])
@@ -58,6 +57,8 @@ def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
                 object_list_int.append(column["number_targets"])
             if "frequency" in column:
                 object_list_int.append(column["frequency"])
+
+    object_list_int = [int(i) for i in object_list_int]
 
     return object_list_int
 
@@ -127,9 +128,6 @@ def list_to_object(dataset_statistics_list: list, dataset_statistics_object: Dat
 
 
     stats_dict["column_information"] = stats_columns_sorted
-
-    #Transforms all numerical key-values to integers
-    stats_dict["column_information"] = [{k:int(v) if type(v) != str else v for k,v in d.items()} for d in stats_dict["column_information"]]
 
     dataset_statistics_object = DatasetStatistics(**stats_dict)
 
