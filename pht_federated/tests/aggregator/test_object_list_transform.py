@@ -79,9 +79,6 @@ def test_object_to_list():
     dataset_statistics_object_masked = object_list_transform.list_to_object(object_list_int_masked, example_object)
     object_dict_masked = dataset_statistics_object_masked.dict()
 
-    #print("Example Object dict : {}".format(masked_example_dict_col))
-    #print("Object dict masked : {}".format(object_dict_masked["column_information"]))
-
     assert example_object_dict["feature_count"] == object_dict_masked["feature_count"]
     assert example_object_dict["item_count"] == object_dict_masked["item_count"]
 
