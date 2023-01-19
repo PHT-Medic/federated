@@ -145,7 +145,6 @@ def get_discovery_summary(
 
     discovery_summary = aggregate_proposal_features(response, proposal_id, features)
     discovery_summary.discovery_id = discovery_id
-    #print("DISCOVERY SUMMARY : {}".format(discovery_summary.json()))
 
     return discovery_summary
 
