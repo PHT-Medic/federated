@@ -76,6 +76,7 @@ def process_column(column_information: list, object_list_int: list) -> list:
             object_list_int = process_unstructured_column(column, object_list_int)
 
     return object_list_int
+
 def retrieve_column(column_information: list, dataset_statistics_list: list) -> list:
 
     for column in column_information:
@@ -106,7 +107,6 @@ def retrieve_categorical_column(column: dict, dataset_statistics_list: list) -> 
 
     return column, dataset_statistics_list
 
-
 def retrieve_numeric_column(column: dict, dataset_statistics_list: list) -> [dict, list]:
 
     if "not_na_elements" in column:
@@ -122,7 +122,6 @@ def retrieve_numeric_column(column: dict, dataset_statistics_list: list) -> [dic
 
     return column, dataset_statistics_list
 
-
 def retrieve_unique_column(column: dict, dataset_statistics_list: list) -> [dict, list]:
     if "number_of_duplicates":
         column["number_of_duplicates"] = dataset_statistics_list.pop(0)
@@ -136,6 +135,7 @@ def retrieve_equal_column(column: dict, dataset_statistics_list: list) -> [dict,
         del column["value"]
 
     return column, dataset_statistics_list
+
 def retrieve_unstructured_column(column: dict, dataset_statistics_list: list) -> [dict, list]:
 
     if "not_na_elements" in column:
@@ -151,9 +151,6 @@ def retrieve_unstructured_column(column: dict, dataset_statistics_list: list) ->
 
     return column, dataset_statistics_list
 
-
-
-
 def process_categorical_column(column: dict, object_list_int: list) -> list:
 
     if "not_na_elements" in column:
@@ -164,7 +161,6 @@ def process_categorical_column(column: dict, object_list_int: list) -> list:
         object_list_int.append(column["frequency"])
 
     return object_list_int
-
 
 def process_numerical_column(column: dict, object_list_int: list) -> list:
     if "not_na_elements" in column:

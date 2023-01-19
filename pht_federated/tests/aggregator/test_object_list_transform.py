@@ -31,6 +31,7 @@ def get_example_object():
                                           'Target2': 140},
                         'most_frequent_target': 'Target2',
                         'frequency': 140}
+    
     equal_col = {'type': 'equal',
                  'title': 'race',
                  'value': 'human'}
