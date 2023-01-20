@@ -28,8 +28,6 @@ def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
 
     object_list_int = process_column(stats_columns_sorted, object_list_int)
 
-    object_list_int = [int(i) for i in object_list_int]
-
     return object_list_int
 
 
@@ -154,45 +152,45 @@ def retrieve_unstructured_column(column: dict, dataset_statistics_list: list) ->
 def process_categorical_column(column: dict, object_list_int: list) -> list:
 
     if "not_na_elements" in column:
-        object_list_int.append(column["not_na_elements"])
+        object_list_int.append(int(column["not_na_elements"]))
     if "number_categories" in column:
-        object_list_int.append(column["number_categories"])
+        object_list_int.append(int(column["number_categories"]))
     if "frequency" in column:
-        object_list_int.append(column["frequency"])
+        object_list_int.append(int(column["frequency"]))
 
     return object_list_int
 
 def process_numerical_column(column: dict, object_list_int: list) -> list:
     if "not_na_elements" in column:
-        object_list_int.append(column["not_na_elements"])
+        object_list_int.append(int(column["not_na_elements"]))
     if "mean" in column:
-        object_list_int.append(column["mean"])
+        object_list_int.append(int(column["mean"]))
     if "std" in column:
-        object_list_int.append(column["std"])
+        object_list_int.append(int(column["std"]))
     if "min" in column:
-        object_list_int.append(column["min"])
+        object_list_int.append(int(column["min"]))
     if "max" in column:
-        object_list_int.append(column["max"])
+        object_list_int.append(int(column["max"]))
 
     return object_list_int
 
 def process_unique_column(column: dict, object_list_int: list) -> list:
     if "number_of_duplicates" in column:
-        object_list_int.append(column["number_of_duplicates"])
+        object_list_int.append(int(column["number_of_duplicates"]))
 
     return object_list_int
 
 def process_unstructured_column(column: dict, object_list_int: list) -> list:
     if "not_na_elements" in column:
-        object_list_int.append(column["not_na_elements"])
+        object_list_int.append(int(column["not_na_elements"]))
     if "number_targets" in column:
-        object_list_int.append(column["number_targets"])
+        object_list_int.append(int(column["number_targets"]))
     if "frequency" in column:
-        object_list_int.append(column["frequency"])
+        object_list_int.append(int(column["frequency"]))
 
     return object_list_int
 
-
+#https://stackoverflow.com/questions/1143671/how-to-sort-objects-by-multiple-keys
 def compare(x, y):
     return (x > y) - (x < y)
 
