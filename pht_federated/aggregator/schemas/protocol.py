@@ -100,8 +100,15 @@ class ProtocolStatus(BaseModel):
         orm_mode = True
 
 
-class RegistrationResponse(BaseModel):
+class RoundInputResponse(BaseModel):
     protocol_id: Union[uuid.UUID, str]
     round_id: Union[int, str]
     message: Optional[str]
+
+
+class RegistrationResponse(RoundInputResponse):
     currently_registered: int
+
+
+class KeyShareResponse(RoundInputResponse):
+    key_shares_submitted: int

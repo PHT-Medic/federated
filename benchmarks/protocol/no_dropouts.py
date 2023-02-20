@@ -65,7 +65,7 @@ def benchmark(n_clients: int = 100, input_size: int = 10000, iterations: int = 1
             key_share_start = perf_counter()
             seed, share_message = client_protocol.process_key_broadcast(
                 keys=client_keys[c],
-                user_id=user_id,
+                client_id=user_id,
                 broadcast=server_key_broadcast,
                 k=3,
             )

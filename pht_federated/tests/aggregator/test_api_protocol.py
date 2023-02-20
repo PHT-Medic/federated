@@ -17,6 +17,29 @@ app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
 
+def setup_protocol_with_registration():
+    # create a protocol
+    data = {"name": "Test Protocol"}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 200, response.text
+
+    protocol_id = response.json()["id"]
+
+    client_protocol = ClientProtocol()
+
+    client_keys = []
+
+    for _ in range(5):
+        keys, broadcast = client_protocol.setup()
+        client_keys.append(keys)
+        response = client.post(
+            f"/api/protocol/{protocol_id}/register", json=broadcast.dict()
+        )
+        assert response.status_code == 200, response.text
+
+    return protocol_id, client_keys
+
+
 @pytest.fixture
 def proposal_id():
     response = client.post("/api/proposal", json={"name": "Protocol test"})
@@ -328,3 +351,46 @@ def test_protocol_auto_advance():
     status = client.get(f"/api/protocol/{protocol_id}/status").json()
     assert status["round_status"]["step"] == 1
     print(status)
+
+
+def test_get_protocol_status():
+    data = {"name": "Test Protocol"}
+    response = client.post("/api/protocol", json=data)
+    assert response.status_code == 200, response.text
+
+    protocol_id = response.json()["id"]
+
+    client_protocol = ClientProtocol()
+    keys, broadcast = client_protocol.setup()
+    response = client.post(
+        f"/api/protocol/{protocol_id}/register", json=broadcast.dict()
+    )
+    assert response.status_code == 200, response.text
+
+    response = client.get(f"/api/protocol/{protocol_id}/status")
+    assert response.status_code == 200, response.text
+
+    # invalid protocol
+    response = client.get(f"/api/protocol/{uuid.uuid4()}/status")
+    assert response.status_code == 404, response.text
+
+
+def test_share_keys():
+    protocol_id, client_keys = setup_protocol_with_registration()
+
+    # advance to the next round
+    response = client.post(f"/api/protocol/{protocol_id}/advance")
+
+    client_protocol = ClientProtocol()
+
+    key_broadcast = client.get(f"/api/protocol/{protocol_id}/keyBroadcasts").json()
+
+    client_id = "user-1"
+    seed, key_shares = client_protocol.process_key_broadcast(
+        client_id, client_keys[0], key_broadcast, 3
+    )
+
+    # share keys
+    response = client.post(
+        f"/api/protocol/{protocol_id}/shareKeys", json=key_shares.dict()
+    )

@@ -11,6 +11,7 @@ from pht_federated.aggregator.schemas.protocol import (
     AggregationProtocol,
     AggregationProtocolCreate,
     AggregationProtocolUpdate,
+    KeyShareResponse,
     ProtocolSettings,
     ProtocolSettingsUpdate,
     ProtocolStatus,
@@ -19,7 +20,10 @@ from pht_federated.aggregator.schemas.protocol import (
 from pht_federated.aggregator.services.secure_aggregation.service import (
     secure_aggregation,
 )
-from pht_federated.protocols.secure_aggregation.models import client_messages
+from pht_federated.protocols.secure_aggregation.models import (
+    client_messages,
+    server_messages,
+)
 
 router = APIRouter()
 
@@ -190,5 +194,40 @@ def register_for_protocol(
     try:
         response = secure_aggregation.process_registration(db, key_broadcast, protocol)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+    return response
+
+
+@router.get(
+    "/{protocol_id}/keyBroadcasts", response_model=server_messages.ServerKeyBroadcast
+)
+def get_key_broadcasts(
+    protocol_id: str, db: Session = Depends(dependencies.get_db)
+) -> List[client_messages.ClientKeyBroadCast]:
+    protocol = protocols.get(db, protocol_id)
+    if not protocol:
+        raise HTTPException(
+            status_code=404, detail=f"Protocol - {protocol_id} - not found"
+        )
+
+    key_broadcasts = secure_aggregation.aggregate_key_broadcasts(db, protocol)
+    return key_broadcasts
+
+
+@router.post("/{protocol_id}/shareKeys", response_model=KeyShareResponse)
+def upload_key_shares(
+    protocol_id: str,
+    key_shares: client_messages.ShareKeysMessage,
+    db: Session = Depends(dependencies.get_db),
+):
+    protocol = protocols.get(db, protocol_id)
+    if not protocol:
+        raise HTTPException(
+            status_code=404, detail=f"Protocol - {protocol_id} - not found"
+        )
+
+    try:
+        response = secure_aggregation.process_key_shares(db, key_shares, protocol)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return response

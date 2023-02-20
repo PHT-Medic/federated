@@ -20,13 +20,16 @@ class ClientKeyBroadCast(BaseModel):
     sharing_public_key: str
     signature: Optional[str] = None
 
+    class Config:
+        orm_mode = True
+
 
 class ShareKeysMessage(BaseModel):
     """
     Encrypted ciphers containing the shared keys are sent to the server.
     """
 
-    user_id: str
+    client_id: str
     ciphers: List[EncryptedCipher]
 
 

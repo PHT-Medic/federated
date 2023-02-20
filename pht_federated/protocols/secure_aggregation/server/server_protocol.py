@@ -1,3 +1,4 @@
+import uuid
 from typing import List, Tuple, Union
 
 import numpy as np
@@ -46,13 +47,13 @@ def _recover_shared_masks(
     """
     reverse_shared_mask = np.zeros(mask_size)
     for broad_cast in client_key_broadcasts:
-        sharing_key_shares = user_key_shares[broad_cast.user_id]
+        sharing_key_shares = user_key_shares[broad_cast.client_id]
         recovered_sharing_key = combine_key_shares(
             sharing_key_shares, k=len(client_key_broadcasts) - 1
         )
 
         for receiver_broadcast in client_key_broadcasts:
-            if receiver_broadcast.user_id != broad_cast.user_id:
+            if receiver_broadcast.client_id != broad_cast.client_id:
                 sharing_public_key = load_public_key(
                     receiver_broadcast.broadcast.sharing_public_key
                 )
@@ -67,37 +68,46 @@ def _recover_shared_masks(
 
 class ServerProtocol:
     @staticmethod
-    def broadcast_keys(client_keys: List[BroadCastClientKeys]) -> ServerKeyBroadcast:
+    def broadcast_keys(
+        protocol_id: Union[uuid.UUID, str],
+        round_id: Union[int, str],
+        client_keys: List[BroadCastClientKeys],
+    ) -> ServerKeyBroadcast:
         """
         Broadcast a list of client key broadcast messages to all users
+        :param protocol_id: the id of the protocol
+        :param round_id: the id of the round
         :param client_keys: list of client key broadcasts submitted to the server
         :return: server broadcast containing the client keys
         """
-        return ServerKeyBroadcast(participants=client_keys)
+        return ServerKeyBroadcast(
+            protocol_id=protocol_id, round_id=round_id, participants=client_keys
+        )
 
     @staticmethod
     def broadcast_cyphers(
-        shared_ciphers: List[ShareKeysMessage], user_id: str
+        client_id: str,
+        shared_ciphers: List[ShareKeysMessage],
     ) -> ServerCipherBroadcast:
         """
         Broadcast a list of ciphers addressed to a specific user
         :param shared_ciphers: list of ciphers received in round 2
-        :param user_id: the user id to which the ciphers are addressed
+        :param client_id: the user id to which the ciphers are addressed
         :return: ServerCipherBroadcast containing all ciphers addressed to the user in the current iteration
         """
         user_ciphers = []
         # iterate over all ciphers received in the previous round
         for message in shared_ciphers:
             # don't add the user's own cipher
-            if message.user_id == user_id:
+            if message.client_id == client_id:
                 pass
             else:
                 # from cipher submitted by other users get the cipher addressed to the user
                 for cipher in message.ciphers:
-                    if cipher.recipient == user_id:
+                    if cipher.recipient == client_id:
                         user_cipher = UserCipher(
-                            sender=message.user_id,
-                            receiver=user_id,
+                            sender=message.client_id,
+                            receiver=client_id,
                             cipher=cipher.cipher,
                         )
 
@@ -177,8 +187,8 @@ class ServerProtocol:
         :param mask_size: the size of the revers mask to generate
         :return:
         """
-        user_seed_shares = {bc.user_id: [] for bc in client_key_broadcasts}
-        user_key_shares = {bc.user_id: [] for bc in client_key_broadcasts}
+        user_seed_shares = {bc.client_id: [] for bc in client_key_broadcasts}
+        user_key_shares = {bc.client_id: [] for bc in client_key_broadcasts}
 
         # aggregate the seed shares and key shares
         for share in seed_shares:

@@ -53,13 +53,17 @@ class ClientProtocol:
         return keys, keys.key_broadcast()
 
     def process_key_broadcast(
-        self, user_id: str, keys: ClientKeys, broadcast: ServerKeyBroadcast, k: int = 3
+        self,
+        client_id: str,
+        keys: ClientKeys,
+        broadcast: ServerKeyBroadcast,
+        k: int = 3,
     ) -> Tuple[str, ShareKeysMessage]:
         """
         Process a key broadcast message from the server. It contains the public keys of the participants for one
         iteration of the protocol.
 
-        :param user_id: the user id of the client
+        :param client_id: the id of the client
         :param keys: the client keys (whose public keys have been broadcast to the server)
         :param broadcast: the server key broadcast containing a list of client public keys
         :param k: the minimum number of required participants
@@ -78,7 +82,7 @@ class ClientProtocol:
         )
         # encrypt the secret shares with the cipher public keys and generate a message to the server with the
         # encrypted shares
-        response = self.share_keys(user_id, keys, secret_shares, broadcast)
+        response = self.share_keys(client_id, keys, secret_shares, broadcast)
 
         return seed, response
 
@@ -164,7 +168,7 @@ class ClientProtocol:
             ciphers=cipher_broadcast.ciphers,
         )
 
-        round_1_participants = set([p.user_id for p in participants])
+        round_1_participants = set([p.client_id for p in participants])
         round_2_participants = set([p.sender for p in cipher_broadcast.ciphers])
 
         unmask_shares = UnmaskShares.construct(
@@ -222,9 +226,9 @@ class ClientProtocol:
                 raise ValueError(
                     f"Cipher receiver must be the user id. Cipher receiver: {cipher.receiver}, user: {user_id}"
                 )
-            sender_broadcast = [p for p in participants if p.user_id == cipher.sender][
-                0
-            ]
+            sender_broadcast = [
+                p for p in participants if p.client_id == cipher.sender
+            ][0]
             sender_public_key = load_public_key(
                 sender_broadcast.broadcast.cipher_public_key
             )
@@ -241,7 +245,7 @@ class ClientProtocol:
 
     @staticmethod
     def share_keys(
-        user_id: str,
+        client_id: str,
         client_keys: ClientKeys,
         secret_shares: SecretShares,
         broadcast: ServerKeyBroadcast,
@@ -266,14 +270,14 @@ class ClientProtocol:
             secret_shares.key_shares, secret_shares.seed_shares, broadcast.participants
         ):
             # Skip generating the cypher for yourself
-            if participant.user_id == user_id:
+            if participant.client_id == client_id:
                 pass
             else:
                 # generate the encrypted cipher
                 cipher = generate_encrypted_cipher(
-                    sender=user_id,
+                    sender=client_id,
                     private_key=client_keys.cipher_key,
-                    recipient=participant.user_id,
+                    recipient=participant.client_id,
                     recipient_key=load_public_key(
                         participant.broadcast.cipher_public_key
                     ),
@@ -281,11 +285,11 @@ class ClientProtocol:
                     key_share=key_share,
                 )
                 encrypted_cipher = EncryptedCipher(
-                    cipher=HexString(cipher), recipient=participant.user_id
+                    cipher=HexString(cipher), recipient=participant.client_id
                 )
                 ciphers.append(encrypted_cipher)
 
-        return ShareKeysMessage(user_id=user_id, ciphers=ciphers)
+        return ShareKeysMessage(client_id=client_id, ciphers=ciphers)
 
     @staticmethod
     def _validate_broadcast(broadcast: ServerKeyBroadcast):

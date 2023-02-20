@@ -70,7 +70,7 @@ def generate_user_masks(
     user_index = len(participants)
     for i, participant in enumerate(participants):
         # set the user index when the id matches the broadcast id
-        if participant.user_id == user_id:
+        if participant.client_id == user_id:
             user_index = i
 
         else:
