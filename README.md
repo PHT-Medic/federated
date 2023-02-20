@@ -48,7 +48,7 @@ The creation of these database is defined in the `/scripts/init.sql` file.
 The aggregator can be started in development mode with hot reloading using the following command:
 
 ```shell
-uvicorn pht_federated.aggregator.app:app --reload --port 8000 --host 0.0.0.0
+poetry run uvicorn pht_federated.aggregator.app:app --reload --port 8000 --host 0.0.0.0
 ```
 
 
