@@ -1,6 +1,7 @@
 from pht_federated.aggregator.schemas.dataset_statistics import *
 from pht_federated.aggregator.services.discovery import statistics
-from typing import List
+from typing import List, Tuple
+from fuzzywuzzy import fuzz
 from pht_federated.aggregator.schemas.dataset_statistics import *
 from pht_federated.aggregator.services.discovery import statistics
 import numpy as np
@@ -46,7 +47,7 @@ def get_example_objects():
     }
 
     unstructured_col = {'type': 'unstructured',
-                        'title': 'image_data',
+                        'title': 'MRI_Img',
                         'not_na_elements': 145,
                         'number_targets': 8,
 #                        'target_counts': {'Target1': 5,
@@ -55,7 +56,16 @@ def get_example_objects():
                         'frequency': 140}
 
     unstructured_col2 = {'type': 'unstructured',
-                        'title': 'image_data',
+                        'title': 'MRI_images',
+                        'not_na_elements': 145,
+                        'number_targets': 8,
+                        'target_counts': {'Target1': 5,
+                                          'Target2': 140},
+                        'most_frequent_target': 'Target2',
+                        'frequency': 140}
+
+    unstructured_col3 = {'type': 'unstructured',
+                        'title': 'FSMI',
                         'not_na_elements': 145,
                         'number_targets': 8,
                         'target_counts': {'Target1': 5,
@@ -67,9 +77,15 @@ def get_example_objects():
                  'title': 'race',
                  'value': 'human'}
 
+    equal_col2 = {'type': 'categorical',
+                 'title': 'race',
+                 'value': 'human'}
+
+    stats_1["column_information"].append(unstructured_col3)
     stats_1["column_information"].append(unstructured_col)
     stats_1["column_information"].append(equal_col)
-    stats_3["column_information"].append(unstructured_col2)
+    stats_2["column_information"].append(unstructured_col2)
+    stats_2["column_information"].append(equal_col2)
 
     dataset_statistics1 = DatasetStatistics(**stats_1)
     dataset_statistics2 = DatasetStatistics(**stats_2)
@@ -131,37 +147,69 @@ def compare_objects(object_list: List[DatasetStatistics]):
 
 
 
-def compare_two_objects(dataset_statistics: DatasetStatistics, dataset_statistics_2: DatasetStatistics):
-    """
-    :type listOfObjects: list<Object>
-    """
-    logging.getLogger().setLevel(logging.INFO)
+def compare_two_objects(dataset_statistics: DatasetStatistics, aggregator_statistics: DatasetStatistics):
 
     stats_dict = dataset_statistics.dict()
-    stats_dict2 = dataset_statistics_2.dict()
+    aggregator_stats_dict = aggregator_statistics.dict()
 
     stats_dict = stats_dict["column_information"]
-    stats_dict2 = stats_dict2["column_information"]
+    aggregator_stats_dict = aggregator_stats_dict["column_information"]
 
-    stats_dict_keys = [list(x.keys()) for x in stats_dict]
-    stats_dict_keys = set([x for l in stats_dict_keys for x in l])
+    stats_dict_keys = [(x["title"], x["type"]) for x in stats_dict]
+    #print("Stats dict keys : {}".format(stats_dict_keys))
 
-    stats_dict2_keys = [list(x.keys()) for x in stats_dict2]
-    stats_dict2_keys = set([x for l in stats_dict2_keys for x in l])
-
-    print("Stats_Dict_Keys: {} ".format(stats_dict_keys))
+    aggregator_stats_dict_keys = [(x["title"], x["type"]) for x in aggregator_stats_dict]
+    #print("Aggregator_Stats_Dict_Keys: {} ".format(aggregator_stats_dict_keys))
 
     # find intersection
-    intersection = [x for x in stats_dict_keys if x in stats_dict2_keys]
-    logging.info("Intersection between object 1 and 2: {} ".format(intersection))
+    #intersection = [x for x in stats_dict_keys if x in aggregator_stats_dict_keys]
+    intersection, type_difference = intersection_two_lists(stats_dict_keys, aggregator_stats_dict_keys)
+    #print("Intersection between Dataset and Aggregator-Dataset: {} ".format(intersection))
+    #print("Type differences between Dataset and Aggregator-Dataset: {} ".format(type_difference))
+    print("Stats dict keys : {}".format(stats_dict_keys))
+
+    stats_dict_keys, difference, matched_columns = fuzzy_matching_prob(stats_dict_keys, aggregator_stats_dict_keys)
+    print("Fuzz matched columns : {}".format(matched_columns))
+    print("Updated Difference list : {}".format(difference))
+    print("Stats dict keys : {}".format(stats_dict_keys))
+
+
+def intersection_two_lists(stats_dict_keys: List[Tuple[str, str]], aggregator_stats_dict_keys: List[Tuple[str, str]]):
+
+    intersection = []
+    type_difference = []
+
+    for stats_keys in stats_dict_keys:
+        for aggregator_keys in aggregator_stats_dict_keys:
+            if stats_keys == aggregator_keys:
+                intersection.append(stats_keys)
+            elif stats_keys[0] == aggregator_keys[0] and stats_keys[1] != aggregator_keys[1]:
+                type_difference.append([stats_keys, aggregator_keys])
+
+    return intersection, type_difference
+
+
+def fuzzy_matching_prob(stats_dict_keys: List[str], aggregator_col_names: List[str]):
+
+    matched_columns = []
 
     # find difference (a - b)
-    diff1 = list(set(stats_dict_keys).difference(set(stats_dict2_keys)))
-    logging.info("Difference between object1 - object2: {}".format(diff1))
+    difference_list = list(set(stats_dict_keys).difference(set(aggregator_col_names)))
 
-    # find difference (b - a)
-    diff2 = list(set(stats_dict2_keys).difference(set(stats_dict_keys)))
-    logging.info("Difference between object2 - object1: {}".format(diff2))
+
+    for diff in difference_list:
+        for col_name in aggregator_col_names:
+            ratio = fuzz.ratio(diff[0].lower(), col_name[0].lower())
+            if ratio > 80:
+                matched_columns.append([col_name, diff, ratio])
+                print("Difference name : {} + aggregator name : {} + matching ratio : {}".format(diff, col_name, ratio))
+                difference_list = [i for i in difference_list if i != diff]
+                stats_dict_keys_updated = [(keys[0].replace(diff[0], col_name[0]), keys[1]) for keys in stats_dict_keys]
+                #stats_dict_keys_updated = [(stats_dict_keys_updated[x], stats_dict_keys[x][1]) for x in range(len(stats_dict_keys))]
+                #print("Stats dict keys updated : {}".format(stats_dict_keys_updated))
+
+    return stats_dict_keys_updated, difference_list, matched_columns
+
 
 def filter_none_values(column_list: list):
 
@@ -175,4 +223,5 @@ def filter_none_values(column_list: list):
 
 
 test1, test2, test3, test4 = get_example_objects()
-compare_objects([test1, test2, test3, test4])
+#compare_objects([test1, test2, test3, test4])
+compare_two_objects(test1, test2)
