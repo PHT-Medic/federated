@@ -73,6 +73,24 @@ def get_example_objects():
                         'most_frequent_target': 'Target2',
                         'frequency': 140}
 
+    unstructured_col4 = {'type': 'unstructured',
+                        'title': 'FSMIs',
+                        'not_na_elements': 145,
+                        'number_targets': 8,
+                        'target_counts': {'Target1': 5,
+                                          'Target2': 140},
+                        'most_frequent_target': 'Target2',
+                        'frequency': 140}
+
+    unstructured_col5 = {'type': 'unstructured',
+                        'title': 'Cancer_Images',
+                        'not_na_elements': 145,
+                        'number_targets': 8,
+                        'target_counts': {'Target1': 5,
+                                          'Target2': 140},
+                        'most_frequent_target': 'Target2',
+                        'frequency': 140}
+
     equal_col = {'type': 'equal',
                  'title': 'race',
                  'value': 'human'}
@@ -82,10 +100,12 @@ def get_example_objects():
                  'value': 'human'}
 
     stats_1["column_information"].append(unstructured_col3)
+    stats_1["column_information"].append(unstructured_col5)
     stats_1["column_information"].append(unstructured_col)
     stats_1["column_information"].append(equal_col)
     stats_2["column_information"].append(unstructured_col2)
     stats_2["column_information"].append(equal_col2)
+    stats_2["column_information"].append(unstructured_col4)
 
     dataset_statistics1 = DatasetStatistics(**stats_1)
     dataset_statistics2 = DatasetStatistics(**stats_2)
@@ -149,37 +169,66 @@ def compare_objects(object_list: List[DatasetStatistics]):
 
 def compare_two_objects(dataset_statistics: DatasetStatistics, aggregator_statistics: DatasetStatistics):
 
-    stats_dict = dataset_statistics.dict()
+    df_stats_dict = dataset_statistics.dict()
     aggregator_stats_dict = aggregator_statistics.dict()
 
-    stats_dict = stats_dict["column_information"]
+    df_stats_dict = df_stats_dict["column_information"]
     aggregator_stats_dict = aggregator_stats_dict["column_information"]
 
-    stats_dict_keys = [(x["title"], x["type"]) for x in stats_dict]
+    df_stats_dict_keys = [(x["title"], x["type"]) for x in df_stats_dict]
     #print("Stats dict keys : {}".format(stats_dict_keys))
 
     aggregator_stats_dict_keys = [(x["title"], x["type"]) for x in aggregator_stats_dict]
     #print("Aggregator_Stats_Dict_Keys: {} ".format(aggregator_stats_dict_keys))
 
     # find intersection
-    #intersection = [x for x in stats_dict_keys if x in aggregator_stats_dict_keys]
-    intersection, type_difference = intersection_two_lists(stats_dict_keys, aggregator_stats_dict_keys)
-    #print("Intersection between Dataset and Aggregator-Dataset: {} ".format(intersection))
-    #print("Type differences between Dataset and Aggregator-Dataset: {} ".format(type_difference))
-    print("Stats dict keys : {}".format(stats_dict_keys))
+    intersection, type_differences = intersection_two_lists(df_stats_dict_keys, aggregator_stats_dict_keys)
+    print("Intersection between Dataset and Aggregator-Dataset: {} ".format(intersection))
+    print("Type differences between Dataset and Aggregator-Dataset: {} ".format(type_differences))
+    print("Stats dict keys : {}".format(df_stats_dict_keys))
 
-    stats_dict_keys, difference, matched_columns = fuzzy_matching_prob(stats_dict_keys, aggregator_stats_dict_keys)
+    df_stats_dict_keys, column_name_differences, matched_columns = fuzzy_matching_prob(df_stats_dict_keys, aggregator_stats_dict_keys)
     print("Fuzz matched columns : {}".format(matched_columns))
-    print("Updated Difference list : {}".format(difference))
-    print("Stats dict keys : {}".format(stats_dict_keys))
+    print("Updated Difference list : {}".format(column_name_differences))
+    print("Stats dict keys_final : {}".format(df_stats_dict_keys))
 
 
-def intersection_two_lists(stats_dict_keys: List[Tuple[str, str]], aggregator_stats_dict_keys: List[Tuple[str, str]]):
+    difference_report = create_difference_report(type_differences, column_name_differences)
+
+    print("FINAL DIFFERENCE REPORT : {}".format(difference_report))
+
+def create_difference_report(type_differences: List[Tuple[str, str]], column_differences: List[Tuple[str, str]]):
+
+    difference_report = {"type_differences": [],
+                         "column_name_differences": []}
+
+
+    type_difference_list = []
+    column_difference_list = []
+
+    for diff in type_differences:
+        case = {"dataframe_type": diff[0],
+                "aggregator_type": diff[1]}
+        type_difference_list.append(case)
+
+    for diff in column_differences:
+        case = {"dataframe_column_name": diff[0]}
+                #"aggregator_column_name": diff[1]}
+        column_difference_list.append(case)
+
+
+    difference_report["type_differences"] = type_difference_list
+    difference_report["column_name_differences"] = column_difference_list
+
+    return difference_report
+
+
+def intersection_two_lists(df_stats_dict_keys: List[Tuple[str, str]], aggregator_stats_dict_keys: List[Tuple[str, str]]):
 
     intersection = []
     type_difference = []
 
-    for stats_keys in stats_dict_keys:
+    for stats_keys in df_stats_dict_keys:
         for aggregator_keys in aggregator_stats_dict_keys:
             if stats_keys == aggregator_keys:
                 intersection.append(stats_keys)
@@ -189,12 +238,12 @@ def intersection_two_lists(stats_dict_keys: List[Tuple[str, str]], aggregator_st
     return intersection, type_difference
 
 
-def fuzzy_matching_prob(stats_dict_keys: List[str], aggregator_col_names: List[str]):
+def fuzzy_matching_prob(df_stats_dict_keys: List[str], aggregator_col_names: List[str]):
 
     matched_columns = []
 
     # find difference (a - b)
-    difference_list = list(set(stats_dict_keys).difference(set(aggregator_col_names)))
+    difference_list = list(set(df_stats_dict_keys).difference(set(aggregator_col_names)))
 
 
     for diff in difference_list:
@@ -202,13 +251,12 @@ def fuzzy_matching_prob(stats_dict_keys: List[str], aggregator_col_names: List[s
             ratio = fuzz.ratio(diff[0].lower(), col_name[0].lower())
             if ratio > 80:
                 matched_columns.append([col_name, diff, ratio])
-                print("Difference name : {} + aggregator name : {} + matching ratio : {}".format(diff, col_name, ratio))
+                #print("Difference name : {} + aggregator name : {} + matching ratio : {}".format(diff, col_name, ratio))
                 difference_list = [i for i in difference_list if i != diff]
-                stats_dict_keys_updated = [(keys[0].replace(diff[0], col_name[0]), keys[1]) for keys in stats_dict_keys]
-                #stats_dict_keys_updated = [(stats_dict_keys_updated[x], stats_dict_keys[x][1]) for x in range(len(stats_dict_keys))]
-                #print("Stats dict keys updated : {}".format(stats_dict_keys_updated))
+                df_stats_dict_keys = [(keys[0].replace(diff[0], col_name[0]), keys[1]) for keys in df_stats_dict_keys]
+                #print("Stats dict keys updated : {}".format(df_stats_dict_keys))
 
-    return stats_dict_keys_updated, difference_list, matched_columns
+    return df_stats_dict_keys, difference_list, matched_columns
 
 
 def filter_none_values(column_list: list):
