@@ -99,12 +99,17 @@ def get_example_objects():
                  'title': 'race',
                  'value': 'human'}
 
+    equal_col3 = {'type': 'equal',
+                 'title': 'gender',
+                 'value': 'male'}
+
     stats_1["column_information"].append(unstructured_col3)
     stats_1["column_information"].append(unstructured_col5)
     stats_1["column_information"].append(unstructured_col)
     stats_1["column_information"].append(equal_col)
     stats_2["column_information"].append(unstructured_col2)
     stats_2["column_information"].append(equal_col2)
+    stats_2["column_information"].append(equal_col3)
     stats_2["column_information"].append(unstructured_col4)
 
     dataset_statistics1 = DatasetStatistics(**stats_1)
@@ -182,43 +187,89 @@ def compare_two_objects(dataset_statistics: DatasetStatistics, aggregator_statis
     #print("Aggregator_Stats_Dict_Keys: {} ".format(aggregator_stats_dict_keys))
 
     # find intersection
-    intersection, type_differences = intersection_two_lists(df_stats_dict_keys, aggregator_stats_dict_keys)
-    print("Intersection between Dataset and Aggregator-Dataset: {} ".format(intersection))
-    print("Type differences between Dataset and Aggregator-Dataset: {} ".format(type_differences))
-    print("Stats dict keys : {}".format(df_stats_dict_keys))
+    intersection, type_differences, aggregator_keys_updated, df_stats_dict_keys = intersection_two_lists(df_stats_dict_keys, aggregator_stats_dict_keys)
+    #print("Intersection between Dataset and Aggregator-Dataset: {} ".format(intersection))
+    #print("Type differences between Dataset and Aggregator-Dataset: {} ".format(type_differences))
 
-    df_stats_dict_keys, column_name_differences, matched_columns = fuzzy_matching_prob(df_stats_dict_keys, aggregator_stats_dict_keys)
-    print("Fuzz matched columns : {}".format(matched_columns))
-    print("Updated Difference list : {}".format(column_name_differences))
-    print("Stats dict keys_final : {}".format(df_stats_dict_keys))
+    # find difference (Dataframe - Aggregator)
+    column_value_differences = list(set(df_stats_dict_keys).difference(set(aggregator_keys_updated)))
+
+    df_stats_dict_keys, column_value_differences, matched_column_names = fuzzy_matching_prob(df_stats_dict_keys, aggregator_keys_updated, column_value_differences)
+    #print("Fuzz matched columns : {}".format(matched_column_names))
 
 
-    difference_report = create_difference_report(type_differences, column_name_differences)
+
+    # find difference (Aggregator - Dataframe)
+    column_value_differences2 = list(set(aggregator_keys_updated).difference(set(df_stats_dict_keys)))
+    #print("Difference Aggregator - Dataframe : {}".format(column_value_differences2))
+
+
+
+    difference_report = create_difference_report(type_differences, column_value_differences, column_value_differences2, matched_column_names)
 
     print("FINAL DIFFERENCE REPORT : {}".format(difference_report))
 
-def create_difference_report(type_differences: List[Tuple[str, str]], column_differences: List[Tuple[str, str]]):
+def create_difference_report(type_differences: List[List[Tuple[str, str]]], column_value_differences: List[Tuple[str, str]],
+                             column_value_differences2: List[Tuple[str, str]],
+                             column_name_differences: List[List[Tuple[str, str]]]):
+    # harmonization report
+    # report = {
+    #     "dataset": "test",
+    #     "datatype": "tabular",
+    #     "status": "passed|failed",
+    #     "errors": [
+    #         # if failed then list of errors for each column
+    #         {
+    #             "column_name": "age",
+    #             "error": {
+    #                 "type": "type",  # missing, type, semantic, extra
+    #                 "dataframe_type": "int",
+    #                 "aggregator_type": "float",
+    #             },
+    #             "hint": "change type to float",  # None or some hint on how to fix the error
+    #         },
+    #         {
+    #             "column_name": "Cancer_Images",
+    #             "error": {
+    #                 "type": "missing",  # missing, type, semantic, extra
+    #                 "aggregator_type": "unstructured",
+    #             },
+    #             "hint": "change type to float",  # Fuzzy match on column name as a hint if no matches generic message
+    #         },
+    #     ],
+    # }
 
     difference_report = {"type_differences": [],
-                         "column_name_differences": []}
+                         "column_name_differences": [],
+                         "column_semantic_differences": []}
 
 
     type_difference_list = []
-    column_difference_list = []
+    column_name_differences_list = []
+    column_semantic_differences_list = []
 
     for diff in type_differences:
         case = {"dataframe_type": diff[0],
                 "aggregator_type": diff[1]}
         type_difference_list.append(case)
 
-    for diff in column_differences:
-        case = {"dataframe_column_name": diff[0]}
-                #"aggregator_column_name": diff[1]}
-        column_difference_list.append(case)
+    for diff in column_value_differences:
+        case = {"dataframe_distinct_column": diff}
+        column_semantic_differences_list.append(case)
+
+    for diff in column_value_differences2:
+        case = {"aggregator_distinct_column": diff}
+        column_semantic_differences_list.append(case)
+
+    for diff in column_name_differences:
+        case = {"dataframe_column_name": diff[0],
+                "aggregator_column_name": diff[1]}
+        column_name_differences_list.append(case)
 
 
     difference_report["type_differences"] = type_difference_list
-    difference_report["column_name_differences"] = column_difference_list
+    difference_report["column_name_differences"] = column_name_differences_list
+    difference_report["column_semantic_differences"] = column_semantic_differences_list
 
     return difference_report
 
@@ -234,17 +285,16 @@ def intersection_two_lists(df_stats_dict_keys: List[Tuple[str, str]], aggregator
                 intersection.append(stats_keys)
             elif stats_keys[0] == aggregator_keys[0] and stats_keys[1] != aggregator_keys[1]:
                 type_difference.append([stats_keys, aggregator_keys])
+                aggregator_stats_dict_keys.remove(aggregator_keys)
+                df_stats_dict_keys.remove(stats_keys)
 
-    return intersection, type_difference
+    return intersection, type_difference, aggregator_stats_dict_keys, df_stats_dict_keys
 
 
-def fuzzy_matching_prob(df_stats_dict_keys: List[str], aggregator_col_names: List[str]):
+def fuzzy_matching_prob(df_stats_dict_keys: List[Tuple[str, str]], aggregator_col_names: List[Tuple[str, str]],
+                        difference_list: List[Tuple[str, str]]):
 
     matched_columns = []
-
-    # find difference (a - b)
-    difference_list = list(set(df_stats_dict_keys).difference(set(aggregator_col_names)))
-
 
     for diff in difference_list:
         for col_name in aggregator_col_names:
@@ -254,7 +304,6 @@ def fuzzy_matching_prob(df_stats_dict_keys: List[str], aggregator_col_names: Lis
                 #print("Difference name : {} + aggregator name : {} + matching ratio : {}".format(diff, col_name, ratio))
                 difference_list = [i for i in difference_list if i != diff]
                 df_stats_dict_keys = [(keys[0].replace(diff[0], col_name[0]), keys[1]) for keys in df_stats_dict_keys]
-                #print("Stats dict keys updated : {}".format(df_stats_dict_keys))
 
     return df_stats_dict_keys, difference_list, matched_columns
 
