@@ -1,124 +1,7 @@
-from pht_federated.aggregator.schemas.dataset_statistics import *
-from pht_federated.aggregator.services.discovery import statistics
 from typing import List, Tuple
 from fuzzywuzzy import fuzz
 from pht_federated.aggregator.schemas.dataset_statistics import *
-from pht_federated.aggregator.services.discovery import statistics
-import numpy as np
-import pandas as pd
-from fastapi.encoders import jsonable_encoder
 import logging
-
-
-def get_example_objects():
-    #data_path = "data/train_data_titanic.csv"
-    data_path = "C:/Users/felix/PycharmProjects/federated/pht_federated/tests/aggregator/data/train_data_titanic.csv"
-    df = pd.read_csv(data_path)
-    df_split = np.array_split(df, 4)
-
-    stats1_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[0]))
-    stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
-    stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
-    stats4_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[3]))
-    # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
-
-    stats_1 = {
-        "item_count": stats1_json["item_count"],
-        "feature_count": stats1_json["feature_count"],
-        "column_information": stats1_json["column_information"],
-    }
-
-    stats_2 = {
-        "item_count": stats2_json["item_count"],
-        "feature_count": stats2_json["feature_count"],
-        "column_information": stats2_json["column_information"],
-    }
-
-    stats_3 = {
-        "item_count": stats3_json["item_count"],
-        "feature_count": stats3_json["feature_count"],
-        "column_information": stats3_json["column_information"],
-    }
-
-    stats_4 = {
-        "item_count": stats4_json["item_count"],
-        "feature_count": stats4_json["feature_count"],
-        "column_information": stats4_json["column_information"],
-    }
-
-    unstructured_col = {'type': 'unstructured',
-                        'title': 'MRI_Img',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-#                        'target_counts': {'Target1': 5,
-#                                          'Target2': 140},
-#                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
-
-    unstructured_col2 = {'type': 'unstructured',
-                        'title': 'MRI_images',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-                        'target_counts': {'Target1': 5,
-                                          'Target2': 140},
-                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
-
-    unstructured_col3 = {'type': 'unstructured',
-                        'title': 'FSMI',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-                        'target_counts': {'Target1': 5,
-                                          'Target2': 140},
-                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
-
-    unstructured_col4 = {'type': 'unstructured',
-                        'title': 'FSMIs',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-                        'target_counts': {'Target1': 5,
-                                          'Target2': 140},
-                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
-
-    unstructured_col5 = {'type': 'unstructured',
-                        'title': 'Cancer_Images',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-                        'target_counts': {'Target1': 5,
-                                          'Target2': 140},
-                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
-
-    equal_col = {'type': 'equal',
-                 'title': 'race',
-                 'value': 'human'}
-
-    equal_col2 = {'type': 'categorical',
-                 'title': 'race',
-                 'value': 'human'}
-
-    equal_col3 = {'type': 'equal',
-                 'title': 'gender',
-                 'value': 'male'}
-
-    stats_1["column_information"].append(unstructured_col3)
-    stats_1["column_information"].append(unstructured_col5)
-    stats_1["column_information"].append(unstructured_col)
-    stats_1["column_information"].append(equal_col)
-    stats_2["column_information"].append(unstructured_col2)
-    stats_2["column_information"].append(equal_col2)
-    stats_2["column_information"].append(equal_col3)
-    stats_2["column_information"].append(unstructured_col4)
-
-    dataset_statistics1 = DatasetStatistics(**stats_1)
-    dataset_statistics2 = DatasetStatistics(**stats_2)
-    dataset_statistics3 = DatasetStatistics(**stats_3)
-    dataset_statistics4 = DatasetStatistics(**stats_4)
-
-    return dataset_statistics1, dataset_statistics2, dataset_statistics3, dataset_statistics4
-
 
 
 def compare_objects(object_list: List[DatasetStatistics]):
@@ -172,19 +55,17 @@ def compare_objects(object_list: List[DatasetStatistics]):
 
 
 
-def compare_two_objects(dataset_statistics: DatasetStatistics, aggregator_statistics: DatasetStatistics):
+def compare_two_objects(dataset_statistics: Tuple[DatasetStatistics, str], aggregator_statistics: DatasetStatistics):
 
-    df_stats_dict = dataset_statistics.dict()
+    dataset_name = dataset_statistics[1]
+    df_stats_dict = dataset_statistics[0].dict()
     aggregator_stats_dict = aggregator_statistics.dict()
 
     df_stats_dict = df_stats_dict["column_information"]
     aggregator_stats_dict = aggregator_stats_dict["column_information"]
 
     df_stats_dict_keys = [(x["title"], x["type"]) for x in df_stats_dict]
-    #print("Stats dict keys : {}".format(stats_dict_keys))
-
     aggregator_stats_dict_keys = [(x["title"], x["type"]) for x in aggregator_stats_dict]
-    #print("Aggregator_Stats_Dict_Keys: {} ".format(aggregator_stats_dict_keys))
 
     # find intersection
     intersection, type_differences, aggregator_keys_updated, df_stats_dict_keys = intersection_two_lists(df_stats_dict_keys, aggregator_stats_dict_keys)
@@ -193,83 +74,84 @@ def compare_two_objects(dataset_statistics: DatasetStatistics, aggregator_statis
 
     # find difference (Dataframe - Aggregator)
     column_value_differences = list(set(df_stats_dict_keys).difference(set(aggregator_keys_updated)))
-
     df_stats_dict_keys, column_value_differences, matched_column_names = fuzzy_matching_prob(df_stats_dict_keys, aggregator_keys_updated, column_value_differences)
     #print("Fuzz matched columns : {}".format(matched_column_names))
 
-
-
     # find difference (Aggregator - Dataframe)
     column_value_differences2 = list(set(aggregator_keys_updated).difference(set(df_stats_dict_keys)))
-    #print("Difference Aggregator - Dataframe : {}".format(column_value_differences2))
 
+    difference_report = create_difference_report(type_differences, column_value_differences, column_value_differences2,
+                                                 matched_column_names, dataset_name)
 
-
-    difference_report = create_difference_report(type_differences, column_value_differences, column_value_differences2, matched_column_names)
-
-    print("FINAL DIFFERENCE REPORT : {}".format(difference_report))
+    return difference_report
 
 def create_difference_report(type_differences: List[List[Tuple[str, str]]], column_value_differences: List[Tuple[str, str]],
                              column_value_differences2: List[Tuple[str, str]],
-                             column_name_differences: List[List[Tuple[str, str]]]):
-    # harmonization report
-    # report = {
-    #     "dataset": "test",
-    #     "datatype": "tabular",
-    #     "status": "passed|failed",
-    #     "errors": [
-    #         # if failed then list of errors for each column
-    #         {
-    #             "column_name": "age",
-    #             "error": {
-    #                 "type": "type",  # missing, type, semantic, extra
-    #                 "dataframe_type": "int",
-    #                 "aggregator_type": "float",
-    #             },
-    #             "hint": "change type to float",  # None or some hint on how to fix the error
-    #         },
-    #         {
-    #             "column_name": "Cancer_Images",
-    #             "error": {
-    #                 "type": "missing",  # missing, type, semantic, extra
-    #                 "aggregator_type": "unstructured",
-    #             },
-    #             "hint": "change type to float",  # Fuzzy match on column name as a hint if no matches generic message
-    #         },
-    #     ],
-    # }
+                             column_name_differences: List[List[Tuple[str, str]]], dataset_name: str):
 
-    difference_report = {"type_differences": [],
-                         "column_name_differences": [],
-                         "column_semantic_differences": []}
+    mismatch_errors_list = []
 
-
-    type_difference_list = []
-    column_name_differences_list = []
-    column_semantic_differences_list = []
+    difference_report = {
+                    "dataset": dataset_name,
+                    "datatype": "tabular",
+                    "status": "",
+                    "errors": []
+    }
 
     for diff in type_differences:
-        case = {"dataframe_type": diff[0],
-                "aggregator_type": diff[1]}
-        type_difference_list.append(case)
+        case = {
+                 "column_name": diff[0][0],
+                 "error": {
+                     "type": "type",  # missing, type, semantic, extra
+                     "dataframe_type": diff[0][1],
+                     "aggregator_type": diff[1][1],
+                 },
+                 "hint": f"Change type to {diff[1][1]}",
+             }
+        mismatch_errors_list.append(case)
 
     for diff in column_value_differences:
-        case = {"dataframe_distinct_column": diff}
-        column_semantic_differences_list.append(case)
+        case = {
+                 "column_name": diff[0],
+                 "error": {
+                     "type": "added",  # missing, type, semantic, extra
+                     "dataframe_type": diff[1],
+                 },
+                 "hint": f"Column name {diff[0]} only exists in local dataset",
+             }
+        mismatch_errors_list.append(case)
 
     for diff in column_value_differences2:
-        case = {"aggregator_distinct_column": diff}
-        column_semantic_differences_list.append(case)
+        case = {
+                 "column_name": diff[0],
+                 "error": {
+                     "type": "missing",  # missing, type, semantic, extra
+                     "aggregator_type": diff[1],
+                 },
+                 "hint": f"Column name {diff[0]} only exists in aggregator dataset",
+             }
+        mismatch_errors_list.append(case)
 
     for diff in column_name_differences:
-        case = {"dataframe_column_name": diff[0],
-                "aggregator_column_name": diff[1]}
-        column_name_differences_list.append(case)
+        case = {
+                 "column_name": diff[0][0],
+                 "error": {
+                     "type": "added",  # missing, type, semantic, extra
+                     "dataset_name": diff[0][0],
+                     "aggregator_name": diff[1][0],
+                     "aggregator_type": diff[1][1]
+                 },
+                 "hint": f"Column name {diff[0][0]} only exists in local dataset."
+                         f" Did you mean column name: {diff[1][0]}",
+             }
+        mismatch_errors_list.append(case)
 
+    if len(mismatch_errors_list) == 0:
+        difference_report["status"] = "passed"
+    else:
+        difference_report["status"] = "failed"
 
-    difference_report["type_differences"] = type_difference_list
-    difference_report["column_name_differences"] = column_name_differences_list
-    difference_report["column_semantic_differences"] = column_semantic_differences_list
+    difference_report["errors"] = mismatch_errors_list
 
     return difference_report
 
@@ -319,6 +201,3 @@ def filter_none_values(column_list: list):
     return filtered_list
 
 
-test1, test2, test3, test4 = get_example_objects()
-#compare_objects([test1, test2, test3, test4])
-compare_two_objects(test1, test2)
