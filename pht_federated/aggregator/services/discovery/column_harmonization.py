@@ -82,6 +82,7 @@ def compare_two_objects(dataset_statistics: Tuple[DatasetStatistics, str], aggre
 
     difference_report = create_difference_report(type_differences, column_value_differences, column_value_differences2,
                                                  matched_column_names, dataset_name)
+    print("small change")
 
     return difference_report
 
