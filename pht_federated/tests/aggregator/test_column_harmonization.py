@@ -1,8 +1,10 @@
-from fastapi.encoders import jsonable_encoder
-from pht_federated.aggregator.services.discovery import statistics
-import pandas as pd
 import numpy as np
+import pandas as pd
+from fastapi.encoders import jsonable_encoder
+
+from pht_federated.aggregator.services.discovery import statistics
 from pht_federated.aggregator.services.discovery.column_harmonization import *
+
 
 def get_example_objects():
     data_path = "data/train_data_titanic.csv"
@@ -39,62 +41,62 @@ def get_example_objects():
         "column_information": stats4_json["column_information"],
     }
 
-    unstructured_col = {'type': 'unstructured',
-                        'title': 'MRI_Img',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-#                        'target_counts': {'Target1': 5,
-#                                          'Target2': 140},
-#                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
+    unstructured_col = {
+        "type": "unstructured",
+        "title": "MRI_Img",
+        "not_na_elements": 145,
+        "number_targets": 8,
+        #                        'target_counts': {'Target1': 5,
+        #                                          'Target2': 140},
+        #                        'most_frequent_target': 'Target2',
+        "frequency": 140,
+    }
 
-    unstructured_col2 = {'type': 'unstructured',
-                        'title': 'MRI_images',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-                        'target_counts': {'Target1': 5,
-                                          'Target2': 140},
-                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
+    unstructured_col2 = {
+        "type": "unstructured",
+        "title": "MRI_images",
+        "not_na_elements": 145,
+        "number_targets": 8,
+        "target_counts": {"Target1": 5, "Target2": 140},
+        "most_frequent_target": "Target2",
+        "frequency": 140,
+    }
 
-    unstructured_col3 = {'type': 'unstructured',
-                        'title': 'FSMI',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-                        'target_counts': {'Target1': 5,
-                                          'Target2': 140},
-                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
+    unstructured_col3 = {
+        "type": "unstructured",
+        "title": "FSMI",
+        "not_na_elements": 145,
+        "number_targets": 8,
+        "target_counts": {"Target1": 5, "Target2": 140},
+        "most_frequent_target": "Target2",
+        "frequency": 140,
+    }
 
-    unstructured_col4 = {'type': 'unstructured',
-                        'title': 'FSMIs',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-                        'target_counts': {'Target1': 5,
-                                          'Target2': 140},
-                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
+    unstructured_col4 = {
+        "type": "unstructured",
+        "title": "FSMIs",
+        "not_na_elements": 145,
+        "number_targets": 8,
+        "target_counts": {"Target1": 5, "Target2": 140},
+        "most_frequent_target": "Target2",
+        "frequency": 140,
+    }
 
-    unstructured_col5 = {'type': 'unstructured',
-                        'title': 'Cancer_Images',
-                        'not_na_elements': 145,
-                        'number_targets': 8,
-                        'target_counts': {'Target1': 5,
-                                          'Target2': 140},
-                        'most_frequent_target': 'Target2',
-                        'frequency': 140}
+    unstructured_col5 = {
+        "type": "unstructured",
+        "title": "Cancer_Images",
+        "not_na_elements": 145,
+        "number_targets": 8,
+        "target_counts": {"Target1": 5, "Target2": 140},
+        "most_frequent_target": "Target2",
+        "frequency": 140,
+    }
 
-    equal_col = {'type': 'equal',
-                 'title': 'race',
-                 'value': 'human'}
+    equal_col = {"type": "equal", "title": "race", "value": "human"}
 
-    equal_col2 = {'type': 'categorical',
-                 'title': 'race',
-                 'value': 'human'}
+    equal_col2 = {"type": "categorical", "title": "race", "value": "human"}
 
-    equal_col3 = {'type': 'equal',
-                 'title': 'gender',
-                 'value': 'male'}
+    equal_col3 = {"type": "equal", "title": "gender", "value": "male"}
 
     stats_1["column_information"].append(unstructured_col3)
     stats_1["column_information"].append(unstructured_col5)
@@ -110,12 +112,22 @@ def get_example_objects():
     dataset_statistics3 = DatasetStatistics(**stats_3)
     dataset_statistics4 = DatasetStatistics(**stats_4)
 
-    return dataset_statistics1, dataset_statistics2, dataset_statistics3, dataset_statistics4
+    return (
+        dataset_statistics1,
+        dataset_statistics2,
+        dataset_statistics3,
+        dataset_statistics4,
+    )
 
 
 def test_difference_report():
 
-    example_dataset, example_aggregation, example_dataset2, example_aggregation2 = get_example_objects()
+    (
+        example_dataset,
+        example_aggregation,
+        example_dataset2,
+        example_aggregation2,
+    ) = get_example_objects()
     example_dataset = (example_dataset, "test_dataset")
     example_dataset2 = (example_dataset2, "test2_dataset")
 

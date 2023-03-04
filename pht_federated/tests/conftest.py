@@ -4,7 +4,7 @@ import httpx
 import pytest
 from authup import Authup
 from authup.plugins.httpx import AuthupHttpx
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 
 @pytest.fixture(scope="session", autouse=True)

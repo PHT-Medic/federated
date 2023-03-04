@@ -23,7 +23,7 @@ class DiscoveryClient:
 
     def get(
         self, proposal_id: typing.Union[str, UUID], discovery_id: typing.Any
-) -> schemas.DataDiscovery:
+    ) -> schemas.DataDiscovery:
         response = self.client.get(
             f"{self.prefix}/{proposal_id}/discoveries/{discovery_id}"
         )
