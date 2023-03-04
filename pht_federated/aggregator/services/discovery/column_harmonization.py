@@ -55,7 +55,7 @@ def compare_objects(object_list: List[DatasetStatistics]):
 
 
 
-def compare_two_objects(dataset_statistics: Tuple[DatasetStatistics, str], aggregator_statistics: DatasetStatistics):
+def compare_two_datasets(dataset_statistics: Tuple[DatasetStatistics, str], aggregator_statistics: DatasetStatistics):
 
     dataset_name = dataset_statistics[1]
     df_stats_dict = dataset_statistics[0].dict()
@@ -82,7 +82,6 @@ def compare_two_objects(dataset_statistics: Tuple[DatasetStatistics, str], aggre
 
     difference_report = create_difference_report(type_differences, column_value_differences, column_value_differences2,
                                                  matched_column_names, dataset_name)
-    print("small change")
 
     return difference_report
 

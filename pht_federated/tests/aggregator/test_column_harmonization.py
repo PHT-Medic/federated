@@ -27,6 +27,18 @@ def get_example_objects():
         "column_information": stats2_json["column_information"],
     }
 
+    stats_3 = {
+        "item_count": stats3_json["item_count"],
+        "feature_count": stats3_json["feature_count"],
+        "column_information": stats3_json["column_information"],
+    }
+
+    stats_4 = {
+        "item_count": stats4_json["item_count"],
+        "feature_count": stats4_json["feature_count"],
+        "column_information": stats4_json["column_information"],
+    }
+
     unstructured_col = {'type': 'unstructured',
                         'title': 'MRI_Img',
                         'not_na_elements': 145,
@@ -95,15 +107,25 @@ def get_example_objects():
 
     dataset_statistics1 = DatasetStatistics(**stats_1)
     dataset_statistics2 = DatasetStatistics(**stats_2)
+    dataset_statistics3 = DatasetStatistics(**stats_3)
+    dataset_statistics4 = DatasetStatistics(**stats_4)
 
-    return dataset_statistics1, dataset_statistics2
+    return dataset_statistics1, dataset_statistics2, dataset_statistics3, dataset_statistics4
 
 
 def test_difference_report():
 
-    example_dataset, example_aggregation = get_example_objects()
+    example_dataset, example_aggregation, example_dataset2, example_aggregation2 = get_example_objects()
     example_dataset = (example_dataset, "test_dataset")
+    example_dataset2 = (example_dataset2, "test2_dataset")
 
-    difference_report = compare_two_objects(example_dataset, example_aggregation)
+    difference_report = compare_two_datasets(example_dataset, example_aggregation)
+    difference_report2 = compare_two_datasets(example_dataset2, example_aggregation2)
 
     print("Difference Report: {}".format(difference_report))
+
+    assert difference_report["status"] == "failed"
+    assert difference_report2["status"] == "passed"
+
+    errors = [column["column_name"] for column in difference_report["errors"]]
+    assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
