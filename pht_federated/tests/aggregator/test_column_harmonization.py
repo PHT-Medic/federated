@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from fastapi.encoders import jsonable_encoder
-
 from pht_federated.aggregator.services.discovery import statistics
 from pht_federated.aggregator.services.discovery.column_harmonization import *
 
@@ -15,7 +14,6 @@ def get_example_objects():
     stats2_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[1]))
     stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     stats4_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[3]))
-    # print("Resulting DataSetStatistics from diabetes_dataset : {} + type {}".format(stats_df, type(stats_df)))
 
     stats_1 = {
         "item_count": stats1_json["item_count"],
@@ -46,9 +44,6 @@ def get_example_objects():
         "title": "MRI_Img",
         "not_na_elements": 145,
         "number_targets": 8,
-        #                        'target_counts': {'Target1': 5,
-        #                                          'Target2': 140},
-        #                        'most_frequent_target': 'Target2',
         "frequency": 140,
     }
 
@@ -121,23 +116,21 @@ def get_example_objects():
 
 
 def test_difference_report():
-
     (
         example_dataset,
         example_aggregation,
         example_dataset2,
         example_aggregation2,
     ) = get_example_objects()
+
     example_dataset = (example_dataset, "test_dataset")
     example_dataset2 = (example_dataset2, "test2_dataset")
 
     difference_report = compare_two_datasets(example_dataset, example_aggregation)
     difference_report2 = compare_two_datasets(example_dataset2, example_aggregation2)
 
-    print("Difference Report: {}".format(difference_report))
-
     assert difference_report["status"] == "failed"
     assert difference_report2["status"] == "passed"
 
     errors = [column["column_name"] for column in difference_report["errors"]]
-    assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
+    assert errors == ['race', 'Cancer_Images', 'gender', 'FSMIs', 'MRI_images']

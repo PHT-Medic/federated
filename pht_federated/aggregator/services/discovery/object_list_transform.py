@@ -15,8 +15,6 @@ def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
 
     stats_dict = dataset_statistics_object.dict()
 
-    # print("Dataset Statistics Object : {}".format(stats_dict))
-
     if "item_count" in stats_dict:
         object_list_int.append(stats_dict["item_count"])
 
@@ -41,7 +39,6 @@ def list_to_object(
     :return: DatasetStatistics
     """
     stats_dict = dataset_statistics_object.dict()
-    # print("Dataset Statistics Object : {}".format(stats_dict))
 
     if "item_count" in stats_dict:
         stats_dict["item_count"] = dataset_statistics_list[0]
