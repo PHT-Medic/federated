@@ -124,12 +124,15 @@ def test_difference_report():
         example_aggregation2,
     ) = get_example_objects()
 
+    difference_report = compare_two_datasets(
+        example_dataset, example_aggregation, "test"
+    )
+    difference_report2 = compare_two_datasets(
+        example_dataset2, example_aggregation2, "test2"
+    )
 
-    difference_report = compare_two_datasets(example_dataset, example_aggregation, "test")
-    difference_report2 = compare_two_datasets(example_dataset2, example_aggregation2, "test2")
+    assert difference_report["status"] == "failed"
+    assert difference_report2["status"] == "passed"
 
-    #assert difference_report["status"] == "failed"
-    #assert difference_report2["status"] == "passed"
-
-    #errors = [column["column_name"] for column in difference_report["errors"]]
-    #assert errors == ["race", "Cancer_Images", "gender", "FSMIs", "MRI_images"]
+    errors = [column["column_name"] for column in difference_report["errors"]]
+    assert errors == ["race", "Cancer_Images", "gender", "FSMIs", "MRI_images"]

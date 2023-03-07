@@ -8,7 +8,7 @@ from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistic
 def compare_two_datasets(
     dataset_statistics: DatasetStatistics,
     aggregator_statistics: DatasetStatistics,
-    dataset_name: str
+    dataset_name: str,
 ) -> dict:
     """
     Compares two datasets in form of DatasetStatistics objects with respect to their column names
@@ -21,8 +21,9 @@ def compare_two_datasets(
     input_column_information = dataset_statistics.dict()["column_information"]
     aggregator_column_information = aggregator_statistics.dict()["column_information"]
 
-
-    input_column_information = [(x["title"], x["type"]) for x in input_column_information]
+    input_column_information = [
+        (x["title"], x["type"]) for x in input_column_information
+    ]
     aggregator_column_information = [
         (x["title"], x["type"]) for x in aggregator_column_information
     ]
@@ -41,16 +42,23 @@ def compare_two_datasets(
     )
     (
         input_column_information,
-        column_value_differences,
+        value_differences_dataframe,
         matched_column_names,
     ) = fuzzy_matching_prob(
-        input_column_information, aggregator_column_information, value_differences_dataframe, 80
+        input_column_information,
+        aggregator_column_information,
+        value_differences_dataframe,
+        80,
     )
 
+    # print("Aggregator column information : {}".format(aggregator_column_information))
+    # print("Input column information: {}".format(input_column_information))
     # find difference (Aggregator - Dataframe)
     value_differences_aggregator = list(
         set(aggregator_column_information).difference(set(input_column_information))
     )
+
+    # print("Value differences aggregator : {}".format(value_differences_aggregator))
 
     difference_report = create_difference_report(
         type_differences,
@@ -141,11 +149,10 @@ def create_difference_report(
         }
         difference_report["errors"].append(case)
 
-    if len(mismatch_errors_list) == 0:
+    if len(difference_report["errors"]) == 0:
         difference_report["status"] = "passed"
     else:
         difference_report["status"] = "failed"
-
 
     return difference_report
 
@@ -187,7 +194,7 @@ def fuzzy_matching_prob(
     df_col_names: List[Tuple[str, str]],
     aggregator_col_names: List[Tuple[str, str]],
     difference_list: List[Tuple[str, str]],
-    matching_probability_threshold: int
+    matching_probability_threshold: int,
 ):
     """
     Checks whether the name-differences between the two datasets might be due to typing and not semantic nature.
@@ -207,6 +214,7 @@ def fuzzy_matching_prob(
         for col_name in aggregator_col_names:
             ratio = fuzz.ratio(diff[0].lower(), col_name[0].lower())
             if ratio > matching_probability_threshold:
+                print("MATCH {} {} {}".format(col_name, diff, ratio))
                 matched_columns.append([col_name, diff, ratio])
                 difference_list = [i for i in difference_list if i != diff]
                 df_col_names = [

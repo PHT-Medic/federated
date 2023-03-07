@@ -30,7 +30,8 @@ def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
 
 
 def list_to_object(
-    dataset_statistics_list: List[DatasetStatistics], dataset_statistics_object: DatasetStatistics
+    dataset_statistics_list: List[DatasetStatistics],
+    dataset_statistics_object: DatasetStatistics,
 ) -> DatasetStatistics:
     """
     Transforms a python list of integers that contain all masked numerical values back to a DatasetStatistics object
