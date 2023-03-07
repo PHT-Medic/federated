@@ -6,57 +6,56 @@ from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistic
 
 
 def compare_two_datasets(
-    dataset_statistics: Tuple[DatasetStatistics, str],
+    dataset_statistics: DatasetStatistics,
     aggregator_statistics: DatasetStatistics,
+    dataset_name: str
 ) -> dict:
     """
     Compares two datasets in form of DatasetStatistics objects with respect to their column names
     :param dataset_statistics: DatasetStatistics of local dataset
     :param aggregator_statistics: DatasetStatistics of aggregator dataset
+    :param dataset_name: Specified name of local dataset
     :return: Dictionary which lists the differences between the two datasets
     """
 
-    dataset_name = dataset_statistics[1]
-    df_stats_dict = dataset_statistics[0].dict()
-    aggregator_stats_dict = aggregator_statistics.dict()
+    input_column_information = dataset_statistics.dict()["column_information"]
+    aggregator_column_information = aggregator_statistics.dict()["column_information"]
 
-    df_stats_dict = df_stats_dict["column_information"]
-    aggregator_stats_dict = aggregator_stats_dict["column_information"]
 
-    df_stats_dict_keys = [(x["title"], x["type"]) for x in df_stats_dict]
-    aggregator_stats_dict_keys = [
-        (x["title"], x["type"]) for x in aggregator_stats_dict
+    input_column_information = [(x["title"], x["type"]) for x in input_column_information]
+    aggregator_column_information = [
+        (x["title"], x["type"]) for x in aggregator_column_information
     ]
 
     # find intersection
     (
         intersection,
         type_differences,
-        aggregator_keys_updated,
-        df_stats_dict_keys,
-    ) = intersection_two_lists(df_stats_dict_keys, aggregator_stats_dict_keys)
+        aggregator_column_information,
+        input_column_information,
+    ) = intersection_two_lists(input_column_information, aggregator_column_information)
 
     # find difference (Dataframe - Aggregator)
-    column_value_differences = list(
-        set(df_stats_dict_keys).difference(set(aggregator_keys_updated))
+    value_differences_dataframe = list(
+        set(input_column_information).difference(set(aggregator_column_information))
     )
     (
-        df_stats_dict_keys,
+        input_column_information,
         column_value_differences,
         matched_column_names,
     ) = fuzzy_matching_prob(
-        df_stats_dict_keys, aggregator_keys_updated, column_value_differences
+        input_column_information, aggregator_column_information, value_differences_dataframe, 80
     )
 
     # find difference (Aggregator - Dataframe)
-    column_value_differences2 = list(
-        set(aggregator_keys_updated).difference(set(df_stats_dict_keys))
+    value_differences_aggregator = list(
+        set(aggregator_column_information).difference(set(input_column_information))
     )
 
     difference_report = create_difference_report(
         type_differences,
-        column_value_differences,
-        column_value_differences2,
+        value_differences_dataframe,
+        value_differences_aggregator,
         matched_column_names,
         dataset_name,
     )
@@ -66,17 +65,17 @@ def compare_two_datasets(
 
 def create_difference_report(
     type_differences: List[List[Tuple[str, str]]],
-    column_value_differences: List[Tuple[str, str]],
-    column_value_differences2: List[Tuple[str, str]],
-    column_name_differences: List[List[Tuple[str, str]]],
+    value_differences_dataframe: List[Tuple[str, str]],
+    value_differences_aggregator: List[Tuple[str, str]],
+    name_differences: List[List[Tuple[str, str]]],
     dataset_name: str,
 ) -> dict:
     """
     Transforms multiple types of mismatch errors between datasets into a summarized difference report
     :param type_differences: Lists differences in type
-    :param column_value_differences: Lists differences (Dataframe - Aggregator)
-    :param column_value_differences2: Lists differences (Aggregator - Dataframe)
-    :param column_name_differences: Lists differences in name only
+    :param value_differences_dataframe: Lists differences (Dataframe - Aggregator)
+    :param value_differences_aggregator: Lists differences (Aggregator - Dataframe)
+    :param name_differences: Lists differences in name only
     :param dataset_name: String that defines the name of local dataset
     :return: Dictionary which lists the differences between the two datasets
     """
@@ -90,6 +89,7 @@ def create_difference_report(
         "errors": [],
     }
 
+    # adds errors to difference report where there is a difference in the type of the same column_name
     for diff in type_differences:
         case = {
             "column_name": diff[0][0],
@@ -100,9 +100,10 @@ def create_difference_report(
             },
             "hint": f"Change type to {diff[1][1]}",
         }
-        mismatch_errors_list.append(case)
+        difference_report["errors"].append(case)
 
-    for diff in column_value_differences:
+    # adds errors to difference report where column_names only exist in local dataset
+    for diff in value_differences_dataframe:
         case = {
             "column_name": diff[0],
             "error": {
@@ -111,9 +112,10 @@ def create_difference_report(
             },
             "hint": f"Column name {diff[0]} only exists in local dataset",
         }
-        mismatch_errors_list.append(case)
+        difference_report["errors"].append(case)
 
-    for diff in column_value_differences2:
+    # adds errors to difference report where column_names only exist in aggregator
+    for diff in value_differences_aggregator:
         case = {
             "column_name": diff[0],
             "error": {
@@ -122,9 +124,10 @@ def create_difference_report(
             },
             "hint": f"Column name {diff[0]} only exists in aggregator dataset",
         }
-        mismatch_errors_list.append(case)
+        difference_report["errors"].append(case)
 
-    for diff in column_name_differences:
+    # adds errors to difference report where column names between datasets mismatch but similarity is significant
+    for diff in name_differences:
         case = {
             "column_name": diff[0][0],
             "error": {
@@ -136,14 +139,13 @@ def create_difference_report(
             "hint": f"Column name {diff[0][0]} only exists in local dataset."
             f" Did you mean column name: {diff[1][0]}",
         }
-        mismatch_errors_list.append(case)
+        difference_report["errors"].append(case)
 
     if len(mismatch_errors_list) == 0:
         difference_report["status"] = "passed"
     else:
         difference_report["status"] = "failed"
 
-    difference_report["errors"] = mismatch_errors_list
 
     return difference_report
 
@@ -185,6 +187,7 @@ def fuzzy_matching_prob(
     df_col_names: List[Tuple[str, str]],
     aggregator_col_names: List[Tuple[str, str]],
     difference_list: List[Tuple[str, str]],
+    matching_probability_threshold: int
 ):
     """
     Checks whether the name-differences between the two datasets might be due to typing and not semantic nature.
@@ -192,6 +195,7 @@ def fuzzy_matching_prob(
     :param df_col_names: Lists column_names & types of local dataset
     :param aggregator_col_names: Lists column_names & types of aggregator dataset
     :param difference_list: Lists differences in column names
+    :param matching_probability_threshold: Threshold probability when two column names are recognized as a match
     :return: df_col_names -> Updated list to not conclude different column_names
     :return: difference_list -> Updated list if matching was successfull
     :return matched_columns -> Matches get added to list if matching probability > 80
@@ -202,7 +206,7 @@ def fuzzy_matching_prob(
     for diff in difference_list:
         for col_name in aggregator_col_names:
             ratio = fuzz.ratio(diff[0].lower(), col_name[0].lower())
-            if ratio > 80:
+            if ratio > matching_probability_threshold:
                 matched_columns.append([col_name, diff, ratio])
                 difference_list = [i for i in difference_list if i != diff]
                 df_col_names = [

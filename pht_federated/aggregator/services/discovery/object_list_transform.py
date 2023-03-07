@@ -30,12 +30,12 @@ def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
 
 
 def list_to_object(
-    dataset_statistics_list: list, dataset_statistics_object: DatasetStatistics
+    dataset_statistics_list: List[DatasetStatistics], dataset_statistics_object: DatasetStatistics
 ) -> DatasetStatistics:
     """
     Transforms a python list of integers that contain all masked numerical values back to a DatasetStatistics object
-    :param dataset_statistics_list: list
-    :param dataset_statistics_object: DatasetStatistics
+    :param dataset_statistics_list: list of DatasetStatistics objects
+    :param dataset_statistics_object: dataset summary
     :return: DatasetStatistics
     """
     stats_dict = dataset_statistics_object.dict()
@@ -45,13 +45,11 @@ def list_to_object(
     if "feature_count" in stats_dict:
         stats_dict["feature_count"] = dataset_statistics_list[1]
 
-    dataset_statistics_list = dataset_statistics_list[2:]
-
     stats_columns = stats_dict["column_information"]
     stats_columns_sorted = multikeysort(stats_columns, ["type", "title"])
 
     stats_columns_sorted = retrieve_column(
-        stats_columns_sorted, dataset_statistics_list
+        stats_columns_sorted, dataset_statistics_list[2:]
     )
 
     stats_dict["column_information"] = stats_columns_sorted
