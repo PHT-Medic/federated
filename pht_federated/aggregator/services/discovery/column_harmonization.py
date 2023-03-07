@@ -214,7 +214,6 @@ def fuzzy_matching_prob(
         for col_name in aggregator_col_names:
             ratio = fuzz.ratio(diff[0].lower(), col_name[0].lower())
             if ratio > matching_probability_threshold:
-                print("MATCH {} {} {}".format(col_name, diff, ratio))
                 matched_columns.append([col_name, diff, ratio])
                 difference_list = [i for i in difference_list if i != diff]
                 df_col_names = [
