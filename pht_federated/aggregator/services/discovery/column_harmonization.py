@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from fuzzywuzzy import fuzz
+from thefuzz import fuzz
 
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
 
@@ -73,11 +73,10 @@ def create_difference_report(
 ) -> dict:
     """
     Transforms multiple types of mismatch errors between datasets into a summarized difference report
-    :param type_differences: List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]] differences in type
-    :param column_value_differences: List[Tuple[col_name, type]] differences (Dataframe - Aggregator)
-    :param column_value_differences2: List[Tuple[col_name, type]] differences (Aggregator - Dataframe)
-    :param column_name_differences: List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]] differences
-                                    in name only
+    :param type_differences: Lists differences in type
+    :param column_value_differences: Lists differences (Dataframe - Aggregator)
+    :param column_value_differences2: Lists differences (Aggregator - Dataframe)
+    :param column_name_differences: Lists differences in name only
     :param dataset_name: String that defines the name of local dataset
     :return: Dictionary which lists the differences between the two datasets
     """
@@ -156,14 +155,12 @@ def intersection_two_lists(
     """
     Compares the column_names and types of the local dataset and the aggregated dataset and returns the intersection
     between both
-    :param df_col_names: List[Tuple[col_name, type]]
-    :param aggregator_col_names: List[Tuple[col_name, type]]
-    :return: intersection -> List[Tuple[col_name, type]] lists column_names & types of identical columns between
-                             local dataset and aggregator dataset
-    :return: type_differences -> List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]] lists
-                                 differences between local dataset and aggregator dataset if only type mismatches
-    :return: aggregator_col_names -> List[Tuple[col_name, type]] updated list that removed columns with type differences
-    :return: df_col_names -> List[Tuple[col_name, type]] updated list that removed columns with type differences
+    :param df_col_names: Lists column_names & types of local dataset
+    :param aggregator_col_names: Lists column_names & types of aggregator dataset
+    :return: intersection -> Lists column_names & types of identical columns between local dataset & aggregator dataset
+    :return: type_differences -> Lists differences between local dataset and aggregator dataset if only type mismatches
+    :return: aggregator_col_names -> Updated list that removed columns with type differences
+    :return: df_col_names -> Updated list that removed columns with type differences
     """
 
     intersection = []
@@ -192,13 +189,12 @@ def fuzzy_matching_prob(
     """
     Checks whether the name-differences between the two datasets might be due to typing and not semantic nature.
     Applies fuzzy matching to check the Levenshtein distance between the column names to find matches.
-    :param df_col_names: List[Tuple[col_name, type]]
-    :param aggregator_col_names: List[Tuple[col_name, type]]
-    :param difference_list: List[Tuple[col_name, type]] which lists differences in column names
-    :return: df_col_names -> List[Tuple[col_name, type]] updated to not conclude different column_names
-    :return: difference_list -> List[Tuple[col_name, type]] updated if matching was successfull
-    :return matched_columns -> List[List[col_name_df, col_name_aggregator, matching_ratio]] matches get added if
-                               matching probability > 80
+    :param df_col_names: Lists column_names & types of local dataset
+    :param aggregator_col_names: Lists column_names & types of aggregator dataset
+    :param difference_list: Lists differences in column names
+    :return: df_col_names -> Updated list to not conclude different column_names
+    :return: difference_list -> Updated list if matching was successfull
+    :return matched_columns -> Matches get added to list if matching probability > 80
     """
 
     matched_columns = []

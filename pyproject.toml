@@ -25,6 +25,7 @@ pandas = "*"
 pendulum = "*"
 alembic = "*"
 aioredis = "*"
+thefuzz = "*"
 authup = {extras = ["fastapi"], version = "*"}
 
 [tool.poetry.group.dev.dependencies]
