@@ -1,5 +1,7 @@
 from typing import List, Tuple
+
 from fuzzywuzzy import fuzz
+
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
 
 
@@ -9,9 +11,9 @@ def compare_two_datasets(
 ) -> dict:
     """
     Compares two datasets in form of DatasetStatistics objects with respect to their column names
-    :param dataset_statistics: DatasetStatistics
-    :param aggregator_statistics: DatasetStatistics
-    :return: dictionary
+    :param dataset_statistics: DatasetStatistics of local dataset
+    :param aggregator_statistics: DatasetStatistics of aggregator dataset
+    :return: Dictionary which lists the differences between the two datasets
     """
 
     dataset_name = dataset_statistics[1]
@@ -71,12 +73,13 @@ def create_difference_report(
 ) -> dict:
     """
     Transforms multiple types of mismatch errors between datasets into a summarized difference report
-    :param type_differences: List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]]
-    :param column_value_differences: List[Tuple[col_name, type]]
-    :param column_value_differences2: List[Tuple[col_name, type]]
-    :param column_name_differences: List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]]
-    :param dataset_name: str
-    :return: dictionary
+    :param type_differences: List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]] differences in type
+    :param column_value_differences: List[Tuple[col_name, type]] differences (Dataframe - Aggregator)
+    :param column_value_differences2: List[Tuple[col_name, type]] differences (Aggregator - Dataframe)
+    :param column_name_differences: List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]] differences
+                                    in name only
+    :param dataset_name: String that defines the name of local dataset
+    :return: Dictionary which lists the differences between the two datasets
     """
 
     mismatch_errors_list = []
@@ -155,14 +158,16 @@ def intersection_two_lists(
     between both
     :param df_col_names: List[Tuple[col_name, type]]
     :param aggregator_col_names: List[Tuple[col_name, type]]
-    :return: intersection -> List[Tuple[col_name, type]]
-    :return: type_difference -> List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]]
-    :return: aggregator_stats_dict_keys -> List[Tuple[col_name, type]]
-    :return: df_stats_dict_keys -> List[Tuple[col_name, type]]
+    :return: intersection -> List[Tuple[col_name, type]] lists column_names & types of identical columns between
+                             local dataset and aggregator dataset
+    :return: type_differences -> List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]] lists
+                                 differences between local dataset and aggregator dataset if only type mismatches
+    :return: aggregator_col_names -> List[Tuple[col_name, type]] updated list that removed columns with type differences
+    :return: df_col_names -> List[Tuple[col_name, type]] updated list that removed columns with type differences
     """
 
     intersection = []
-    type_difference = []
+    type_differences = []
 
     for stats_keys in df_col_names:
         for aggregator_keys in aggregator_col_names:
@@ -172,11 +177,11 @@ def intersection_two_lists(
                 stats_keys[0] == aggregator_keys[0]
                 and stats_keys[1] != aggregator_keys[1]
             ):
-                type_difference.append([stats_keys, aggregator_keys])
+                type_differences.append([stats_keys, aggregator_keys])
                 aggregator_col_names.remove(aggregator_keys)
                 df_col_names.remove(stats_keys)
 
-    return intersection, type_difference, aggregator_col_names, df_col_names
+    return intersection, type_differences, aggregator_col_names, df_col_names
 
 
 def fuzzy_matching_prob(
@@ -189,10 +194,11 @@ def fuzzy_matching_prob(
     Applies fuzzy matching to check the Levenshtein distance between the column names to find matches.
     :param df_col_names: List[Tuple[col_name, type]]
     :param aggregator_col_names: List[Tuple[col_name, type]]
-    :param difference_list: List[Tuple[col_name, type]]
-    :return: df_col_names -> List[Tuple[col_name, type]]
-    :return: difference_list -> List[Tuple[col_name, type]]
-    :return matched_columns -> List[List[Tuple[col_name_df, type], Tuple[col_name_aggregator, type]]]
+    :param difference_list: List[Tuple[col_name, type]] which lists differences in column names
+    :return: df_col_names -> List[Tuple[col_name, type]] updated to not conclude different column_names
+    :return: difference_list -> List[Tuple[col_name, type]] updated if matching was successfull
+    :return matched_columns -> List[List[col_name_df, col_name_aggregator, matching_ratio]] matches get added if
+                               matching probability > 80
     """
 
     matched_columns = []
@@ -209,4 +215,3 @@ def fuzzy_matching_prob(
                 ]
 
     return df_col_names, difference_list, matched_columns
-

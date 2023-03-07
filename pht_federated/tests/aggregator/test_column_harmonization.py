@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from fastapi.encoders import jsonable_encoder
+
 from pht_federated.aggregator.services.discovery import statistics
 from pht_federated.aggregator.services.discovery.column_harmonization import *
 
@@ -133,4 +134,4 @@ def test_difference_report():
     assert difference_report2["status"] == "passed"
 
     errors = [column["column_name"] for column in difference_report["errors"]]
-    assert errors == ['race', 'Cancer_Images', 'gender', 'FSMIs', 'MRI_images']
+    assert errors == ["race", "Cancer_Images", "gender", "FSMIs", "MRI_images"]

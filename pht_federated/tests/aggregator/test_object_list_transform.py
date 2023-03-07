@@ -3,7 +3,10 @@ import pandas as pd
 from fastapi.encoders import jsonable_encoder
 
 from pht_federated.aggregator.schemas.dataset_statistics import *
-from pht_federated.aggregator.services.discovery import object_list_transform, statistics
+from pht_federated.aggregator.services.discovery import (
+    object_list_transform,
+    statistics,
+)
 
 
 def get_example_object():
