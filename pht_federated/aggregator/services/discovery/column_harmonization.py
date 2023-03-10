@@ -106,7 +106,7 @@ def create_difference_report(
                 "dataframe_type": diff[0][1],
                 "aggregator_type": diff[1][1],
             },
-            "hint": f"Change type to {diff[1][1]}",
+            "hint": f"Change type of column '{diff[0][0]}' to {diff[1][1]}",
         }
         difference_report["errors"].append(case)
 
@@ -118,7 +118,7 @@ def create_difference_report(
                 "type": "added",  # missing, type, semantic, extra
                 "dataframe_type": diff[1],
             },
-            "hint": f"Column name {diff[0]} only exists in local dataset",
+            "hint": f"Column name '{diff[0]}' only exists in local dataset",
         }
         difference_report["errors"].append(case)
 
@@ -130,7 +130,7 @@ def create_difference_report(
                 "type": "missing",  # missing, type, semantic, extra
                 "aggregator_type": diff[1],
             },
-            "hint": f"Column name {diff[0]} only exists in aggregator dataset",
+            "hint": f"Column name '{diff[0]}' only exists in aggregator dataset",
         }
         difference_report["errors"].append(case)
 
@@ -144,8 +144,8 @@ def create_difference_report(
                 "aggregator_name": diff[1][0],
                 "aggregator_type": diff[1][1],
             },
-            "hint": f"Column name {diff[0][0]} only exists in local dataset."
-            f" Did you mean column name: {diff[1][0]}",
+            "hint": f"Column name '{diff[0][0]}' only exists in local dataset."
+            f" Did you mean column name: '{diff[1][0]}'",
         }
         difference_report["errors"].append(case)
 
@@ -222,3 +222,21 @@ def fuzzy_matching_prob(
                 ]
 
     return df_col_names, difference_list, matched_columns
+
+
+def adjust_dataset(local_dataset: DatasetStatistics, difference_report: dict) -> DatasetStatistics:
+
+    local_dataset = local_dataset.dict()
+    print("Local dataset: {}".format(local_dataset))
+    print("Difference Report: {}".format(difference_report))
+
+    errors_type = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "type"]
+    print("Type Errors : {}".format(errors_type))
+
+    errors_name = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "added"]
+    print("Name Errors : {}".format(errors_name))
+
+
+
+
+    return DatasetStatistics(**local_dataset)
