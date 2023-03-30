@@ -100,13 +100,13 @@ def create_difference_report(
     # adds errors to difference report where there is a difference in the type of the same column_name
     for diff in type_differences:
         case = {
-            "column_name": diff[1][1],
+            "column_name": diff[0][0],
             "error": {
                 "type": "type",  # missing, type, semantic, extra
                 "dataframe_type": diff[0][1],
                 "aggregator_type": diff[1][1],
             },
-            "hint": f"Change type of column \"{diff[1][1]}\" to \"{diff[0][0]}\"",
+            "hint": f"Change type of column \"{diff[0][0]}\" to \"{diff[1][1]}\"",
         }
         difference_report["errors"].append(case)
 
@@ -125,12 +125,12 @@ def create_difference_report(
     # adds errors to difference report where column_names only exist in aggregator
     for diff in value_differences_aggregator:
         case = {
-            "column_name": diff[1],
+            "column_name": diff[0],
             "error": {
                 "type": "missing",  # missing, type, semantic, extra
-                "aggregator_type": diff[0],
+                "aggregator_type": diff[1],
             },
-            "hint": f"Column name \"{diff[1]}\" only exists in aggregator dataset",
+            "hint": f"Column name \"{diff[0]}\" only exists in aggregator dataset",
         }
         difference_report["errors"].append(case)
 
@@ -223,34 +223,3 @@ def fuzzy_matching_prob(
 
     return df_col_names, difference_list, matched_columns
 
-
-def adjust_dataset(local_dataset: DatasetStatistics, difference_report: dict) -> DatasetStatistics:
-
-    local_dataset = local_dataset.dict()
-    print("Local dataset: {}".format(local_dataset))
-    print("Difference Report: {}".format(difference_report))
-
-    type_errors = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "type"]
-    print("Type Errors : {}".format(type_errors))
-
-    name_errors = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "added"]
-    print("Name Errors : {}".format(name_errors))
-
-
-    type_diffs = [re.findall('"([^"]*)"', errors) for errors in type_errors]
-    print("Type diffs : {}".format(type_diffs))
-    name_diffs = [re.findall('"([^"]*)"', errors) for errors in name_errors]
-    name_diffs = [error for error in name_diffs if len(error) > 1]
-    print("Name diffs : {}".format(name_diffs))
-
-    for column in local_dataset["column_information"]:
-        for diff in name_diffs:
-            if column["title"] == diff[0]:
-                column["title"] = diff[1]
-        for diff in type_diffs:
-            if column["title"] == diff[1]:
-                column["type"] == diff[0]
-
-    print("Updated local dataset : {}".format(local_dataset))
-
-    return DatasetStatistics(**local_dataset)

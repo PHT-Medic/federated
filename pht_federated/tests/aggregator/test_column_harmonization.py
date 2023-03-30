@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 
 from pht_federated.aggregator.services.discovery import statistics
 from pht_federated.aggregator.services.discovery.column_harmonization import *
+from pht_federated.aggregator.services.discovery.adjust_tabular_dataset import *
 
 
 def get_example_objects():
@@ -113,6 +114,7 @@ def get_example_objects():
         dataset_statistics2,
         dataset_statistics3,
         dataset_statistics4,
+        df
     )
 
 
@@ -122,6 +124,7 @@ def test_difference_report():
         example_aggregation,
         example_dataset2,
         example_aggregation2,
+        dataframe
     ) = get_example_objects()
 
     difference_report = compare_two_datasets(
@@ -137,6 +140,7 @@ def test_difference_report():
     errors = [column["column_name"] for column in difference_report["errors"]]
     #assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
 
-    adjusted_dataset = adjust_dataset(example_dataset, difference_report)
+    adjusted_dataset_names = adjust_name_differences(example_dataset, difference_report)
 
-    #print("Adjusted Dataset : {}".format(adjusted_dataset))
+    adjusted_dataset_types = adjust_type_differences(dataframe, example_dataset, difference_report)
+
