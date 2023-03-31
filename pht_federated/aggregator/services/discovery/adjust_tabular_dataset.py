@@ -33,6 +33,27 @@ def adjust_name_differences(local_dataset_stat: DatasetStatistics, difference_re
 
     return DatasetStatistics(**local_dataset_stat)
 
+def delete_name_differences(local_dataset_stat: DatasetStatistics, difference_report: dict) -> DatasetStatistics:
+    """
+    Deletes the column names of the local dataset when the respective column is only available locally
+    :param local_dataset_stat: summary statistics of the given local dataset
+    :param difference_report: Lists differences between local and aggregated datasets and provides hints to resolve them
+    :return adjusted_dataset -> Dataset with applied column name changes
+    """
+
+    local_dataset_stat = local_dataset_stat.dict()
+
+    name_errors = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "added"]
+    name_diffs = [re.findall('"([^"]*)"', errors) for errors in name_errors]
+    name_diffs = [error for error in name_diffs if len(error) == 1]
+
+    for c in range(len(local_dataset_stat["column_information"])):
+        for diff in name_diffs:
+            if local_dataset_stat["column_information"][c]["title"] == diff[0]:
+                del local_dataset_stat["column_information"][c]
+
+    return DatasetStatistics(**local_dataset_stat)
+
 
 def adjust_type_differences(local_dataset: pd.DataFrame, local_dataset_stat: DatasetStatistics,
                             difference_report: dict) -> DatasetStatistics:
