@@ -77,3 +77,24 @@ def adjust_type_differences(local_dataset: pd.DataFrame, local_dataset_stat: Dat
 
     type_diffs = [re.findall('"([^"]*)"', errors) for errors in type_errors]
     print("Type diffs : {}".format(type_diffs))
+
+    #numeric = local_dataset.applymap(lambda x: isinstance(x, (int, float)))['Age']
+    #print(numeric)
+
+    for differences in type_diffs:
+        find_mismatch(local_dataset, differences[0], differences[1])
+
+
+
+
+def find_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: type):
+
+    for entry in local_dataset[column_name]:
+        print(entry)
+        type_bool = isinstance(entry, (column_type))
+        print(type_bool)
+        if type_bool == False:
+            try:
+                pass
+            except:
+                pass
