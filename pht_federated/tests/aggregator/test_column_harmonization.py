@@ -140,6 +140,12 @@ def test_difference_report():
     errors = [column["column_name"] for column in difference_report["errors"]]
     #assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
 
+    #Add new column to dataframe for testing
+    race_col_entries = ["human" for x in range(891)]
+    race_col_entries[889] = 722
+    race_col_entries[890] = 888
+    dataframe = dataframe.assign(race=race_col_entries)
+
     adjusted_dataset_names = adjust_name_differences(example_dataset, difference_report)
 
     adjusted_dataset_types = adjust_type_differences(dataframe, example_dataset, difference_report)

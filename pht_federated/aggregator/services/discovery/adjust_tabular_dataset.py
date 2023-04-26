@@ -1,6 +1,8 @@
 import re
+from typing import List, Tuple
+import numpy as np
 import pandas as pd
-
+from pandas.api.types import is_bool_dtype, is_numeric_dtype
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
 
 
@@ -81,20 +83,109 @@ def adjust_type_differences(local_dataset: pd.DataFrame, local_dataset_stat: Dat
     #numeric = local_dataset.applymap(lambda x: isinstance(x, (int, float)))['Age']
     #print(numeric)
 
+    row_errors_list = []
+
     for differences in type_diffs:
-        find_mismatch(local_dataset, differences[0], differences[1])
+        print("Type-Differences : {}".format(differences))
+        row_errors_list.append(find_row_errors(local_dataset, differences[0], differences[1]))
+
+
+    error_report = create_row_error_report(row_errors_list, "test_dataset")
+
+    print("Error Report : {}".format(error_report))
 
 
 
 
-def find_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: type):
+def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: str):
+    """
+    Checks the column of the local_dataset where the error was found and searches for specific entries that
+    violate the desired/likely column type
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :param column_type: Suggested correct column type
+    :return: List[Tuple[error_index, error_value, column_name , column_type]]
+    """
+    #print("Column Name : {}".format(column_name))
+    #print("Column Type : {}".format(column_type))
+
+    row_errors_list = []
 
     for entry in local_dataset[column_name]:
-        print(entry)
-        type_bool = isinstance(entry, (column_type))
-        print(type_bool)
-        if type_bool == False:
-            try:
-                pass
-            except:
-                pass
+
+        if column_type == "categorical":
+            if not isinstance(entry, str | bool):
+                error_index = local_dataset.index[local_dataset[column_name]==entry].tolist()
+                error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
+                error_type = type(error_value)
+                error_tuple = (error_index, error_value, column_name, column_type)
+                row_errors_list.append(error_tuple)
+                #print("Error Index : {}".format(error_index))
+                #print("Error Value : {} + type: {}".format(error_value, type(error_value)))
+        if column_type == "numeric":
+            if not isinstance(entry, int | float | np.int64 | np.float64):
+                error_index = local_dataset.index[local_dataset[column_name]==entry].tolist()
+                error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
+                error_tuple = (error_index, error_value, column_name, column_type)
+                row_errors_list.append(error_tuple)
+                #print("Error Index : {}".format(error_index))
+                #print("Error Value : {} + type: {}".format(error_value, type(error_value)))
+        if column_type == "unique":
+            if not (local_dataset[column_name] == local_dataset[column_name][0]).all():
+                unequal_indices = check_same_value(local_dataset[column_name].tolist())
+                error_value = [local_dataset[column_name].loc[[x]].to_list() for x in unequal_indices]
+                error_tuple = (unequal_indices, error_value, column_name, column_type)
+                row_errors_list.append(error_tuple)
+
+    return row_errors_list
+
+
+
+def create_row_error_report(
+    row_errors_list: List[List[Tuple[str, str, str, str]]],
+    dataset_name: str,
+) -> dict:
+    """
+    Transforms multiple types of potentially false row-index entries into an error-report that is provided to the
+    creator of a proposal
+    :param row_errors: Lists errors in specific row indices that do not match the expected data type
+    :param dataset_name: String that defines the name of local dataset
+    :return: Dictionary which lists type errors in specific rows with hints for correction if possible
+    """
+
+    difference_report = {
+        "dataset": dataset_name,
+        "datatype": "tabular",
+        "status": "",
+        "errors": [],
+    }
+
+    # adds errors to difference report where there is a difference in the type of the same column_name
+    for row_errors in row_errors_list:
+        for error in row_errors:
+            case = {
+                "column_name": error[2],
+                "error": {
+                    "type": "type",  # missing, type, semantic, extra
+                    "suggested_type": error[3],
+                    "row_index": error[0][0],
+                    "row_value": error[1][0]
+                },
+                "hint": f"Change type of row entry \"{error[1][0]}\" at index \"{error[0][0]}\" to \"{error[3]}\"",
+            }
+            difference_report["errors"].append(case)
+
+
+    return difference_report
+
+
+
+def check_same_value(lst):
+    unequal_value = next((x for x in lst if x != lst[0]), None)
+    if unequal_value is None:
+        unequal_indices = []
+    else:
+        unequal_indices = [i for i in range(len(lst)) if lst[i] != lst[0]]
+        unequal_indices.append(0)
+    print(f"Not all values in the list are the same value. Indices of values that are not the same value: {unequal_indices}")
+    return unequal_indices
