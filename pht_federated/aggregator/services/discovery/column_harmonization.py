@@ -183,9 +183,10 @@ def intersection_two_lists(
                 stats_keys[0] == aggregator_keys[0]
                 and stats_keys[1] != aggregator_keys[1]
             ):
-                type_differences.append([stats_keys, aggregator_keys])
-                aggregator_col_names.remove(aggregator_keys)
-                df_col_names.remove(stats_keys)
+                if [stats_keys, aggregator_keys] not in type_differences:
+                    type_differences.append([stats_keys, aggregator_keys])
+                #print("Type differences: {} ".format(type_differences))
+
 
     return intersection, type_differences, aggregator_col_names, df_col_names
 

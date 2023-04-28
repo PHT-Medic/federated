@@ -2,6 +2,7 @@ import re
 from typing import List, Tuple
 import numpy as np
 import pandas as pd
+import collections
 from pandas.api.types import is_bool_dtype, is_numeric_dtype
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
 
@@ -70,9 +71,9 @@ def adjust_type_differences(local_dataset: pd.DataFrame, local_dataset_stat: Dat
 
     local_dataset_stat = local_dataset_stat.dict()
 
-    print("Local Dataset : {}".format(local_dataset))
-    print("Local Dataset Statistics : {}".format(local_dataset_stat))
-    print("Difference Report : {}".format(difference_report))
+    #print("Local Dataset : {}".format(local_dataset))
+    #print("Local Dataset Statistics : {}".format(local_dataset_stat))
+    #print("Difference Report : {}".format(difference_report))
 
     type_errors = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "type"]
     type_diffs = [re.findall('"([^"]*)"', errors) for errors in type_errors]
@@ -180,24 +181,23 @@ def find_numerical_mismatch(local_dataset: pd.DataFrame, column_name: str, colum
 
 def find_equal_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: str):
 
-    for entry in local_dataset[column_name]:
-        if not (local_dataset[column_name] == local_dataset[column_name][0]).all():
-            unequal_indices = check_same_value(local_dataset[column_name].tolist())
-            error_value = [local_dataset[column_name].loc[[x]].to_list() for x in unequal_indices]
-            error_tuple = (unequal_indices, error_value, column_name, column_type)
+    #for entry in local_dataset[column_name]:
+    if not (local_dataset[column_name] == local_dataset[column_name][0]).all():
+        unequal_indices = check_same_value(local_dataset[column_name].tolist())
+        error_value = [local_dataset[column_name].loc[[x]].to_list() for x in unequal_indices]
+        error_tuple = (unequal_indices, error_value, column_name, column_type)
+        print("Error Tuple - equal : {}".format(error_tuple))
 
     return error_tuple
 
 
 def find_unique_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: str):
 
-    for entry in local_dataset[column_name]:
-        if len(local_dataset[column_name].tolist()) > len(local_dataset[column_name].tolist()):
-            seen = set(local_dataset[column_name].tolist())
-            dupes = [x for x in local_dataset[column_name].tolist() if x in seen or seen.add(x)]
-            error_indices = [local_dataset.index[local_dataset[column_name] == x].tolist() for x in dupes]
-            error_value = [local_dataset[column_name].loc[[x]].to_list() for x in dupes]
-            error_tuple = (error_indices, error_value, column_name, column_type)
+    if len(local_dataset[column_name].tolist()) > len(set(local_dataset[column_name].tolist())):
+        dupes = [item for item, count in collections.Counter(local_dataset[column_name].tolist()).items() if count > 1]
+        error_indices = [local_dataset.index[local_dataset[column_name] == x].tolist() for x in dupes]
+        error_value = [local_dataset[column_name].loc[[x]].to_list() for x in dupes]
+        error_tuple = (error_indices, error_value, column_name, column_type)
 
     return error_tuple
 
@@ -218,6 +218,6 @@ def check_same_value(lst):
         unequal_indices = []
     else:
         unequal_indices = [i for i in range(len(lst)) if lst[i] != lst[0]]
-        unequal_indices.append(0)
-    print(f"Not all values in the list are the same value. Indices of values that are not the same value: {unequal_indices}")
+        #unequal_indices.append(0)
+        #TODO - case when first element of list is unqueal to all other elements
     return unequal_indices

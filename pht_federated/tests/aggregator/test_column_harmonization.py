@@ -120,7 +120,6 @@ def get_example_objects():
     aggregated_statistics["column_information"].append(categorical_col)
     aggregated_statistics["column_information"].append(equal_col4)
     aggregated_statistics["column_information"].append(unstructured_col4)
-    aggregated_statistics["column_information"].append(categorical_col)
     aggregated_statistics["column_information"].append(numerical_col2)
     aggregated_statistics["column_information"].append(equal_col3)
     aggregated_statistics["column_information"].append(unique_col4)
