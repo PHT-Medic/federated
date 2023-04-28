@@ -172,6 +172,7 @@ def test_difference_report():
     percentage_col_entries = [random.randint(0,100) for x in range(891)]
     percentage_col_entries[560] = "77"
     percentage_col_entries[561] = "48ix"
+    percentage_col_entries[761] = "notanumber"
     dataframe = dataframe.assign(percentage=percentage_col_entries)
 
     #Add new column to dataframe for testing -> suggested type: equal
@@ -183,6 +184,7 @@ def test_difference_report():
     #Add new column to dataframe for testing -> suggested type: unique
     identity_col_entries = [x for x in range(891)]
     identity_col_entries[120] = 220
+    identity_col_entries[421] = 230
     identity_col_entries[661] = "554"
     identity_col_entries[662] = "fiftyfive"
     dataframe = dataframe.assign(identity=identity_col_entries)

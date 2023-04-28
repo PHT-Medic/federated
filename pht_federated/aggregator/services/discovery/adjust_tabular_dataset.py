@@ -101,19 +101,18 @@ def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: 
     :return: List[Tuple[error_index, error_value, column_name , column_type]]
     """
     row_errors_list = []
-
     #print("Local Dataset : {} + type {}".format(local_dataset[column_name], type(local_dataset[column_name])))
 
     if column_type == "categorical":
-        row_errors_list.append(find_categorical_mismatch(local_dataset, column_name, column_type))
+        row_errors_list = find_categorical_mismatch(local_dataset, column_name, column_type)
     if column_type == "numeric":
-        row_errors_list.append(find_numerical_mismatch(local_dataset, column_name, column_type))
+        row_errors_list = find_numerical_mismatch(local_dataset, column_name, column_type)
     if column_type == "equal":
-        row_errors_list.append(find_equal_mismatch(local_dataset, column_name, column_type))
+        row_errors_list = find_equal_mismatch(local_dataset, column_name, column_type)
     if column_type == "unique":
-        row_errors_list.append(find_unique_mismatch(local_dataset, column_name, column_type))
+        row_errors_list = find_unique_mismatch(local_dataset, column_name, column_type)
     if column_type == "unstructured":
-        row_errors_list.append(find_unstructured_mismatch(local_dataset, column_name, column_type))
+        row_errors_list = find_unstructured_mismatch(local_dataset, column_name, column_type)
 
     return row_errors_list
 
@@ -137,9 +136,12 @@ def create_row_error_report(
         "errors": [],
     }
 
+    print("Row Errors List : {}".format(row_errors_list))
+
     # adds errors to difference report where there is a difference in the type of the same column_name
     for row_errors in row_errors_list:
         for error in row_errors:
+            print("Error : {}".format(error))
             case = {
                 "column_name": error[2],
                 "error": {
@@ -159,58 +161,73 @@ def create_row_error_report(
 
 def find_categorical_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: str):
 
+    error_list = []
+
     for entry in local_dataset[column_name]:
         if not isinstance(entry, str | bool):
             error_index = local_dataset.index[local_dataset[column_name] == entry].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_tuple = (error_index, error_value, column_name, column_type)
-            # print("Error Index : {}".format(error_index))
-            # print("Error Value : {} + type: {}".format(error_value, type(error_value)))
+            error_list.append(error_tuple)
 
-    return error_tuple
+    return error_list
 
 
 def find_numerical_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: str):
+
+    error_list = []
+
     for entry in local_dataset[column_name]:
         if not isinstance(entry, int | float | np.int64 | np.float64):
             error_index = local_dataset.index[local_dataset[column_name] == entry].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_tuple = (error_index, error_value, column_name, column_type)
+            error_list.append(error_tuple)
 
-    return error_tuple
+    return error_list
 
 def find_equal_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: str):
 
-    #for entry in local_dataset[column_name]:
+    error_list = []
+
     if not (local_dataset[column_name] == local_dataset[column_name][0]).all():
         unequal_indices = check_same_value(local_dataset[column_name].tolist())
-        error_value = [local_dataset[column_name].loc[[x]].to_list() for x in unequal_indices]
-        error_tuple = (unequal_indices, error_value, column_name, column_type)
-        print("Error Tuple - equal : {}".format(error_tuple))
 
-    return error_tuple
+        for index in unequal_indices:
+            error_value = local_dataset[column_name].loc[[index]].to_list()
+            error_tuple = ([index], error_value, column_name, column_type)
+            error_list.append(error_tuple)
+
+    return error_list
 
 
 def find_unique_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: str):
 
+    error_list = []
+
     if len(local_dataset[column_name].tolist()) > len(set(local_dataset[column_name].tolist())):
         dupes = [item for item, count in collections.Counter(local_dataset[column_name].tolist()).items() if count > 1]
-        error_indices = [local_dataset.index[local_dataset[column_name] == x].tolist() for x in dupes]
-        error_value = [local_dataset[column_name].loc[[x]].to_list() for x in dupes]
-        error_tuple = (error_indices, error_value, column_name, column_type)
+        for val in dupes:
+            error_index = local_dataset.index[local_dataset[column_name] == val].tolist()
+            error_index = [x for x in error_index if x != val]
+            error_tuple = (error_index, [val], column_name, column_type)
+            error_list.append(error_tuple)
 
-    return error_tuple
+    return error_list
 
 
 def find_unstructured_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: str):
 
+    error_list = []
+
     for entry in local_dataset[column_name]:
-        if not isinstance(entry, str | bool | int | float | np.int64 | np.float64):
+        if not type(entry) == bytes:
             error_index = local_dataset.index[local_dataset[column_name] == entry].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_tuple = (error_index, error_value, column_name, column_type)
+            error_list.append(error_tuple)
 
-    return error_tuple
+    return error_list
 
 def check_same_value(lst):
     unequal_value = next((x for x in lst if x != lst[0]), None)
