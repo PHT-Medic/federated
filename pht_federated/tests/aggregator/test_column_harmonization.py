@@ -18,25 +18,25 @@ def get_example_objects():
     stats3_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[2]))
     stats4_json = jsonable_encoder(statistics.get_discovery_statistics(df_split[3]))
 
-    stats_1 = {
+    local_statistics = {
         "item_count": stats1_json["item_count"],
         "feature_count": stats1_json["feature_count"],
         "column_information": stats1_json["column_information"],
     }
 
-    stats_2 = {
+    aggregated_statistics = {
         "item_count": stats2_json["item_count"],
         "feature_count": stats2_json["feature_count"],
         "column_information": stats2_json["column_information"],
     }
 
-    stats_3 = {
+    local_statistics2 = {
         "item_count": stats3_json["item_count"],
         "feature_count": stats3_json["feature_count"],
         "column_information": stats3_json["column_information"],
     }
 
-    stats_4 = {
+    aggregated_statistics2 = {
         "item_count": stats4_json["item_count"],
         "feature_count": stats4_json["feature_count"],
         "column_information": stats4_json["column_information"],
@@ -91,48 +91,70 @@ def get_example_objects():
     }
 
     equal_col = {"type": "equal", "title": "race", "value": "human"}
+    categorical_col = {"type": "categorical", "title": "race", "value": "human"}
 
-    equal_col2 = {"type": "categorical", "title": "race", "value": "human"}
+    categorical_col2 = {"type": "categorical", "title": "percentage", "value": "100"}
+    numerical_col2 = {"type": "numeric", "title": "percentage", "mean": "50"}
 
-    equal_col3 = {"type": "equal", "title": "gender", "value": "male"}
+    categorical_col3 = {"type": "categorical", "title": "alive", "value": "maybe"}
+    equal_col3 = {"type": "equal", "title": "alive", "value": "maybe"}
 
-    stats_1["column_information"].append(unstructured_col3)
-    stats_1["column_information"].append(unstructured_col5)
-    stats_1["column_information"].append(unstructured_col)
-    stats_1["column_information"].append(equal_col)
-    stats_2["column_information"].append(unstructured_col2)
-    stats_2["column_information"].append(equal_col2)
-    stats_2["column_information"].append(equal_col3)
-    stats_2["column_information"].append(unstructured_col4)
+    categorical_col4 = {"type": "categorical", "title": "identity", "value": "identification"}
+    unique_col4 = {"type": "unique", "title": "identity", "value": "identification"}
 
-    dataset_statistics1 = DatasetStatistics(**stats_1)
-    dataset_statistics2 = DatasetStatistics(**stats_2)
-    dataset_statistics3 = DatasetStatistics(**stats_3)
-    dataset_statistics4 = DatasetStatistics(**stats_4)
+    categorical_col5 = {"type": "categorical", "title": "bytes", "value": "bytes_values"}
+    unstruct_col5 = {"type": "unstructured", "title": "bytes", "value": "bytes_values"}
+
+    equal_col4 = {"type": "equal", "title": "gender", "value": "male"}
+
+    local_statistics["column_information"].append(unstructured_col3)
+    local_statistics["column_information"].append(unstructured_col5)
+    local_statistics["column_information"].append(unstructured_col)
+    local_statistics["column_information"].append(equal_col)
+    local_statistics["column_information"].append(categorical_col2)
+    local_statistics["column_information"].append(categorical_col3)
+    local_statistics["column_information"].append(categorical_col4)
+    local_statistics["column_information"].append(categorical_col5)
+
+    aggregated_statistics["column_information"].append(unstructured_col2)
+    aggregated_statistics["column_information"].append(categorical_col)
+    aggregated_statistics["column_information"].append(equal_col4)
+    aggregated_statistics["column_information"].append(unstructured_col4)
+    aggregated_statistics["column_information"].append(categorical_col)
+    aggregated_statistics["column_information"].append(numerical_col2)
+    aggregated_statistics["column_information"].append(equal_col3)
+    aggregated_statistics["column_information"].append(unique_col4)
+    aggregated_statistics["column_information"].append(unstruct_col5)
+
+    dataset_statistics_local = DatasetStatistics(**local_statistics)
+    dataset_statistics_aggregated = DatasetStatistics(**aggregated_statistics)
+
+    dataset_statistics_local2 = DatasetStatistics(**local_statistics2)
+    dataset_statistics_aggregated2 = DatasetStatistics(**aggregated_statistics2)
 
     return (
-        dataset_statistics1,
-        dataset_statistics2,
-        dataset_statistics3,
-        dataset_statistics4,
+        dataset_statistics_local,
+        dataset_statistics_aggregated,
+        dataset_statistics_local2,
+        dataset_statistics_aggregated2,
         df
     )
 
 
 def test_difference_report():
     (
-        example_dataset,
-        example_aggregation,
-        example_dataset2,
-        example_aggregation2,
+        dataset_local,
+        dataset_aggregated,
+        dataset_local2,
+        dataset_aggregated2,
         dataframe
     ) = get_example_objects()
 
     difference_report = compare_two_datasets(
-        example_dataset, example_aggregation, "test"
+        dataset_local, dataset_aggregated, "test"
     )
     difference_report2 = compare_two_datasets(
-        example_dataset2, example_aggregation2, "test2"
+        dataset_local2, dataset_aggregated2, "test2"
     )
 
     assert difference_report["status"] == "failed"
@@ -174,7 +196,15 @@ def test_difference_report():
     bytes_col_entries[783] = 55
     dataframe = dataframe.assign(bytes=bytes_col_entries)
 
-    adjusted_dataset_names = adjust_name_differences(example_dataset, difference_report)
+    #Add new column to dataframe for testing -> suggested type: unstructured
+    mri_img_col_entries = [b'\x48\x65\x6c\x6c\x6f\x26\x71\x6f\x72\x6c\x64' for x in range(891)]
+    mri_img_col_entries[160] = b'\x43\x65\x6c\x6c\x6f\x20\x76\x6f\x72\x6c\x64'
+    mri_img_col_entries[321] = b'\x48\x55\x6c\x6c\x6f\x20\x77\x6f\x71\x6c\x62'
+    mri_img_col_entries[512] = "fiftyfive"
+    dataframe = dataframe.assign(MRI_Img=mri_img_col_entries)
 
-    adjusted_dataset_types = adjust_type_differences(dataframe, example_dataset, difference_report)
+
+    adjusted_dataset_names = adjust_name_differences(dataset_local, difference_report)
+
+    adjusted_dataset_types = adjust_type_differences(dataframe, dataset_local, difference_report)
 
