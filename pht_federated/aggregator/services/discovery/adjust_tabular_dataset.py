@@ -70,9 +70,9 @@ def adjust_type_differences(local_dataset: pd.DataFrame, local_dataset_stat: Dat
 
     local_dataset_stat = local_dataset_stat.dict()
 
-    #print("Local Dataset : {}".format(local_dataset))
-    #print("Local Dataset Statistics : {}".format(local_dataset_stat))
-    #print("Difference Report : {}".format(difference_report))
+    print("Local Dataset : {}".format(local_dataset))
+    print("Local Dataset Statistics : {}".format(local_dataset_stat))
+    print("Difference Report : {}".format(difference_report))
 
     type_errors = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "type"]
     type_diffs = [re.findall('"([^"]*)"', errors) for errors in type_errors]
@@ -115,6 +115,44 @@ def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: 
         row_errors_list.append(find_unstructured_mismatch(local_dataset, column_name, column_type))
 
     return row_errors_list
+
+
+def create_row_error_report(
+    row_errors_list: List[List[Tuple[str, str, str, str]]],
+    dataset_name: str,
+) -> dict:
+    """
+    Transforms multiple types of potentially false row-index entries into an error-report that is provided to the
+    creator of a proposal
+    :param row_errors: Lists errors in specific row indices that do not match the expected data type
+    :param dataset_name: String that defines the name of local dataset
+    :return: Dictionary which lists type errors in specific rows with hints for correction if possible
+    """
+
+    difference_report = {
+        "dataset": dataset_name,
+        "datatype": "tabular",
+        "status": "",
+        "errors": [],
+    }
+
+    # adds errors to difference report where there is a difference in the type of the same column_name
+    for row_errors in row_errors_list:
+        for error in row_errors:
+            case = {
+                "column_name": error[2],
+                "error": {
+                    "type": "type",  # missing, type, semantic, extra
+                    "suggested_type": error[3],
+                    "row_index": error[0][0],
+                    "row_value": error[1][0]
+                },
+                "hint": f"Change type of row entry \"{error[1][0]}\" at index \"{error[0][0]}\" to \"{error[3]}\"",
+            }
+            difference_report["errors"].append(case)
+
+
+    return difference_report
 
 
 
@@ -167,51 +205,12 @@ def find_unique_mismatch(local_dataset: pd.DataFrame, column_name: str, column_t
 def find_unstructured_mismatch(local_dataset: pd.DataFrame, column_name: str, column_type: str):
 
     for entry in local_dataset[column_name]:
-        if isinstance(entry, str | bool | int | float | np.int64 | np.float64):
+        if not isinstance(entry, str | bool | int | float | np.int64 | np.float64):
             error_index = local_dataset.index[local_dataset[column_name] == entry].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_tuple = (error_index, error_value, column_name, column_type)
 
     return error_tuple
-
-def create_row_error_report(
-    row_errors_list: List[List[Tuple[str, str, str, str]]],
-    dataset_name: str,
-) -> dict:
-    """
-    Transforms multiple types of potentially false row-index entries into an error-report that is provided to the
-    creator of a proposal
-    :param row_errors: Lists errors in specific row indices that do not match the expected data type
-    :param dataset_name: String that defines the name of local dataset
-    :return: Dictionary which lists type errors in specific rows with hints for correction if possible
-    """
-
-    difference_report = {
-        "dataset": dataset_name,
-        "datatype": "tabular",
-        "status": "",
-        "errors": [],
-    }
-
-    # adds errors to difference report where there is a difference in the type of the same column_name
-    for row_errors in row_errors_list:
-        for error in row_errors:
-            case = {
-                "column_name": error[2],
-                "error": {
-                    "type": "type",  # missing, type, semantic, extra
-                    "suggested_type": error[3],
-                    "row_index": error[0][0],
-                    "row_value": error[1][0]
-                },
-                "hint": f"Change type of row entry \"{error[1][0]}\" at index \"{error[0][0]}\" to \"{error[3]}\"",
-            }
-            difference_report["errors"].append(case)
-
-
-    return difference_report
-
-
 
 def check_same_value(lst):
     unequal_value = next((x for x in lst if x != lst[0]), None)

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import random
 from fastapi.encoders import jsonable_encoder
 
 from pht_federated.aggregator.services.discovery import statistics
@@ -140,11 +141,38 @@ def test_difference_report():
     errors = [column["column_name"] for column in difference_report["errors"]]
     #assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
 
-    #Add new column to dataframe for testing
+    #Add new column to dataframe for testing -> suggested type: categorical
     race_col_entries = ["human" for x in range(891)]
     race_col_entries[889] = 722
     race_col_entries[890] = 888
     dataframe = dataframe.assign(race=race_col_entries)
+
+    #Add new column to dataframe for testing -> suggested type: numerical
+    percentage_col_entries = [random.randint(0,100) for x in range(891)]
+    percentage_col_entries[560] = "77"
+    percentage_col_entries[561] = "48ix"
+    dataframe = dataframe.assign(percentage=percentage_col_entries)
+
+    #Add new column to dataframe for testing -> suggested type: equal
+    alive_col_entries = ["yes" for x in range(891)]
+    alive_col_entries[320] = "no"
+    alive_col_entries[261] = 1
+    dataframe = dataframe.assign(alive=alive_col_entries)
+
+    #Add new column to dataframe for testing -> suggested type: unique
+    identity_col_entries = [x for x in range(891)]
+    identity_col_entries[120] = 220
+    identity_col_entries[661] = "554"
+    identity_col_entries[662] = "fiftyfive"
+    dataframe = dataframe.assign(identity=identity_col_entries)
+
+    #Add new column to dataframe for testing -> suggested type: unstructured
+    bytes_col_entries = [b'\x48\x65\x6c\x6c\x6f\x20\x77\x6f\x72\x6c\x64' for x in range(891)]
+    bytes_col_entries[120] = b'\x43\x65\x6c\x6c\x6f\x20\x76\x6f\x72\x6c\x64'
+    bytes_col_entries[121] = b'\x48\x55\x6c\x6c\x6f\x20\x77\x6f\x71\x6c\x62'
+    bytes_col_entries[432] = "fiftyfive"
+    bytes_col_entries[783] = 55
+    dataframe = dataframe.assign(bytes=bytes_col_entries)
 
     adjusted_dataset_names = adjust_name_differences(example_dataset, difference_report)
 
