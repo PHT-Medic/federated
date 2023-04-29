@@ -205,7 +205,7 @@ def test_difference_report():
     dataframe = dataframe.assign(MRI_Img=mri_img_col_entries)
 
 
-    adjusted_dataset_names = adjust_name_differences(dataset_local, difference_report)
+    #adjusted_dataset_names = adjust_name_differences(dataset_local, difference_report)
 
-    #adjusted_dataset_types = adjust_type_differences(dataframe, dataset_local, difference_report)
+    adjusted_dataset_types = adjust_differences(dataframe, dataset_local, difference_report)
 

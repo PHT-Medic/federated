@@ -28,7 +28,6 @@ def compare_two_datasets(
         (x["title"], x["type"]) for x in aggregator_column_information
     ]
 
-
     # find intersection
     (
         intersection,

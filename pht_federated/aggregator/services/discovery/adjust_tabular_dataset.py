@@ -58,11 +58,11 @@ def delete_name_differences(local_dataset_stat: DatasetStatistics, difference_re
     return DatasetStatistics(**local_dataset_stat)
 
 
-def adjust_type_differences(local_dataset: pd.DataFrame, local_dataset_stat: DatasetStatistics,
+def adjust_differences(local_dataset: pd.DataFrame, local_dataset_stat: DatasetStatistics,
                             difference_report: dict) -> DatasetStatistics:
     """
-    Changes the column types of the local dataset according to the suggested changes provided by the difference report
-    while taking multiple different mismatching cases into account
+    Changes the column types and names of the local dataset according to the suggested changes provided by the
+    difference report while taking multiple different mismatching cases into account
     :param local_dataset: Pandas dataframe of the tabular local dataset
     :param local_dataset_stat: summary statistics of the given local dataset
     :param difference_report: Lists differences between local and aggregated datasets and provides hints to resolve them
@@ -78,13 +78,19 @@ def adjust_type_differences(local_dataset: pd.DataFrame, local_dataset_stat: Dat
     type_errors = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "type"]
     type_diffs = [re.findall('"([^"]*)"', errors) for errors in type_errors]
 
+    name_errors = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "added"]
+    name_diffs = [re.findall('"([^"]*)"', errors) for errors in name_errors]
+    col_error_list = [error for error in name_diffs if len(error) > 1]
+
     row_errors_list = []
 
     for differences in type_diffs:
         print("Type-Differences : {}".format(differences))
         row_errors_list.append(find_row_errors(local_dataset, differences[0], differences[1]))
 
-    error_report = create_row_error_report(row_errors_list, "test_dataset")
+
+
+    error_report = create_error_report(row_errors_list, col_error_list, "test_dataset")
 
     print("Error Report : {}".format(error_report))
 
@@ -117,8 +123,9 @@ def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: 
     return row_errors_list
 
 
-def create_row_error_report(
+def create_error_report(
     row_errors_list: List[List[Tuple[str, str, str, str]]],
+    col_errors_list: List[List[str]],
     dataset_name: str,
 ) -> dict:
     """
@@ -136,12 +143,20 @@ def create_row_error_report(
         "errors": [],
     }
 
-    print("Row Errors List : {}".format(row_errors_list))
+    for error in col_errors_list:
+        case = {
+            "column_name": error[0],
+            "error": {
+                "type": "column_name",  # missing, type, semantic, extra
+                "suggested_name": error[1]
+            },
+            "hint": f"Change name of column: \"{error[0]}\" to \"{error[1]}\"",
+        }
+        difference_report["errors"].append(case)
 
     # adds errors to difference report where there is a difference in the type of the same column_name
     for row_errors in row_errors_list:
         for error in row_errors:
-            print("Error : {}".format(error))
             case = {
                 "column_name": error[2],
                 "error": {
