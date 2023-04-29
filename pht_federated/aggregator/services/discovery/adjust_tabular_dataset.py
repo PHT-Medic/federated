@@ -18,14 +18,14 @@ def adjust_name_differences(local_dataset_stat: DatasetStatistics, difference_re
 
     local_dataset_stat = local_dataset_stat.dict()
     #print("Local dataset: {}".format(local_dataset))
-    #print("Difference Report: {}".format(difference_report))
+    print("Difference Report: {}".format(difference_report))
 
     name_errors = [column["hint"] for column in difference_report["errors"] if column["error"]["type"] == "added"]
     #print("Name Errors : {}".format(name_errors))
 
     name_diffs = [re.findall('"([^"]*)"', errors) for errors in name_errors]
     name_diffs = [error for error in name_diffs if len(error) > 1]
-    #print("Name diffs : {}".format(name_diffs))
+    print("Name diffs : {}".format(name_diffs))
 
     for column in local_dataset_stat["column_information"]:
         for diff in name_diffs:
@@ -150,8 +150,21 @@ def create_row_error_report(
                     "row_index": error[0][0],
                     "row_value": error[1][0]
                 },
-                "hint": f"Change type of row entry \"{error[1][0]}\" at index \"{error[0][0]}\" to \"{error[3]}\"",
+                "hint": f"Change type of row entry: \"{error[1][0]}\" at index: \"{error[0][0]}\" to \"{error[3]}\"",
             }
+
+            if error[3] == "equal":
+                case["hint"] = f"Change type of row entry: \"{error[1][0]}\" at index: \"{error[0][0]}\" to" \
+                               f" the most common element: \"{error[4]}\""
+
+            if error[3] == "unique":
+                case["hint"] = f"Change type of row entry: \"{error[1][0]}\" at index: \"{error[0][0]}\" to" \
+                               f" a unique element"
+
+            if error[3] == "unstructured":
+                case["hint"] = f"Change type of row entry: \"{error[1][0]}\" at index: \"{error[0][0]}\" to" \
+                               f" the most common type in this column: \"{error[4]}\""
+
             difference_report["errors"].append(case)
 
 
@@ -195,7 +208,8 @@ def find_equal_mismatch(local_dataset: pd.DataFrame, column_name: str, column_ty
 
         for index in unequal_indices:
             error_value = local_dataset[column_name].loc[[index]].to_list()
-            error_tuple = ([index], error_value, column_name, column_type)
+            most_common_element = max(set(local_dataset[column_name].tolist()), key=local_dataset[column_name].tolist().count)
+            error_tuple = ([index], error_value, column_name, column_type, most_common_element)
             error_list.append(error_tuple)
 
     return error_list
@@ -222,9 +236,10 @@ def find_unstructured_mismatch(local_dataset: pd.DataFrame, column_name: str, co
 
     for entry in local_dataset[column_name]:
         if not type(entry) == bytes:
+            most_common_type = type(max(set(local_dataset[column_name].tolist()), key=local_dataset[column_name].tolist().count))
             error_index = local_dataset.index[local_dataset[column_name] == entry].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
-            error_tuple = (error_index, error_value, column_name, column_type)
+            error_tuple = (error_index, error_value, column_name, column_type, most_common_type)
             error_list.append(error_tuple)
 
     return error_list

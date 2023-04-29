@@ -28,6 +28,7 @@ def compare_two_datasets(
         (x["title"], x["type"]) for x in aggregator_column_information
     ]
 
+
     # find intersection
     (
         intersection,
@@ -51,14 +52,10 @@ def compare_two_datasets(
         80,
     )
 
-    # print("Aggregator column information : {}".format(aggregator_column_information))
-    # print("Input column information: {}".format(input_column_information))
     # find difference (Aggregator - Dataframe)
     value_differences_aggregator = list(
         set(aggregator_column_information).difference(set(input_column_information))
     )
-
-    # print("Value differences aggregator : {}".format(value_differences_aggregator))
 
     difference_report = create_difference_report(
         type_differences,
@@ -175,6 +172,7 @@ def intersection_two_lists(
     intersection = []
     type_differences = []
 
+
     for stats_keys in df_col_names:
         for aggregator_keys in aggregator_col_names:
             if stats_keys == aggregator_keys:
@@ -185,7 +183,10 @@ def intersection_two_lists(
             ):
                 if [stats_keys, aggregator_keys] not in type_differences:
                     type_differences.append([stats_keys, aggregator_keys])
-                #print("Type differences: {} ".format(type_differences))
+
+    for tup in type_differences:
+        aggregator_col_names.remove(tup[1])
+        df_col_names.remove(tup[0])
 
 
     return intersection, type_differences, aggregator_col_names, df_col_names

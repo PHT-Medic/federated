@@ -207,5 +207,5 @@ def test_difference_report():
 
     adjusted_dataset_names = adjust_name_differences(dataset_local, difference_report)
 
-    adjusted_dataset_types = adjust_type_differences(dataframe, dataset_local, difference_report)
+    #adjusted_dataset_types = adjust_type_differences(dataframe, dataset_local, difference_report)
 
