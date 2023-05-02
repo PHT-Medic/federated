@@ -1,5 +1,5 @@
 from typing import List, Tuple
-import re
+
 from thefuzz import fuzz
 
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
@@ -84,7 +84,6 @@ def create_difference_report(
     :return: Dictionary which lists the differences between the two datasets
     """
 
-    mismatch_errors_list = []
 
     difference_report = {
         "dataset": dataset_name,
@@ -102,7 +101,7 @@ def create_difference_report(
                 "dataframe_type": diff[0][1],
                 "aggregator_type": diff[1][1],
             },
-            "hint": f"Change type of column \"{diff[0][0]}\" to \"{diff[1][1]}\"",
+            "hint": f'Change type of column "{diff[0][0]}" to "{diff[1][1]}"',
         }
         difference_report["errors"].append(case)
 
@@ -114,7 +113,7 @@ def create_difference_report(
                 "type": "added",  # missing, type, semantic, extra
                 "dataframe_type": diff[0],
             },
-            "hint": f"Column name \"{diff[1]}\" only exists in local dataset",
+            "hint": f'Column name "{diff[1]}" only exists in local dataset',
         }
         difference_report["errors"].append(case)
 
@@ -126,7 +125,7 @@ def create_difference_report(
                 "type": "missing",  # missing, type, semantic, extra
                 "aggregator_type": diff[1],
             },
-            "hint": f"Column name \"{diff[0]}\" only exists in aggregator dataset",
+            "hint": f'Column name "{diff[0]}" only exists in aggregator dataset',
         }
         difference_report["errors"].append(case)
 
@@ -140,8 +139,8 @@ def create_difference_report(
                 "aggregator_name": diff[0][0],
                 "aggregator_type": diff[1][1],
             },
-            "hint": f"Column name \"{diff[1][0]}\" only exists in local dataset."
-            f" Did you mean column name: \"{diff[0][0]}\"",
+            "hint": f'Column name "{diff[1][0]}" only exists in local dataset.'
+            f' Did you mean column name: "{diff[0][0]}"',
         }
         difference_report["errors"].append(case)
 
@@ -171,7 +170,6 @@ def intersection_two_lists(
     intersection = []
     type_differences = []
 
-
     for stats_keys in df_col_names:
         for aggregator_keys in aggregator_col_names:
             if stats_keys == aggregator_keys:
@@ -186,7 +184,6 @@ def intersection_two_lists(
     for tup in type_differences:
         aggregator_col_names.remove(tup[1])
         df_col_names.remove(tup[0])
-
 
     return intersection, type_differences, aggregator_col_names, df_col_names
 
@@ -223,4 +220,3 @@ def fuzzy_matching_prob(
                 ]
 
     return df_col_names, difference_list, matched_columns
-

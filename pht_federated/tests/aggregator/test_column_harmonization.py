@@ -1,11 +1,12 @@
+import random
+
 import numpy as np
 import pandas as pd
-import random
 from fastapi.encoders import jsonable_encoder
 
 from pht_federated.aggregator.services.discovery import statistics
-from pht_federated.aggregator.services.discovery.column_harmonization import *
 from pht_federated.aggregator.services.discovery.adjust_tabular_dataset import *
+from pht_federated.aggregator.services.discovery.column_harmonization import *
 
 
 def get_example_objects():
@@ -99,10 +100,18 @@ def get_example_objects():
     categorical_col3 = {"type": "categorical", "title": "alive", "value": "maybe"}
     equal_col3 = {"type": "equal", "title": "alive", "value": "maybe"}
 
-    categorical_col4 = {"type": "categorical", "title": "identity", "value": "identification"}
+    categorical_col4 = {
+        "type": "categorical",
+        "title": "identity",
+        "value": "identification",
+    }
     unique_col4 = {"type": "unique", "title": "identity", "value": "identification"}
 
-    categorical_col5 = {"type": "categorical", "title": "bytes", "value": "bytes_values"}
+    categorical_col5 = {
+        "type": "categorical",
+        "title": "bytes",
+        "value": "bytes_values",
+    }
     unstruct_col5 = {"type": "unstructured", "title": "bytes", "value": "bytes_values"}
 
     equal_col4 = {"type": "equal", "title": "gender", "value": "male"}
@@ -136,7 +145,7 @@ def get_example_objects():
         dataset_statistics_aggregated,
         dataset_statistics_local2,
         dataset_statistics_aggregated2,
-        df
+        df,
     )
 
 
@@ -146,12 +155,10 @@ def test_difference_report():
         dataset_aggregated,
         dataset_local2,
         dataset_aggregated2,
-        dataframe
+        dataframe,
     ) = get_example_objects()
 
-    difference_report = compare_two_datasets(
-        dataset_local, dataset_aggregated, "test"
-    )
+    difference_report = compare_two_datasets(dataset_local, dataset_aggregated, "test")
     difference_report2 = compare_two_datasets(
         dataset_local2, dataset_aggregated2, "test2"
     )
@@ -159,29 +166,29 @@ def test_difference_report():
     assert difference_report["status"] == "failed"
     assert difference_report2["status"] == "passed"
 
-    errors = [column["column_name"] for column in difference_report["errors"]]
-    #assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
+    [column["column_name"] for column in difference_report["errors"]]
+    # assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
 
-    #Add new column to dataframe for testing -> suggested type: categorical
+    # Add new column to dataframe for testing -> suggested type: categorical
     race_col_entries = ["human" for x in range(891)]
     race_col_entries[889] = 722
     race_col_entries[890] = 888
     dataframe = dataframe.assign(race=race_col_entries)
 
-    #Add new column to dataframe for testing -> suggested type: numerical
-    percentage_col_entries = [random.randint(0,100) for x in range(891)]
+    # Add new column to dataframe for testing -> suggested type: numerical
+    percentage_col_entries = [random.randint(0, 100) for x in range(891)]
     percentage_col_entries[560] = "77"
     percentage_col_entries[561] = "48ix"
     percentage_col_entries[761] = "notanumber"
     dataframe = dataframe.assign(percentage=percentage_col_entries)
 
-    #Add new column to dataframe for testing -> suggested type: equal
+    # Add new column to dataframe for testing -> suggested type: equal
     alive_col_entries = ["yes" for x in range(891)]
     alive_col_entries[320] = "no"
     alive_col_entries[261] = 1
     dataframe = dataframe.assign(alive=alive_col_entries)
 
-    #Add new column to dataframe for testing -> suggested type: unique
+    # Add new column to dataframe for testing -> suggested type: unique
     identity_col_entries = [x for x in range(891)]
     identity_col_entries[120] = 220
     identity_col_entries[421] = 230
@@ -189,23 +196,27 @@ def test_difference_report():
     identity_col_entries[662] = "fiftyfive"
     dataframe = dataframe.assign(identity=identity_col_entries)
 
-    #Add new column to dataframe for testing -> suggested type: unstructured
-    bytes_col_entries = [b'\x48\x65\x6c\x6c\x6f\x20\x77\x6f\x72\x6c\x64' for x in range(891)]
-    bytes_col_entries[120] = b'\x43\x65\x6c\x6c\x6f\x20\x76\x6f\x72\x6c\x64'
-    bytes_col_entries[121] = b'\x48\x55\x6c\x6c\x6f\x20\x77\x6f\x71\x6c\x62'
+    # Add new column to dataframe for testing -> suggested type: unstructured
+    bytes_col_entries = [
+        b"\x48\x65\x6c\x6c\x6f\x20\x77\x6f\x72\x6c\x64" for x in range(891)
+    ]
+    bytes_col_entries[120] = b"\x43\x65\x6c\x6c\x6f\x20\x76\x6f\x72\x6c\x64"
+    bytes_col_entries[121] = b"\x48\x55\x6c\x6c\x6f\x20\x77\x6f\x71\x6c\x62"
     bytes_col_entries[432] = "fiftyfive"
     bytes_col_entries[783] = 55
     dataframe = dataframe.assign(bytes=bytes_col_entries)
 
-    #Add new column to dataframe for testing -> suggested type: unstructured
-    mri_img_col_entries = [b'\x48\x65\x6c\x6c\x6f\x26\x71\x6f\x72\x6c\x64' for x in range(891)]
-    mri_img_col_entries[160] = b'\x43\x65\x6c\x6c\x6f\x20\x76\x6f\x72\x6c\x64'
-    mri_img_col_entries[321] = b'\x48\x55\x6c\x6c\x6f\x20\x77\x6f\x71\x6c\x62'
+    # Add new column to dataframe for testing -> suggested type: unstructured
+    mri_img_col_entries = [
+        b"\x48\x65\x6c\x6c\x6f\x26\x71\x6f\x72\x6c\x64" for x in range(891)
+    ]
+    mri_img_col_entries[160] = b"\x43\x65\x6c\x6c\x6f\x20\x76\x6f\x72\x6c\x64"
+    mri_img_col_entries[321] = b"\x48\x55\x6c\x6c\x6f\x20\x77\x6f\x71\x6c\x62"
     mri_img_col_entries[512] = "fiftyfive"
     dataframe = dataframe.assign(MRI_Img=mri_img_col_entries)
 
+    # adjusted_dataset_names = adjust_name_differences(dataset_local, difference_report)
 
-    #adjusted_dataset_names = adjust_name_differences(dataset_local, difference_report)
-
-    adjusted_dataset_types = adjust_differences(dataframe, dataset_local, difference_report)
-
+    adjust_differences(
+        dataframe, dataset_local, difference_report
+    )
