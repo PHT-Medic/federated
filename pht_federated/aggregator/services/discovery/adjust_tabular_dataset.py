@@ -85,10 +85,7 @@ def adjust_differences(local_dataset: pd.DataFrame, local_dataset_stat: DatasetS
     row_errors_list = []
 
     for differences in type_diffs:
-        print("Type-Differences : {}".format(differences))
         row_errors_list.append(find_row_errors(local_dataset, differences[0], differences[1]))
-
-
 
     error_report = create_error_report(row_errors_list, col_error_list, "test_dataset")
 
@@ -262,9 +259,11 @@ def find_unstructured_mismatch(local_dataset: pd.DataFrame, column_name: str, co
 def check_same_value(lst):
     unequal_value = next((x for x in lst if x != lst[0]), None)
     if unequal_value is None:
-        unequal_indices = []
-    else:
+        try:
+            unequal_value = next((x for x in lst if x != lst[1]), None)
+        except:
+            unequal_indices = []
+    if unequal_value is not None:
         unequal_indices = [i for i in range(len(lst)) if lst[i] != lst[0]]
-        #unequal_indices.append(0)
-        #TODO - case when first element of list is unqueal to all other elements
+
     return unequal_indices
