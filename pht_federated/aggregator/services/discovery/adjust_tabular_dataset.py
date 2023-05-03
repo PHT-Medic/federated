@@ -105,6 +105,9 @@ def adjust_differences(
             find_row_errors(local_dataset, differences[0], differences[1])
         )
 
+    print("Row Errors List : {}".format(row_errors_list))
+    print("Col Errors List : {}".format(col_error_list))
+
     error_report = create_error_report(row_errors_list, col_error_list, "test_dataset")
 
     print("Error Report : {}".format(error_report))

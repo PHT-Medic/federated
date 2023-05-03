@@ -35,3 +35,15 @@ class ColumnError(BaseModel):
     error_type: Optional[str]
     suggested_name: Optional[str]
     hint: Optional[str]
+
+
+class ColumnHarmonizationResult(BaseModel):
+    local_column_name: Optional[str]
+    aggregator_column_name: Optional[str]
+
+
+class RowHarmonizationResult(BaseModel):
+    row_index: Optional[int]
+    row_value: Optional[int]
+    column_name: Optional[str]
+    aggregator_column_type: Optional[str]
