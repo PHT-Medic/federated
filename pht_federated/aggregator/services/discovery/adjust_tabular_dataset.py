@@ -212,6 +212,12 @@ def create_error_report(
 def find_categorical_mismatch(
     local_dataset: pd.DataFrame, column_name: str, column_type: str
 ):
+    """
+    Searches for a column in the local dataset that is supposed to be categorical but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :return error_list: List of tuples that contain the index and value of the error, the column name and suggested type
+    """
 
     error_list = []
 
@@ -230,6 +236,12 @@ def find_categorical_mismatch(
 def find_numerical_mismatch(
     local_dataset: pd.DataFrame, column_name: str, column_type: str
 ):
+    """
+    Searches for a column in the local dataset that is supposed to be numerical but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :return error_list: List of tuples that contain the index and value of the error, the column name and suggested type
+    """
 
     error_list = []
 
@@ -248,6 +260,13 @@ def find_numerical_mismatch(
 def find_equal_mismatch(
     local_dataset: pd.DataFrame, column_name: str, column_type: str
 ):
+    """
+    Searches for a column in the local dataset that is supposed to be equal value but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :return error_list: List of tuples that contain the index and value of the error, the column name, suggested type and
+                        most common element in the respective column
+    """
 
     error_list = []
 
@@ -275,6 +294,12 @@ def find_equal_mismatch(
 def find_unique_mismatch(
     local_dataset: pd.DataFrame, column_name: str, column_type: str
 ):
+    """
+    Searches for a column in the local dataset that is supposed to be unique value but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :return error_list: List of tuples that contain the index and value of the error, the column name and suggested type
+    """
 
     error_list = []
 
@@ -302,6 +327,13 @@ def find_unique_mismatch(
 def find_unstructured_mismatch(
     local_dataset: pd.DataFrame, column_name: str, column_type: str
 ):
+    """
+    Searches for a column in the local dataset that is supposed to be unstructured data but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :return error_list: List of tuples that contain the index and value of the error, the column name, suggested type and
+                        most common type in the respective column
+    """
 
     error_list = []
 
@@ -330,6 +362,10 @@ def find_unstructured_mismatch(
 
 
 def check_same_value(lst):
+    """
+    Checks if all elements in a list are the same
+     :param lst: List of values
+    """
     unequal_value = next((x for x in lst if x != lst[0]), None)
     if unequal_value is None:
         try:
