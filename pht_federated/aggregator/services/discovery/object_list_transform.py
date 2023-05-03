@@ -61,6 +61,12 @@ def list_to_object(
 
 
 def process_column(column_information: list, object_list_int: list) -> list:
+    """
+    Transforms a DatasetStatistics object to python list of integers that contain all numerical values of the object
+    :param column_information: list of column information
+    :param object_list_int: list of integers
+    :return: list of integers
+    """
 
     for column in column_information:
         if column["type"] == "categorical":
@@ -78,6 +84,12 @@ def process_column(column_information: list, object_list_int: list) -> list:
 
 
 def retrieve_column(column_information: list, dataset_statistics_list: list) -> list:
+    """
+    Transforms a list of integers that contain all masked numerical values back to a DatasetStatistics object
+    :param column_information: list of column information
+    :param dataset_statistics_list: list of masked integers
+    :return: column_information in list format
+    """
 
     for column in column_information:
         if column["type"] == "categorical":
@@ -106,6 +118,13 @@ def retrieve_column(column_information: list, dataset_statistics_list: list) -> 
 def retrieve_categorical_column(
     column: dict, dataset_statistics_list: list
 ) -> [dict, list]:
+    """
+    Transforms a list of integers that contain respective values back to the categorical column
+    of a DatasetStatistics object
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: column in dict format, updated list of integers
+    """
 
     if "not_na_elements" in column:
         column["not_na_elements"] = dataset_statistics_list.pop(0)
@@ -124,6 +143,13 @@ def retrieve_categorical_column(
 def retrieve_numeric_column(
     column: dict, dataset_statistics_list: list
 ) -> [dict, list]:
+    """
+    Transforms a list of integers that contains respective values back to the numerical column
+    of a DatasetStatistics object
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: column in dict format, updated list of integers
+    """
 
     if "not_na_elements" in column:
         column["not_na_elements"] = dataset_statistics_list.pop(0)
@@ -140,6 +166,14 @@ def retrieve_numeric_column(
 
 
 def retrieve_unique_column(column: dict, dataset_statistics_list: list) -> [dict, list]:
+    """
+    Transforms a list of integers that contains respective values back to the unqiue column
+    of a DatasetStatistics object
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: column in dict format, updated list of integers
+    """
+
     if "number_of_duplicates":
         column["number_of_duplicates"] = dataset_statistics_list.pop(0)
 
@@ -147,6 +181,13 @@ def retrieve_unique_column(column: dict, dataset_statistics_list: list) -> [dict
 
 
 def retrieve_equal_column(column: dict, dataset_statistics_list: list) -> [dict, list]:
+    """
+    Transforms a list of integers that contains respective values back to the equal column
+    of a DatasetStatistics object
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: column in dict format, updated list of integers
+    """
     if "title" in column:
         pass
     if "value" in column:
@@ -158,6 +199,13 @@ def retrieve_equal_column(column: dict, dataset_statistics_list: list) -> [dict,
 def retrieve_unstructured_column(
     column: dict, dataset_statistics_list: list
 ) -> [dict, list]:
+    """
+    Transforms a list of integers that contains respective values back to the unstructured column
+    of a DatasetStatistics object
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: column in dict format, updated list of integers
+    """
 
     if "not_na_elements" in column:
         column["not_na_elements"] = dataset_statistics_list.pop(0)
@@ -174,6 +222,12 @@ def retrieve_unstructured_column(
 
 
 def process_categorical_column(column: dict, object_list_int: list) -> list:
+    """
+    Transforms a categorical column of a DatasetStatistics object to a list of integers
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: updated list of integers
+    """
 
     if "not_na_elements" in column:
         object_list_int.append(int(column["not_na_elements"]))
@@ -186,6 +240,12 @@ def process_categorical_column(column: dict, object_list_int: list) -> list:
 
 
 def process_numerical_column(column: dict, object_list_int: list) -> list:
+    """
+    Transforms a numerical column of a DatasetStatistics object to a list of integers
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: updated list of integers
+    """
     if "not_na_elements" in column:
         object_list_int.append(int(column["not_na_elements"]))
     if "mean" in column:
@@ -201,6 +261,13 @@ def process_numerical_column(column: dict, object_list_int: list) -> list:
 
 
 def process_unique_column(column: dict, object_list_int: list) -> list:
+    """
+    Transforms a unqiue column of a DatasetStatistics object to a list of integers
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: updated list of integers
+    """
+
     if "number_of_duplicates" in column:
         object_list_int.append(int(column["number_of_duplicates"]))
 
@@ -208,6 +275,13 @@ def process_unique_column(column: dict, object_list_int: list) -> list:
 
 
 def process_unstructured_column(column: dict, object_list_int: list) -> list:
+    """
+    Transforms an unstructured column of a DatasetStatistics object to a list of integers
+    :param column: dict of column information
+    :param dataset_statistics_list: list of integers
+    :return: updated list of integers
+    """
+
     if "not_na_elements" in column:
         object_list_int.append(int(column["not_na_elements"]))
     if "number_targets" in column:
@@ -224,6 +298,12 @@ def compare(x, y):
 
 
 def multikeysort(items, columns):
+    """
+    Sorts a list of dictionaries by multiple keys
+    :param items: list of dictionaries
+    :param columns: list of keys to sort by
+    :return: sorted list of dictionaries
+    """
     comparers = [
         ((i(col[1:].strip()), -1) if col.startswith("-") else (i(col.strip()), 1))
         for col in columns
