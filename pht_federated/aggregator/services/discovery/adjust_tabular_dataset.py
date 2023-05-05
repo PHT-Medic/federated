@@ -116,9 +116,6 @@ def adjust_differences(
     row_errors_list = RowHarmonizationResult(**{"row_differences": row_errors_list})
     col_error_list = ColumnHarmonizationResult(**{"column_differences": col_error_list})
 
-    print("Row Errors List : {}".format(row_errors_list))
-    print("Col Errors List : {}".format(col_error_list))
-
     error_report = create_error_report(row_errors_list, col_error_list, "test_dataset")
 
     print("Error Report : {}".format(error_report))
@@ -133,26 +130,25 @@ def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: 
     :param column_type: Suggested correct column type
     :return: List[Tuple[error_index, error_value, column_name , column_type]]
     """
-    row_errors_list = []
 
     if column_type == "categorical":
-        row_errors_list = find_categorical_mismatch(
+        row_error = find_categorical_mismatch(
             local_dataset, column_name, column_type
         )
     if column_type == "numeric":
-        row_errors_list = find_numerical_mismatch(
+        row_error = find_numerical_mismatch(
             local_dataset, column_name, column_type
         )
     if column_type == "equal":
-        row_errors_list = find_equal_mismatch(local_dataset, column_name, column_type)
+        row_error = find_equal_mismatch(local_dataset, column_name, column_type)
     if column_type == "unique":
-        row_errors_list = find_unique_mismatch(local_dataset, column_name, column_type)
+        row_error = find_unique_mismatch(local_dataset, column_name, column_type)
     if column_type == "unstructured":
-        row_errors_list = find_unstructured_mismatch(
+        row_error = find_unstructured_mismatch(
             local_dataset, column_name, column_type
         )
 
-    return row_errors_list
+    return row_error
 
 
 def create_error_report(
@@ -175,50 +171,54 @@ def create_error_report(
         "errors": [],
     }
 
-    for error in col_errors_list:
+    for col_error in col_errors_list.column_differences:
+        #print("Column Error : {}".format(col_error))
         case = {
-            "column_name": error[0],
+            "column_name": col_error.local_column_name,
             "error": {
                 "type": "column_name",  # missing, type, semantic, extra
-                "suggested_name": error[1],
+                "suggested_name": col_error.aggregator_column_name,
             },
-            "hint": f'Change name of column: "{error[0]}" to "{error[1]}"',
+            "hint": f'Change name of column: "{col_error.local_column_name}" to "{col_error.aggregator_column_name}"',
         }
-        difference_report["errors"].append(case)
+        difference_report["errors"].append(ColumnError(**case))
 
     # adds errors to difference report where there is a difference in the type of the same column_name
-    for row_errors in row_errors_list:
-        for error in row_errors:
-            case = {
-                "column_name": error[2],
-                "error": {
-                    "type": "type",  # missing, type, semantic, extra
-                    "suggested_type": error[3],
-                    "row_index": error[0][0],
-                    "row_value": error[1][0],
-                },
-                "hint": f'Change type of row entry: "{error[1][0]}" at index: "{error[0][0]}" to "{error[3]}"',
-            }
+    for row_error in row_errors_list.row_differences:
+        #print("Row Error : {}".format(row_error))
+        case = {
+            "column_name": row_error.column_name,
+            "error": {
+                "type": "type",  # missing, type, semantic, extra
+                "suggested_type": row_error.aggregator_column_type,
+                "row_index": row_error.index,
+                "row_value": row_error.value,
+            },
+            "hint": f'Change type of row entry: "{row_error.value}" at index: "{row_error.index}" to "{row_error.aggregator_column_type}"',
+        }
 
-            if error[3] == "equal":
-                case["hint"] = (
-                    f'Change type of row entry: "{error[1][0]}" at index: "{error[0][0]}" to'
-                    f' the most common element: "{error[4]}"'
-                )
+        if row_error.aggregator_column_type == "equal":
+            case["hint"] = (
+                f'Change type of row entry: "{row_error.value}" at index: "{row_error.index}" to'
+                f' the most common element: "{row_error.most_frequent_element}"'
+            )
 
-            if error[3] == "unique":
-                case["hint"] = (
-                    f'Change type of row entry: "{error[1][0]}" at index: "{error[0][0]}" to'
-                    f" a unique element"
-                )
+        if row_error.aggregator_column_type == "unique":
+            case["hint"] = (
+                f'Change type of row entry: "{row_error.value}" at index: "{row_error.index}" to'
+                f" a unique element"
+            )
 
-            if error[3] == "unstructured":
-                case["hint"] = (
-                    f'Change type of row entry: "{error[1][0]}" at index: "{error[0][0]}" to'
-                    f' the most common type in this column: "{error[4]}"'
-                )
+        if row_error.aggregator_column_type == "unstructured":
+            case["hint"] = (
+                f'Change type of row entry: "{row_error.value}" at index: "{row_error.index}" to'
+                f' the most common type in this column: "{row_error.most_frequent_type}"'
+            )
 
-            difference_report["errors"].append(case)
+        difference_report["errors"].append(RowError(**case))
+
+    print("Difference Report : {}".format(difference_report))
+    difference_report = DifferenceReport(**difference_report)
 
     return difference_report
 
@@ -233,24 +233,20 @@ def find_categorical_mismatch(
     :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
     """
 
-    error_list = []
-
     for entry in local_dataset[column_name]:
         if not isinstance(entry, str | bool):
             error_index = local_dataset.index[
                 local_dataset[column_name] == entry
             ].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
-            #error_dict = (error_index, error_value, column_name, column_type)
             error_dict = {
                     "row_index": error_index[0],
                     "row_value": error_value[0],
                     "column_name": column_name,
                     "aggregator_column_type": column_type,
             }
-            error_list.append(RowHarmonizationError(**error_dict))
 
-    return error_list
+    return RowHarmonizationError(**error_dict)
 
 
 def find_numerical_mismatch(
@@ -262,8 +258,6 @@ def find_numerical_mismatch(
     :param column_name: Name of the column where the type error occured
     :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
     """
-
-    error_list = []
 
     for entry in local_dataset[column_name]:
         if not isinstance(entry, int | float | np.int64 | np.float64):
@@ -277,9 +271,8 @@ def find_numerical_mismatch(
                     "column_name": column_name,
                     "aggregator_column_type": column_type,
             }
-            error_list.append(RowHarmonizationError(**error_dict))
 
-    return error_list
+    return RowHarmonizationError(**error_dict)
 
 
 def find_equal_mismatch(
@@ -292,8 +285,6 @@ def find_equal_mismatch(
     :return error_list: List of dicts that contain the index and value of the error, the column name, suggested type and
                         most common element in the respective column
     """
-
-    error_list = []
 
     if not (local_dataset[column_name] == local_dataset[column_name][0]).all():
         unequal_indices = check_same_value(local_dataset[column_name].tolist())
@@ -311,9 +302,8 @@ def find_equal_mismatch(
                     "aggregator_column_type": column_type,
                     "most_frequent_element": most_frequent_element,
             }
-            error_list.append(RowHarmonizationError(**error_dict))
 
-    return error_list
+    return RowHarmonizationError(**error_dict)
 
 
 def find_unique_mismatch(
@@ -325,8 +315,6 @@ def find_unique_mismatch(
     :param column_name: Name of the column where the type error occured
     :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
     """
-
-    error_list = []
 
     if len(local_dataset[column_name].tolist()) > len(
         set(local_dataset[column_name].tolist())
@@ -349,9 +337,8 @@ def find_unique_mismatch(
                 "column_name": column_name,
                 "aggregator_column_type": column_type,
             }
-            error_list.append(RowHarmonizationError(**error_dict))
 
-    return error_list
+    return RowHarmonizationError(**error_dict)
 
 
 def find_unstructured_mismatch(
@@ -364,8 +351,6 @@ def find_unstructured_mismatch(
     :return error_list: List of dicts that contain the index and value of the error, the column name, suggested type and
                         most common type in the respective column
     """
-
-    error_list = []
 
     for entry in local_dataset[column_name]:
         if not type(entry) == bytes:
@@ -387,9 +372,8 @@ def find_unstructured_mismatch(
                     #"most_frequent_type": most_frequent_type
                     #TODO: Add most frequent type to error dict
             }
-            error_list.append(RowHarmonizationError(**error_dict))
 
-    return error_list
+    return RowHarmonizationError(**error_dict)
 
 
 def check_same_value(lst):

@@ -9,8 +9,8 @@ class RowError(BaseModel):
     column_name: Optional[str]
     error_type: Optional[str]
     suggested_type: Optional[str]
-    row_index: Optional[int]
-    row_value: Optional[str]
+    index: Optional[int]
+    value: Optional[str]
     hint: Optional[str]
 
 
@@ -42,8 +42,8 @@ class ColumnHarmonizationResult(BaseModel):
 
 
 class RowHarmonizationError(BaseModel):
-    row_index: Optional[int]
-    row_value: Optional[Union[int, str]]
+    index: Optional[int]
+    value: Optional[Union[int, str]]
     column_name: Optional[str]
     aggregator_column_type: Optional[str]
     most_frequent_element: Optional[str]
