@@ -172,28 +172,22 @@ def create_error_report(
     }
 
     for col_error in col_errors_list.column_differences:
-        #print("Column Error : {}".format(col_error))
         case = {
             "column_name": col_error.local_column_name,
-            "error": {
-                "type": "column_name",  # missing, type, semantic, extra
-                "suggested_name": col_error.aggregator_column_name,
-            },
+            "error_type": "column_name",
+            "suggested_name": col_error.aggregator_column_name,
             "hint": f'Change name of column: "{col_error.local_column_name}" to "{col_error.aggregator_column_name}"',
         }
         difference_report["errors"].append(ColumnError(**case))
 
     # adds errors to difference report where there is a difference in the type of the same column_name
     for row_error in row_errors_list.row_differences:
-        #print("Row Error : {}".format(row_error))
         case = {
             "column_name": row_error.column_name,
-            "error": {
-                "type": "type",  # missing, type, semantic, extra
-                "suggested_type": row_error.aggregator_column_type,
-                "row_index": row_error.index,
-                "row_value": row_error.value,
-            },
+            "error_type": "type",  # missing, type, semantic, extra
+            "suggested_type": row_error.aggregator_column_type,
+            "index": row_error.index,
+            "value": row_error.value,
             "hint": f'Change type of row entry: "{row_error.value}" at index: "{row_error.index}" to "{row_error.aggregator_column_type}"',
         }
 
@@ -240,8 +234,8 @@ def find_categorical_mismatch(
             ].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_dict = {
-                    "row_index": error_index[0],
-                    "row_value": error_value[0],
+                    "index": error_index[0],
+                    "value": error_value[0],
                     "column_name": column_name,
                     "aggregator_column_type": column_type,
             }
@@ -266,8 +260,8 @@ def find_numerical_mismatch(
             ].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_dict = {
-                    "row_index": error_index[0],
-                    "row_value": error_value[0],
+                    "index": error_index[0],
+                    "value": error_value[0],
                     "column_name": column_name,
                     "aggregator_column_type": column_type,
             }
@@ -296,8 +290,8 @@ def find_equal_mismatch(
                 key=local_dataset[column_name].tolist().count,
             )
             error_dict = {
-                    "row_index": index,
-                    "row_value": error_value[0],
+                    "index": index,
+                    "value": error_value[0],
                     "column_name": column_name,
                     "aggregator_column_type": column_type,
                     "most_frequent_element": most_frequent_element,
@@ -332,8 +326,8 @@ def find_unique_mismatch(
             ].tolist()
             error_index = [x for x in error_index if x != val]
             error_dict = {
-                "row_index": error_index[0],
-                "row_value": val,
+                "index": error_index[0],
+                "value": val,
                 "column_name": column_name,
                 "aggregator_column_type": column_type,
             }
@@ -365,8 +359,8 @@ def find_unstructured_mismatch(
             ].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_dict = {
-                    "row_index": error_index[0],
-                    "row_value": error_value[0],
+                    "index": error_index[0],
+                    "value": error_value[0],
                     "column_name": column_name,
                     "aggregator_column_type": column_type,
                     #"most_frequent_type": most_frequent_type

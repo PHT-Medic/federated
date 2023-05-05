@@ -6,8 +6,8 @@ from typing_extensions import Annotated
 
 
 class RowError(BaseModel):
+    error_type: Literal["type"]
     column_name: Optional[str]
-    error_type: Optional[str]
     suggested_type: Optional[str]
     index: Optional[int]
     value: Optional[str]
@@ -15,8 +15,8 @@ class RowError(BaseModel):
 
 
 class ColumnError(BaseModel):
+    error_type: Literal["column_name"]
     column_name: Optional[str]
-    error_type: Optional[str]
     suggested_name: Optional[str]
     hint: Optional[str]
 
@@ -26,12 +26,15 @@ class DifferenceReport(BaseModel):
     status: Optional[str]
     errors: Optional[
         List[
+            Annotated[
                 Union[
-                    RowError,
                     ColumnError,
-                ]
+                    RowError,
+                ],
+                Field(discriminator="error_type")
             ]
         ]
+    ]
 
 
 class ColumnHarmonizationError(BaseModel):
