@@ -163,10 +163,10 @@ def test_difference_report():
         dataset_local2, dataset_aggregated2, "test2"
     )
 
-    assert difference_report["status"] == "failed"
-    assert difference_report2["status"] == "passed"
+    assert difference_report.status == "failed"
+    assert difference_report2.status == "passed"
 
-    [column["column_name"] for column in difference_report["errors"]]
+    [column.column_name for column in difference_report.errors]
     # assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
 
     # Add new column to dataframe for testing -> suggested type: categorical

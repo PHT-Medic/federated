@@ -71,3 +71,47 @@ class DifferenceReportRequirements(BaseModel):
     dataset_name: Optional[str]
 
 
+
+class TypeDifference(BaseModel):
+    error_type: Literal["type"]
+    column_name: Optional[str]
+    dataframe_type: Optional[str]
+    aggregator_type: Optional[str]
+    hint: Optional[str]
+
+class DataframeValueDifference(BaseModel):
+    error_type: Literal["added"]
+    column_name: Optional[str]
+    dataframe_type: Optional[str]
+    hint: Optional[str]
+
+class AggregatorValueDifference(BaseModel):
+    error_type: Literal["missing"]
+    column_name: Optional[str]
+    aggregator_type: Optional[str]
+    hint: Optional[str]
+
+class ColumnNameDifference(BaseModel):
+    error_type: Literal["added_name"]
+    column_name: Optional[str]
+    dataframe_name: Optional[str]
+    aggregator_name: Optional[str]
+    aggregator_type: Optional[str]
+    hint: Optional[str]
+
+class DifferenceReportBackend(BaseModel):
+    dataset: Optional[str]
+    datatype: Optional[str]
+    status: Optional[str]
+    errors: Optional[List[
+            Annotated[
+                Union[
+                    TypeDifference,
+                    DataframeValueDifference,
+                    AggregatorValueDifference,
+                    ColumnNameDifference,
+                ],
+                Field(discriminator="error_type")
+            ]
+        ]
+    ]

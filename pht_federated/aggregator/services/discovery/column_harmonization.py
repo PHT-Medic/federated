@@ -69,7 +69,7 @@ def compare_two_datasets(
 
 def create_difference_report(
 difference_report_requirements: DifferenceReportRequirements
-) -> dict:
+) -> DifferenceReportBackend:
     """
     Transforms multiple types of mismatch errors between datasets into a summarized difference report
     :param type_differences: Lists differences in type
@@ -91,12 +91,10 @@ difference_report_requirements: DifferenceReportRequirements
     # adds errors to difference report where there is a difference in the type of the same column_name
     for diff in difference_report_requirements.type_differences:
         case = {
+            "error_type": "type", # missing, type, semantic, extra
             "column_name": diff[0][0],
-            "error": {
-                "type": "type",  # missing, type, semantic, extra
-                "dataframe_type": diff[0][1],
-                "aggregator_type": diff[1][1],
-            },
+            "dataframe_type": diff[0][1],
+            "aggregator_type": diff[1][1],
             "hint": f'Change type of column "{diff[0][0]}" to "{diff[1][1]}"',
         }
         difference_report["errors"].append(case)
@@ -104,11 +102,9 @@ difference_report_requirements: DifferenceReportRequirements
     # adds errors to difference report where column_names only exist in local dataset
     for diff in difference_report_requirements.dataframe_value_difference:
         case = {
+            "error_type": "added", # missing, type, semantic, extra
             "column_name": diff[1],
-            "error": {
-                "type": "added",  # missing, type, semantic, extra
-                "dataframe_type": diff[0],
-            },
+            "dataframe_type": diff[0],
             "hint": f'Column name "{diff[1]}" only exists in local dataset',
         }
         difference_report["errors"].append(case)
@@ -116,11 +112,9 @@ difference_report_requirements: DifferenceReportRequirements
     # adds errors to difference report where column_names only exist in aggregator
     for diff in difference_report_requirements.aggregator_value_difference:
         case = {
+            "error_type": "missing", # missing, type, semantic, extra
             "column_name": diff[0],
-            "error": {
-                "type": "missing",  # missing, type, semantic, extra
-                "aggregator_type": diff[1],
-            },
+            "aggregator_type": diff[1],
             "hint": f'Column name "{diff[0]}" only exists in aggregator dataset',
         }
         difference_report["errors"].append(case)
@@ -128,13 +122,11 @@ difference_report_requirements: DifferenceReportRequirements
     # adds errors to difference report where column names between datasets mismatch but similarity is significant
     for diff in difference_report_requirements.matched_column_names:
         case = {
+            "error_type": "added_name", # missing, type, semantic, extra
             "column_name": diff[1][0],
-            "error": {
-                "type": "added",  # missing, type, semantic, extra
-                "dataset_name": diff[1][0],
-                "aggregator_name": diff[0][0],
-                "aggregator_type": diff[1][1],
-            },
+            "dataframe_name": diff[1][0],
+            "aggregator_name": diff[0][0],
+            "aggregator_type": diff[1][1],
             "hint": f'Column name "{diff[1][0]}" only exists in local dataset.'
             f' Did you mean column name: "{diff[0][0]}"',
         }
@@ -144,6 +136,8 @@ difference_report_requirements: DifferenceReportRequirements
         difference_report["status"] = "passed"
     else:
         difference_report["status"] = "failed"
+
+    difference_report = DifferenceReportBackend(**difference_report)
 
     return difference_report
 

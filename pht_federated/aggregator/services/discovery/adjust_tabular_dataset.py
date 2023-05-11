@@ -70,7 +70,7 @@ def delete_name_differences(
 def adjust_differences(
     local_dataset: pd.DataFrame,
     local_dataset_stat: DatasetStatistics,
-    difference_report: dict,
+    difference_report: DifferenceReportBackend,
 ) -> DatasetStatistics:
     """
     Changes the column types and names of the local dataset according to the suggested changes provided by the
@@ -84,9 +84,9 @@ def adjust_differences(
     local_dataset_stat = local_dataset_stat.dict()
 
     name_errors = [
-        column["hint"]
-        for column in difference_report["errors"]
-        if column["error"]["type"] == "added"
+        column.hint
+        for column in difference_report.errors
+        if column.error_type == "added" or column.error_type == "added_name"
     ]
     name_diffs = [re.findall('"([^"]*)"', errors) for errors in name_errors]
 
@@ -100,9 +100,9 @@ def adjust_differences(
             col_error_list.append(ColumnHarmonizationError(**case))
 
     type_errors = [
-        column["hint"]
-        for column in difference_report["errors"]
-        if column["error"]["type"] == "type"
+        column.hint
+        for column in difference_report.errors
+        if column.error_type == "type"
     ]
     type_diffs = [re.findall('"([^"]*)"', errors) for errors in type_errors]
 
