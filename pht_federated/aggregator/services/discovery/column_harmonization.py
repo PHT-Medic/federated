@@ -5,6 +5,7 @@ from thefuzz import fuzz
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
 from pht_federated.aggregator.schemas.difference_report import *
 
+
 def compare_two_datasets(
     dataset_statistics: DatasetStatistics,
     aggregator_statistics: DatasetStatistics,
@@ -29,11 +30,15 @@ def compare_two_datasets(
     ]
 
     # find intersection
-    list_intersection_report = intersection_two_lists(input_column_information, aggregator_column_information)
+    list_intersection_report = intersection_two_lists(
+        input_column_information, aggregator_column_information
+    )
 
     # find difference (Dataframe - Aggregator)
     value_differences_dataframe = list(
-        set(list_intersection_report.dataframe_columns).difference(set(list_intersection_report.aggregator_columns))
+        set(list_intersection_report.dataframe_columns).difference(
+            set(list_intersection_report.aggregator_columns)
+        )
     )
     (
         list_intersection_report,
@@ -47,7 +52,9 @@ def compare_two_datasets(
 
     # find difference (Aggregator - Dataframe)
     value_differences_aggregator = list(
-        set(list_intersection_report.aggregator_columns).difference(set(list_intersection_report.dataframe_columns))
+        set(list_intersection_report.aggregator_columns).difference(
+            set(list_intersection_report.dataframe_columns)
+        )
     )
 
     difference_report_requirements = {
@@ -55,20 +62,20 @@ def compare_two_datasets(
         "dataframe_value_difference": value_differences_dataframe,
         "aggregator_value_difference": value_differences_aggregator,
         "matched_column_names": matched_column_names,
-        "dataset_name": dataset_name
+        "dataset_name": dataset_name,
     }
 
-    difference_report_requirements = DifferenceReportRequirements(**difference_report_requirements)
-
-    difference_report = create_difference_report(
-        difference_report_requirements
+    difference_report_requirements = DifferenceReportRequirements(
+        **difference_report_requirements
     )
+
+    difference_report = create_difference_report(difference_report_requirements)
 
     return difference_report
 
 
 def create_difference_report(
-difference_report_requirements: DifferenceReportRequirements
+    difference_report_requirements: DifferenceReportRequirements,
 ) -> DifferenceReportBackend:
     """
     Transforms multiple types of mismatch errors between datasets into a summarized difference report
@@ -80,7 +87,6 @@ difference_report_requirements: DifferenceReportRequirements
     :return: Dictionary which lists the differences between the two datasets
     """
 
-
     difference_report = {
         "dataset": difference_report_requirements.dataset_name,
         "datatype": "tabular",
@@ -91,7 +97,7 @@ difference_report_requirements: DifferenceReportRequirements
     # adds errors to difference report where there is a difference in the type of the same column_name
     for diff in difference_report_requirements.type_differences:
         case = {
-            "error_type": "type", # missing, type, semantic, extra
+            "error_type": "type",  # missing, type, semantic, extra
             "column_name": diff[0][0],
             "dataframe_type": diff[0][1],
             "aggregator_type": diff[1][1],
@@ -102,7 +108,7 @@ difference_report_requirements: DifferenceReportRequirements
     # adds errors to difference report where column_names only exist in local dataset
     for diff in difference_report_requirements.dataframe_value_difference:
         case = {
-            "error_type": "added", # missing, type, semantic, extra
+            "error_type": "added",  # missing, type, semantic, extra
             "column_name": diff[1],
             "dataframe_type": diff[0],
             "hint": f'Column name "{diff[1]}" only exists in local dataset',
@@ -112,7 +118,7 @@ difference_report_requirements: DifferenceReportRequirements
     # adds errors to difference report where column_names only exist in aggregator
     for diff in difference_report_requirements.aggregator_value_difference:
         case = {
-            "error_type": "missing", # missing, type, semantic, extra
+            "error_type": "missing",  # missing, type, semantic, extra
             "column_name": diff[0],
             "aggregator_type": diff[1],
             "hint": f'Column name "{diff[0]}" only exists in aggregator dataset',
@@ -122,7 +128,7 @@ difference_report_requirements: DifferenceReportRequirements
     # adds errors to difference report where column names between datasets mismatch but similarity is significant
     for diff in difference_report_requirements.matched_column_names:
         case = {
-            "error_type": "added_name", # missing, type, semantic, extra
+            "error_type": "added_name",  # missing, type, semantic, extra
             "column_name": diff[1][0],
             "dataframe_name": diff[1][0],
             "aggregator_name": diff[0][0],
@@ -179,13 +185,12 @@ def intersection_two_lists(
         "intersection": intersection,
         "type_differences": type_differences,
         "dataframe_columns": df_col_names,
-        "aggregator_columns": aggregator_col_names
+        "aggregator_columns": aggregator_col_names,
     }
 
     list_intersection_report = ListIntersectionReport(**list_intersection_report)
 
-
-    return  list_intersection_report
+    return list_intersection_report
 
 
 def fuzzy_matching_prob(
@@ -216,7 +221,5 @@ def fuzzy_matching_prob(
                     (keys[0].replace(diff[0], col_name[0]), keys[1])
                     for keys in list_intersection_report.dataframe_columns
                 ]
-
-
 
     return list_intersection_report, difference_list, matched_columns

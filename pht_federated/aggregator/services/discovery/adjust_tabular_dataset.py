@@ -8,6 +8,7 @@ import pandas as pd
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
 from pht_federated.aggregator.schemas.difference_report import *
 
+
 def adjust_name_differences(
     local_dataset_stat: DatasetStatistics, difference_report: dict
 ) -> DatasetStatistics:
@@ -19,7 +20,7 @@ def adjust_name_differences(
     """
 
     local_dataset_stat = local_dataset_stat.dict()
-    #print("Difference Report: {}".format(difference_report))
+    # print("Difference Report: {}".format(difference_report))
 
     name_errors = [
         column["hint"]
@@ -132,21 +133,15 @@ def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: 
     """
 
     if column_type == "categorical":
-        row_error = find_categorical_mismatch(
-            local_dataset, column_name, column_type
-        )
+        row_error = find_categorical_mismatch(local_dataset, column_name, column_type)
     if column_type == "numeric":
-        row_error = find_numerical_mismatch(
-            local_dataset, column_name, column_type
-        )
+        row_error = find_numerical_mismatch(local_dataset, column_name, column_type)
     if column_type == "equal":
         row_error = find_equal_mismatch(local_dataset, column_name, column_type)
     if column_type == "unique":
         row_error = find_unique_mismatch(local_dataset, column_name, column_type)
     if column_type == "unstructured":
-        row_error = find_unstructured_mismatch(
-            local_dataset, column_name, column_type
-        )
+        row_error = find_unstructured_mismatch(local_dataset, column_name, column_type)
 
     return row_error
 
@@ -234,10 +229,10 @@ def find_categorical_mismatch(
             ].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_dict = {
-                    "index": error_index[0],
-                    "value": error_value[0],
-                    "column_name": column_name,
-                    "aggregator_column_type": column_type,
+                "index": error_index[0],
+                "value": error_value[0],
+                "column_name": column_name,
+                "aggregator_column_type": column_type,
             }
 
     return RowHarmonizationError(**error_dict)
@@ -260,10 +255,10 @@ def find_numerical_mismatch(
             ].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_dict = {
-                    "index": error_index[0],
-                    "value": error_value[0],
-                    "column_name": column_name,
-                    "aggregator_column_type": column_type,
+                "index": error_index[0],
+                "value": error_value[0],
+                "column_name": column_name,
+                "aggregator_column_type": column_type,
             }
 
     return RowHarmonizationError(**error_dict)
@@ -290,11 +285,11 @@ def find_equal_mismatch(
                 key=local_dataset[column_name].tolist().count,
             )
             error_dict = {
-                    "index": index,
-                    "value": error_value[0],
-                    "column_name": column_name,
-                    "aggregator_column_type": column_type,
-                    "most_frequent_element": most_frequent_element,
+                "index": index,
+                "value": error_value[0],
+                "column_name": column_name,
+                "aggregator_column_type": column_type,
+                "most_frequent_element": most_frequent_element,
             }
 
     return RowHarmonizationError(**error_dict)
@@ -348,7 +343,7 @@ def find_unstructured_mismatch(
 
     for entry in local_dataset[column_name]:
         if not type(entry) == bytes:
-            most_frequent_type = type(
+            type(
                 max(
                     set(local_dataset[column_name].tolist()),
                     key=local_dataset[column_name].tolist().count,
@@ -359,12 +354,12 @@ def find_unstructured_mismatch(
             ].tolist()
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_dict = {
-                    "index": error_index[0],
-                    "value": error_value[0],
-                    "column_name": column_name,
-                    "aggregator_column_type": column_type,
-                    #"most_frequent_type": most_frequent_type
-                    #TODO: Add most frequent type to error dict
+                "index": error_index[0],
+                "value": error_value[0],
+                "column_name": column_name,
+                "aggregator_column_type": column_type,
+                # "most_frequent_type": most_frequent_type
+                # TODO: Add most frequent type to error dict
             }
 
     return RowHarmonizationError(**error_dict)
