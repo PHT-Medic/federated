@@ -50,23 +50,25 @@ def compare_two_datasets(
         set(list_intersection_report.aggregator_columns).difference(set(list_intersection_report.dataframe_columns))
     )
 
+    difference_report_requirements = {
+        "type_differences": list_intersection_report.type_differences,
+        "dataframe_value_difference": value_differences_dataframe,
+        "aggregator_value_difference": value_differences_aggregator,
+        "matched_column_names": matched_column_names,
+        "dataset_name": dataset_name
+    }
+
+    difference_report_requirements = DifferenceReportRequirements(**difference_report_requirements)
+
     difference_report = create_difference_report(
-        list_intersection_report.type_differences,
-        value_differences_dataframe,
-        value_differences_aggregator,
-        matched_column_names,
-        dataset_name,
+        difference_report_requirements
     )
 
     return difference_report
 
 
 def create_difference_report(
-    type_differences: List[List[Tuple[str, str]]],
-    value_differences_dataframe: List[Tuple[str, str]],
-    value_differences_aggregator: List[Tuple[str, str]],
-    name_differences: List[List[Tuple[str, str]]],
-    dataset_name: str,
+difference_report_requirements: DifferenceReportRequirements
 ) -> dict:
     """
     Transforms multiple types of mismatch errors between datasets into a summarized difference report
@@ -80,14 +82,14 @@ def create_difference_report(
 
 
     difference_report = {
-        "dataset": dataset_name,
+        "dataset": difference_report_requirements.dataset_name,
         "datatype": "tabular",
         "status": "",
         "errors": [],
     }
 
     # adds errors to difference report where there is a difference in the type of the same column_name
-    for diff in type_differences:
+    for diff in difference_report_requirements.type_differences:
         case = {
             "column_name": diff[0][0],
             "error": {
@@ -100,7 +102,7 @@ def create_difference_report(
         difference_report["errors"].append(case)
 
     # adds errors to difference report where column_names only exist in local dataset
-    for diff in value_differences_dataframe:
+    for diff in difference_report_requirements.dataframe_value_difference:
         case = {
             "column_name": diff[1],
             "error": {
@@ -112,7 +114,7 @@ def create_difference_report(
         difference_report["errors"].append(case)
 
     # adds errors to difference report where column_names only exist in aggregator
-    for diff in value_differences_aggregator:
+    for diff in difference_report_requirements.aggregator_value_difference:
         case = {
             "column_name": diff[0],
             "error": {
@@ -124,7 +126,7 @@ def create_difference_report(
         difference_report["errors"].append(case)
 
     # adds errors to difference report where column names between datasets mismatch but similarity is significant
-    for diff in name_differences:
+    for diff in difference_report_requirements.matched_column_names:
         case = {
             "column_name": diff[1][0],
             "error": {
@@ -200,8 +202,7 @@ def fuzzy_matching_prob(
     """
     Checks whether the name-differences between the two datasets might be due to typing and not semantic nature.
     Applies fuzzy matching to check the Levenshtein distance between the column names to find matches.
-    :param df_col_names: Lists column_names & types of local dataset
-    :param aggregator_col_names: Lists column_names & types of aggregator dataset
+    :param list_intersection_report: Lists column_names & types of identical columns between local dataset & aggregator dataset
     :param difference_list: Lists differences in column names
     :param matching_probability_threshold: Threshold probability when two column names are recognized as a match
     :return: list_intersection_report -> Updated object to not include different column_names

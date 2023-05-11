@@ -61,3 +61,13 @@ class ListIntersectionReport(BaseModel):
     type_differences: Optional[List[List[Tuple[str, str]]]]
     dataframe_columns: Optional[List[Tuple[str, str]]]
     aggregator_columns: Optional[List[Tuple[str, str]]]
+
+
+class DifferenceReportRequirements(BaseModel):
+    type_differences: Optional[List[List[Tuple[str, str]]]]
+    dataframe_value_difference: Optional[List[Tuple[str, str]]]
+    aggregator_value_difference: Optional[List[Tuple[str, str]]]
+    matched_column_names: Optional[List[List[Union[Tuple[str, str], int]]]]
+    dataset_name: Optional[str]
+
+
