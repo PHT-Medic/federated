@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union, Tuple
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -54,3 +54,10 @@ class RowHarmonizationError(BaseModel):
 
 class RowHarmonizationResult(BaseModel):
     row_differences: Optional[List[RowHarmonizationError]]
+
+
+class ListIntersectionReport(BaseModel):
+    intersection: Optional[List[Tuple[str, str]]]
+    type_differences: Optional[List[List[Tuple[str, str]]]]
+    dataframe_columns: Optional[List[Tuple[str, str]]]
+    aggregator_columns: Optional[List[Tuple[str, str]]]

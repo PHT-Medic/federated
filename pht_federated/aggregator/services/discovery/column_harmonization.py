@@ -3,7 +3,7 @@ from typing import List, Tuple
 from thefuzz import fuzz
 
 from pht_federated.aggregator.schemas.dataset_statistics import DatasetStatistics
-
+from pht_federated.aggregator.schemas.difference_report import *
 
 def compare_two_datasets(
     dataset_statistics: DatasetStatistics,
@@ -29,35 +29,29 @@ def compare_two_datasets(
     ]
 
     # find intersection
-    (
-        intersection,
-        type_differences,
-        aggregator_column_information,
-        input_column_information,
-    ) = intersection_two_lists(input_column_information, aggregator_column_information)
+    list_intersection_report = intersection_two_lists(input_column_information, aggregator_column_information)
 
     # find difference (Dataframe - Aggregator)
     value_differences_dataframe = list(
-        set(input_column_information).difference(set(aggregator_column_information))
+        set(list_intersection_report.dataframe_columns).difference(set(list_intersection_report.aggregator_columns))
     )
     (
-        input_column_information,
+        list_intersection_report,
         value_differences_dataframe,
         matched_column_names,
     ) = fuzzy_matching_prob(
-        input_column_information,
-        aggregator_column_information,
+        list_intersection_report,
         value_differences_dataframe,
         80,
     )
 
     # find difference (Aggregator - Dataframe)
     value_differences_aggregator = list(
-        set(aggregator_column_information).difference(set(input_column_information))
+        set(list_intersection_report.aggregator_columns).difference(set(list_intersection_report.dataframe_columns))
     )
 
     difference_report = create_difference_report(
-        type_differences,
+        list_intersection_report.type_differences,
         value_differences_dataframe,
         value_differences_aggregator,
         matched_column_names,
@@ -185,12 +179,21 @@ def intersection_two_lists(
         aggregator_col_names.remove(tup[1])
         df_col_names.remove(tup[0])
 
-    return intersection, type_differences, aggregator_col_names, df_col_names
+    list_intersection_report = {
+        "intersection": intersection,
+        "type_differences": type_differences,
+        "dataframe_columns": df_col_names,
+        "aggregator_columns": aggregator_col_names
+    }
+
+    list_intersection_report = ListIntersectionReport(**list_intersection_report)
+
+
+    return  list_intersection_report
 
 
 def fuzzy_matching_prob(
-    df_col_names: List[Tuple[str, str]],
-    aggregator_col_names: List[Tuple[str, str]],
+    list_intersection_report: ListIntersectionReport,
     difference_list: List[Tuple[str, str]],
     matching_probability_threshold: int,
 ):
@@ -201,7 +204,7 @@ def fuzzy_matching_prob(
     :param aggregator_col_names: Lists column_names & types of aggregator dataset
     :param difference_list: Lists differences in column names
     :param matching_probability_threshold: Threshold probability when two column names are recognized as a match
-    :return: df_col_names -> Updated list to not conclude different column_names
+    :return: list_intersection_report -> Updated object to not include different column_names
     :return: difference_list -> Updated list if matching was successfull
     :return matched_columns -> Matches get added to list if matching probability > 80
     """
@@ -209,14 +212,16 @@ def fuzzy_matching_prob(
     matched_columns = []
 
     for diff in difference_list:
-        for col_name in aggregator_col_names:
+        for col_name in list_intersection_report.aggregator_columns:
             ratio = fuzz.ratio(diff[0].lower(), col_name[0].lower())
             if ratio > matching_probability_threshold:
                 matched_columns.append([col_name, diff, ratio])
                 difference_list = [i for i in difference_list if i != diff]
-                df_col_names = [
+                list_intersection_report.dataframe_columns = [
                     (keys[0].replace(diff[0], col_name[0]), keys[1])
-                    for keys in df_col_names
+                    for keys in list_intersection_report.dataframe_columns
                 ]
 
-    return df_col_names, difference_list, matched_columns
+
+
+    return list_intersection_report, difference_list, matched_columns
