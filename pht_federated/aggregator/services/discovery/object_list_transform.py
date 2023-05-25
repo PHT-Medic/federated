@@ -4,7 +4,7 @@ from operator import itemgetter as i
 from pht_federated.aggregator.schemas.dataset_statistics import *
 
 
-def object_to_list(dataset_statistics_object: DatasetStatistics) -> list:
+def object_to_list(dataset_statistics_object: DatasetStatistics) -> List[int]:
     """
     Transforms a DatasetStatistics object to python list of integers that contain all numerical values of the object
     :param dataset_statistics_object: DatasetStatistics
@@ -60,7 +60,7 @@ def list_to_object(
     return dataset_statistics_object
 
 
-def process_column(column_information: list, object_list_int: list) -> list:
+def process_column(column_information: List[dict], object_list_int: List[int]) -> List[int]:
     """
     Transforms a DatasetStatistics object to python list of integers that contain all numerical values of the object
     :param column_information: list of column information
@@ -83,7 +83,7 @@ def process_column(column_information: list, object_list_int: list) -> list:
     return object_list_int
 
 
-def retrieve_column(column_information: list, dataset_statistics_list: list) -> list:
+def retrieve_column(column_information: List[dict], dataset_statistics_list: List[int]) -> List[dict]:
     """
     Transforms a list of integers that contain all masked numerical values back to a DatasetStatistics object
     :param column_information: list of column information
@@ -116,7 +116,7 @@ def retrieve_column(column_information: list, dataset_statistics_list: list) -> 
 
 
 def retrieve_categorical_column(
-    column: dict, dataset_statistics_list: list
+    column: dict, dataset_statistics_list: List[int]
 ) -> [dict, list]:
     """
     Transforms a list of integers that contain respective values back to the categorical column
@@ -141,7 +141,7 @@ def retrieve_categorical_column(
 
 
 def retrieve_numeric_column(
-    column: dict, dataset_statistics_list: list
+    column: dict, dataset_statistics_list: List[int]
 ) -> [dict, list]:
     """
     Transforms a list of integers that contains respective values back to the numerical column
@@ -165,7 +165,7 @@ def retrieve_numeric_column(
     return column, dataset_statistics_list
 
 
-def retrieve_unique_column(column: dict, dataset_statistics_list: list) -> [dict, list]:
+def retrieve_unique_column(column: dict, dataset_statistics_list: List[int]) -> [dict, list]:
     """
     Transforms a list of integers that contains respective values back to the unqiue column
     of a DatasetStatistics object
@@ -180,7 +180,7 @@ def retrieve_unique_column(column: dict, dataset_statistics_list: list) -> [dict
     return column, dataset_statistics_list
 
 
-def retrieve_equal_column(column: dict, dataset_statistics_list: list) -> [dict, list]:
+def retrieve_equal_column(column: dict, dataset_statistics_list: List[int]) -> [dict, list]:
     """
     Transforms a list of integers that contains respective values back to the equal column
     of a DatasetStatistics object
@@ -197,7 +197,7 @@ def retrieve_equal_column(column: dict, dataset_statistics_list: list) -> [dict,
 
 
 def retrieve_unstructured_column(
-    column: dict, dataset_statistics_list: list
+    column: dict, dataset_statistics_list: List[int]
 ) -> [dict, list]:
     """
     Transforms a list of integers that contains respective values back to the unstructured column
@@ -221,7 +221,7 @@ def retrieve_unstructured_column(
     return column, dataset_statistics_list
 
 
-def process_categorical_column(column: dict, object_list_int: list) -> list:
+def process_categorical_column(column: dict, object_list_int: List[int]) -> List[int]:
     """
     Transforms a categorical column of a DatasetStatistics object to a list of integers
     :param column: dict of column information
@@ -239,7 +239,7 @@ def process_categorical_column(column: dict, object_list_int: list) -> list:
     return object_list_int
 
 
-def process_numerical_column(column: dict, object_list_int: list) -> list:
+def process_numerical_column(column: dict, object_list_int: List[int]) -> List[int]:
     """
     Transforms a numerical column of a DatasetStatistics object to a list of integers
     :param column: dict of column information
@@ -260,7 +260,7 @@ def process_numerical_column(column: dict, object_list_int: list) -> list:
     return object_list_int
 
 
-def process_unique_column(column: dict, object_list_int: list) -> list:
+def process_unique_column(column: dict, object_list_int: List[int]) -> List[int]:
     """
     Transforms a unqiue column of a DatasetStatistics object to a list of integers
     :param column: dict of column information
@@ -274,7 +274,7 @@ def process_unique_column(column: dict, object_list_int: list) -> list:
     return object_list_int
 
 
-def process_unstructured_column(column: dict, object_list_int: list) -> list:
+def process_unstructured_column(column: dict, object_list_int: List[int]) -> List[int]:
     """
     Transforms an unstructured column of a DatasetStatistics object to a list of integers
     :param column: dict of column information
@@ -297,7 +297,7 @@ def compare(x, y):
     return (x > y) - (x < y)
 
 
-def multikeysort(items, columns):
+def multikeysort(items, columns) -> List[dict]:
     """
     Sorts a list of dictionaries by multiple keys
     :param items: list of dictionaries
