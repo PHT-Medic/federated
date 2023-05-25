@@ -23,10 +23,10 @@ def compare_two_datasets(
     aggregator_column_information = aggregator_statistics.dict()["column_information"]
 
     input_column_information = [
-        (x["title"], x["type"]) for x in input_column_information
+        DataframeColumn(**{"name": x["title"], "type": x["type"]}) for x in input_column_information
     ]
     aggregator_column_information = [
-        (x["title"], x["type"]) for x in aggregator_column_information
+        AggregatorColumn(**{"name": x["title"], "type": x["type"]}) for x in aggregator_column_information
     ]
 
     # find intersection
@@ -34,12 +34,20 @@ def compare_two_datasets(
         input_column_information, aggregator_column_information
     )
 
+    print("List intersection report dataframe columns : {}".format(list_intersection_report.dataframe_columns))
+    print("List intersection report aggregator columns : {}".format(list_intersection_report.aggregator_columns))
+
     # find difference (Dataframe - Aggregator)
-    value_differences_dataframe = list(
-        set(list_intersection_report.dataframe_columns).difference(
-            set(list_intersection_report.aggregator_columns)
-        )
-    )
+    value_differences_dataframe = []
+    for col in list_intersection_report.dataframe_columns:
+        count = 0
+        for col2 in list_intersection_report.aggregator_columns:
+            if not (col.name == col2.name and col.type == col2.type) and count == 0:
+                value_differences_dataframe.append(col)
+                count += 1
+
+    print("Value differences dataframe : {}".format(value_differences_dataframe))
+
     (
         list_intersection_report,
         value_differences_dataframe,
@@ -64,6 +72,11 @@ def compare_two_datasets(
         "matched_column_names": matched_column_names,
         "dataset_name": dataset_name,
     }
+
+    print("List intersection type differences : {}".format(list_intersection_report.type_differences))
+    print("dataframe value differences : {}".format(value_differences_dataframe))
+    print("aggregator value differences : {}".format(value_differences_aggregator))
+    print("matched column names : {}".format(matched_column_names))
 
     difference_report_requirements = DifferenceReportRequirements(
         **difference_report_requirements
@@ -149,8 +162,8 @@ def create_difference_report(
 
 
 def intersection_two_lists(
-    df_col_names: List[Tuple[str, str]],
-    aggregator_col_names: List[Tuple[str, str]],
+    df_col_names: List[DataframeColumn],
+    aggregator_col_names: List[AggregatorColumn],
 ):
     """
     Compares the column_names and types of the local dataset and the aggregated dataset and returns the intersection
@@ -166,20 +179,31 @@ def intersection_two_lists(
     intersection = []
     type_differences = []
 
-    for stats_keys in df_col_names:
-        for aggregator_keys in aggregator_col_names:
-            if stats_keys == aggregator_keys:
-                intersection.append(stats_keys)
+    for dataframe_column in df_col_names:
+        for aggregator_column in aggregator_col_names:
+            if dataframe_column.name == aggregator_column.name and dataframe_column.type == aggregator_column.type:
+                intersection.append(dataframe_column)
             elif (
-                stats_keys[0] == aggregator_keys[0]
-                and stats_keys[1] != aggregator_keys[1]
+                dataframe_column.name == aggregator_column.name
+                and dataframe_column.type != aggregator_column.type
             ):
-                if [stats_keys, aggregator_keys] not in type_differences:
-                    type_differences.append([stats_keys, aggregator_keys])
+                value_type_differences = VariableTypeDifference(**{
+                    "local_column_name": dataframe_column.name,
+                    "aggregator_column_name": aggregator_column.name,
+                    "local_column_type": dataframe_column.type,
+                    "aggregator_column_type": aggregator_column.type
+                })
+                if value_type_differences not in type_differences:
+                    type_differences.append(value_type_differences)
 
-    for tup in type_differences:
-        aggregator_col_names.remove(tup[1])
-        df_col_names.remove(tup[0])
+
+    for diff in type_differences:
+        for col in aggregator_col_names:
+            if diff.aggregator_column_name == col.name and diff.aggregator_column_type == col.type:
+                aggregator_col_names.remove(col)
+        for col in df_col_names:
+            if diff.local_column_name == col.name and diff.local_column_type == col.type:
+                df_col_names.remove(col)
 
     list_intersection_report = {
         "intersection": intersection,
@@ -195,7 +219,7 @@ def intersection_two_lists(
 
 def fuzzy_matching_prob(
     list_intersection_report: ListIntersectionReport,
-    difference_list: List[Tuple[str, str]],
+    difference_list: List[DataframeColumn],
     matching_probability_threshold: int,
 ):
     """
@@ -211,15 +235,24 @@ def fuzzy_matching_prob(
 
     matched_columns = []
 
-    for diff in difference_list:
-        for col_name in list_intersection_report.aggregator_columns:
-            ratio = fuzz.ratio(diff[0].lower(), col_name[0].lower())
-            if ratio > matching_probability_threshold:
-                matched_columns.append([col_name, diff, ratio])
-                difference_list = [i for i in difference_list if i != diff]
-                list_intersection_report.dataframe_columns = [
-                    (keys[0].replace(diff[0], col_name[0]), keys[1])
-                    for keys in list_intersection_report.dataframe_columns
-                ]
+    print("Difference list: {} ".format(difference_list))
+    print("Aggregator columns: {} ".format(list_intersection_report.aggregator_columns))
 
+    for diff in difference_list:
+        for col in list_intersection_report.aggregator_columns:
+            print("Diff: {} ".format(diff.name.lower()))
+            print("Col: {} ".format(col.name.lower()))
+            ratio = fuzz.ratio(diff.name.lower(), col.name.lower())
+            if ratio > matching_probability_threshold:
+                matched_columns.append(MatchedColumnNames(**{
+                                                          "local_column_name": diff.name,
+                                                          "aggregator_column_name": col.name,
+                                                          "matching_probability": ratio}))
+
+                difference_list = [i for i in difference_list if i.name != diff.name]
+
+                for c in range(len(list_intersection_report.dataframe_columns)):
+                    list_intersection_report.dataframe_columns[c].name = col.name
+
+    print("Matched columns: {} ".format(matched_columns))
     return list_intersection_report, difference_list, matched_columns

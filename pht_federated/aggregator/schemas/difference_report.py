@@ -58,20 +58,38 @@ class RowHarmonizationError(BaseModel):
 class RowHarmonizationResult(BaseModel):
     row_differences: Optional[List[RowHarmonizationError]]
 
+class VariableTypeDifference(BaseModel):
+    local_column_name: Optional[str]
+    aggregator_column_name: Optional[str]
+    local_column_type: Optional[str]
+    aggregator_column_type: Optional[str]
+
+class DataframeColumn(BaseModel):
+    name: Optional[str]
+    type: Optional[str]
+
+class AggregatorColumn(BaseModel):
+    name: Optional[str]
+    type: Optional[str]
 
 class ListIntersectionReport(BaseModel):
-    intersection: Optional[List[Tuple[str, str]]]
-    type_differences: Optional[List[List[Tuple[str, str]]]]
-    dataframe_columns: Optional[List[Tuple[str, str]]]
-    aggregator_columns: Optional[List[Tuple[str, str]]]
+    intersection: Optional[List[DataframeColumn]]
+    type_differences: Optional[List[VariableTypeDifference]]
+    dataframe_columns: Optional[List[DataframeColumn]]
+    aggregator_columns: Optional[List[AggregatorColumn]]
 
+class MatchedColumnNames(BaseModel):
+    local_column_name: Optional[str]
+    aggregator_column_name: Optional[str]
+    matching_probability: Optional[int]
 
 class DifferenceReportRequirements(BaseModel):
-    type_differences: Optional[List[List[Tuple[str, str]]]]
+    type_differences: Optional[List[VariableTypeDifference]]
     dataframe_value_difference: Optional[List[Tuple[str, str]]]
     aggregator_value_difference: Optional[List[Tuple[str, str]]]
     matched_column_names: Optional[List[List[Union[Tuple[str, str], int]]]]
     dataset_name: Optional[str]
+
 
 
 class TypeDifference(BaseModel):
