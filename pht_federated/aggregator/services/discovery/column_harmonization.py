@@ -38,15 +38,8 @@ def compare_two_datasets(
     print("List intersection report aggregator columns : {}".format(list_intersection_report.aggregator_columns))
 
     # find difference (Dataframe - Aggregator)
-    value_differences_dataframe = []
-    for col in list_intersection_report.dataframe_columns:
-        count = 0
-        for col2 in list_intersection_report.aggregator_columns:
-            if not (col.name == col2.name and col.type == col2.type) and count == 0:
-                value_differences_dataframe.append(col)
-                count += 1
+    value_differences_dataframe = find_differences(list_intersection_report.dataframe_columns, list_intersection_report.aggregator_columns)
 
-    print("Value differences dataframe : {}".format(value_differences_dataframe))
 
     (
         list_intersection_report,
@@ -59,11 +52,7 @@ def compare_two_datasets(
     )
 
     # find difference (Aggregator - Dataframe)
-    value_differences_aggregator = list(
-        set(list_intersection_report.aggregator_columns).difference(
-            set(list_intersection_report.dataframe_columns)
-        )
-    )
+    value_differences_aggregator = find_differences(list_intersection_report.aggregator_columns, list_intersection_report.dataframe_columns)
 
     difference_report_requirements = {
         "type_differences": list_intersection_report.type_differences,
@@ -235,13 +224,8 @@ def fuzzy_matching_prob(
 
     matched_columns = []
 
-    print("Difference list: {} ".format(difference_list))
-    print("Aggregator columns: {} ".format(list_intersection_report.aggregator_columns))
-
     for diff in difference_list:
         for col in list_intersection_report.aggregator_columns:
-            print("Diff: {} ".format(diff.name.lower()))
-            print("Col: {} ".format(col.name.lower()))
             ratio = fuzz.ratio(diff.name.lower(), col.name.lower())
             if ratio > matching_probability_threshold:
                 matched_columns.append(MatchedColumnNames(**{
@@ -250,9 +234,32 @@ def fuzzy_matching_prob(
                                                           "matching_probability": ratio}))
 
                 difference_list = [i for i in difference_list if i.name != diff.name]
-
                 for c in range(len(list_intersection_report.dataframe_columns)):
-                    list_intersection_report.dataframe_columns[c].name = col.name
+                    if list_intersection_report.dataframe_columns[c].name == diff.name:
+                        list_intersection_report.dataframe_columns[c].name = col.name
+                        break
 
-    print("Matched columns: {} ".format(matched_columns))
+
     return list_intersection_report, difference_list, matched_columns
+
+
+def find_differences(ListA: list, ListB: list):
+    """
+    Compares the column_names and types of the local dataset and the aggregated dataset and returns the differences
+    between both
+    :param ListA: Lists column_names & types of  dataset
+    :param ListB: Lists column_names & types of dataset
+    :return: difference_list -> Lists differences ListA - ListB
+    """
+
+    differences_list = []
+
+    for col in ListA:
+        match = False
+        for col2 in ListB:
+            if col.name == col2.name and col.type == col2.type:
+                match = True
+        if match == False:
+            differences_list.append(col)
+
+    return differences_list

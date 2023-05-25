@@ -85,9 +85,9 @@ class MatchedColumnNames(BaseModel):
 
 class DifferenceReportRequirements(BaseModel):
     type_differences: Optional[List[VariableTypeDifference]]
-    dataframe_value_difference: Optional[List[Tuple[str, str]]]
-    aggregator_value_difference: Optional[List[Tuple[str, str]]]
-    matched_column_names: Optional[List[List[Union[Tuple[str, str], int]]]]
+    dataframe_value_difference: Optional[List[DataframeColumn]]
+    aggregator_value_difference: Optional[List[AggregatorColumn]]
+    matched_column_names: Optional[List[MatchedColumnNames]]
     dataset_name: Optional[str]
 
 
