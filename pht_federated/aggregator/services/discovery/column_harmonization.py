@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 from thefuzz import fuzz
 
@@ -23,10 +23,12 @@ def compare_two_datasets(
     aggregator_column_information = aggregator_statistics.dict()["column_information"]
 
     input_column_information = [
-        DataframeColumn(**{"name": x["title"], "type": x["type"]}) for x in input_column_information
+        DataframeColumn(**{"name": x["title"], "type": x["type"]})
+        for x in input_column_information
     ]
     aggregator_column_information = [
-        AggregatorColumn(**{"name": x["title"], "type": x["type"]}) for x in aggregator_column_information
+        AggregatorColumn(**{"name": x["title"], "type": x["type"]})
+        for x in aggregator_column_information
     ]
 
     # find intersection
@@ -34,12 +36,11 @@ def compare_two_datasets(
         input_column_information, aggregator_column_information
     )
 
-    print("List intersection report dataframe columns : {}".format(list_intersection_report.dataframe_columns))
-    print("List intersection report aggregator columns : {}".format(list_intersection_report.aggregator_columns))
-
     # find difference (Dataframe - Aggregator)
-    value_differences_dataframe = find_differences(list_intersection_report.dataframe_columns, list_intersection_report.aggregator_columns)
-
+    value_differences_dataframe = find_differences(
+        list_intersection_report.dataframe_columns,
+        list_intersection_report.aggregator_columns,
+    )
 
     (
         list_intersection_report,
@@ -52,7 +53,10 @@ def compare_two_datasets(
     )
 
     # find difference (Aggregator - Dataframe)
-    value_differences_aggregator = find_differences(list_intersection_report.aggregator_columns, list_intersection_report.dataframe_columns)
+    value_differences_aggregator = find_differences(
+        list_intersection_report.aggregator_columns,
+        list_intersection_report.dataframe_columns,
+    )
 
     difference_report_requirements = {
         "type_differences": list_intersection_report.type_differences,
@@ -61,11 +65,6 @@ def compare_two_datasets(
         "matched_column_names": matched_column_names,
         "dataset_name": dataset_name,
     }
-
-    print("List intersection type differences : {}".format(list_intersection_report.type_differences))
-    print("dataframe value differences : {}".format(value_differences_dataframe))
-    print("aggregator value differences : {}".format(value_differences_aggregator))
-    print("matched column names : {}".format(matched_column_names))
 
     difference_report_requirements = DifferenceReportRequirements(
         **difference_report_requirements
@@ -100,10 +99,10 @@ def create_difference_report(
     for diff in difference_report_requirements.type_differences:
         case = {
             "error_type": "type",  # missing, type, semantic, extra
-            "column_name": diff[0][0],
-            "dataframe_type": diff[0][1],
-            "aggregator_type": diff[1][1],
-            "hint": f'Change type of column "{diff[0][0]}" to "{diff[1][1]}"',
+            "column_name": diff.local_column_name,
+            "dataframe_type": diff.local_column_type,
+            "aggregator_type": diff.aggregator_column_type,
+            "hint": f'Change type of column "{diff.local_column_name}" to "{diff.aggregator_column_type}"',
         }
         difference_report["errors"].append(case)
 
@@ -111,9 +110,9 @@ def create_difference_report(
     for diff in difference_report_requirements.dataframe_value_difference:
         case = {
             "error_type": "added",  # missing, type, semantic, extra
-            "column_name": diff[1],
-            "dataframe_type": diff[0],
-            "hint": f'Column name "{diff[1]}" only exists in local dataset',
+            "column_name": diff.name,
+            "dataframe_type": diff.type,
+            "hint": f'Column name "{diff.name}" only exists in local dataset',
         }
         difference_report["errors"].append(case)
 
@@ -121,9 +120,9 @@ def create_difference_report(
     for diff in difference_report_requirements.aggregator_value_difference:
         case = {
             "error_type": "missing",  # missing, type, semantic, extra
-            "column_name": diff[0],
-            "aggregator_type": diff[1],
-            "hint": f'Column name "{diff[0]}" only exists in aggregator dataset',
+            "column_name": diff.name,
+            "aggregator_type": diff.type,
+            "hint": f'Column name "{diff.name}" only exists in aggregator dataset',
         }
         difference_report["errors"].append(case)
 
@@ -131,12 +130,12 @@ def create_difference_report(
     for diff in difference_report_requirements.matched_column_names:
         case = {
             "error_type": "added_name",  # missing, type, semantic, extra
-            "column_name": diff[1][0],
-            "dataframe_name": diff[1][0],
-            "aggregator_name": diff[0][0],
-            "aggregator_type": diff[1][1],
-            "hint": f'Column name "{diff[1][0]}" only exists in local dataset.'
-            f' Did you mean column name: "{diff[0][0]}"',
+            "column_name": diff.local_column_name,
+            "dataframe_name": diff.local_column_name,
+            "aggregator_name": diff.aggregator_column_name,
+            "aggregator_type": diff.aggregator_column_type,
+            "hint": f'Column name "{diff.local_column_name}" only exists in local dataset.'
+            f' Did you mean column name: "{diff.aggregator_column_name}"',
         }
         difference_report["errors"].append(case)
 
@@ -170,28 +169,38 @@ def intersection_two_lists(
 
     for dataframe_column in df_col_names:
         for aggregator_column in aggregator_col_names:
-            if dataframe_column.name == aggregator_column.name and dataframe_column.type == aggregator_column.type:
+            if (
+                dataframe_column.name == aggregator_column.name
+                and dataframe_column.type == aggregator_column.type
+            ):
                 intersection.append(dataframe_column)
             elif (
                 dataframe_column.name == aggregator_column.name
                 and dataframe_column.type != aggregator_column.type
             ):
-                value_type_differences = VariableTypeDifference(**{
-                    "local_column_name": dataframe_column.name,
-                    "aggregator_column_name": aggregator_column.name,
-                    "local_column_type": dataframe_column.type,
-                    "aggregator_column_type": aggregator_column.type
-                })
+                value_type_differences = VariableTypeDifference(
+                    **{
+                        "local_column_name": dataframe_column.name,
+                        "aggregator_column_name": aggregator_column.name,
+                        "local_column_type": dataframe_column.type,
+                        "aggregator_column_type": aggregator_column.type,
+                    }
+                )
                 if value_type_differences not in type_differences:
                     type_differences.append(value_type_differences)
 
-
     for diff in type_differences:
         for col in aggregator_col_names:
-            if diff.aggregator_column_name == col.name and diff.aggregator_column_type == col.type:
+            if (
+                diff.aggregator_column_name == col.name
+                and diff.aggregator_column_type == col.type
+            ):
                 aggregator_col_names.remove(col)
         for col in df_col_names:
-            if diff.local_column_name == col.name and diff.local_column_type == col.type:
+            if (
+                diff.local_column_name == col.name
+                and diff.local_column_type == col.type
+            ):
                 df_col_names.remove(col)
 
     list_intersection_report = {
@@ -228,17 +237,22 @@ def fuzzy_matching_prob(
         for col in list_intersection_report.aggregator_columns:
             ratio = fuzz.ratio(diff.name.lower(), col.name.lower())
             if ratio > matching_probability_threshold:
-                matched_columns.append(MatchedColumnNames(**{
-                                                          "local_column_name": diff.name,
-                                                          "aggregator_column_name": col.name,
-                                                          "matching_probability": ratio}))
+                matched_columns.append(
+                    MatchedColumnNames(
+                        **{
+                            "local_column_name": diff.name,
+                            "aggregator_column_name": col.name,
+                            "aggregator_column_type": col.type,
+                            "matching_probability": ratio,
+                        }
+                    )
+                )
 
                 difference_list = [i for i in difference_list if i.name != diff.name]
                 for c in range(len(list_intersection_report.dataframe_columns)):
                     if list_intersection_report.dataframe_columns[c].name == diff.name:
                         list_intersection_report.dataframe_columns[c].name = col.name
                         break
-
 
     return list_intersection_report, difference_list, matched_columns
 
@@ -259,7 +273,7 @@ def find_differences(ListA: list, ListB: list):
         for col2 in ListB:
             if col.name == col2.name and col.type == col2.type:
                 match = True
-        if match == False:
+        if match is False:
             differences_list.append(col)
 
     return differences_list

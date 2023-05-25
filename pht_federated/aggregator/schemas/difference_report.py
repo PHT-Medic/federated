@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Tuple, Union
+from typing import List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -58,19 +58,23 @@ class RowHarmonizationError(BaseModel):
 class RowHarmonizationResult(BaseModel):
     row_differences: Optional[List[RowHarmonizationError]]
 
+
 class VariableTypeDifference(BaseModel):
     local_column_name: Optional[str]
     aggregator_column_name: Optional[str]
     local_column_type: Optional[str]
     aggregator_column_type: Optional[str]
 
+
 class DataframeColumn(BaseModel):
     name: Optional[str]
     type: Optional[str]
 
+
 class AggregatorColumn(BaseModel):
     name: Optional[str]
     type: Optional[str]
+
 
 class ListIntersectionReport(BaseModel):
     intersection: Optional[List[DataframeColumn]]
@@ -78,10 +82,13 @@ class ListIntersectionReport(BaseModel):
     dataframe_columns: Optional[List[DataframeColumn]]
     aggregator_columns: Optional[List[AggregatorColumn]]
 
+
 class MatchedColumnNames(BaseModel):
     local_column_name: Optional[str]
     aggregator_column_name: Optional[str]
+    aggregator_column_type: Optional[str]
     matching_probability: Optional[int]
+
 
 class DifferenceReportRequirements(BaseModel):
     type_differences: Optional[List[VariableTypeDifference]]
@@ -89,7 +96,6 @@ class DifferenceReportRequirements(BaseModel):
     aggregator_value_difference: Optional[List[AggregatorColumn]]
     matched_column_names: Optional[List[MatchedColumnNames]]
     dataset_name: Optional[str]
-
 
 
 class TypeDifference(BaseModel):
