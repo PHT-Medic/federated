@@ -30,7 +30,6 @@ def adjust_name_differences(
 
     name_diffs = [re.findall('"([^"]*)"', errors) for errors in name_errors]
     name_diffs = [error for error in name_diffs if len(error) > 1]
-    print("Name diffs : {}".format(name_diffs))
 
     for column in local_dataset_stat["column_information"]:
         for diff in name_diffs:
@@ -169,7 +168,7 @@ def create_error_report(
     for col_error in col_errors_list.column_differences:
         case = {
             "column_name": col_error.local_column_name,
-            "error_type": "column_name",
+            "error_type": "column_name_error",
             "suggested_name": col_error.aggregator_column_name,
             "hint": f'Change name of column: "{col_error.local_column_name}" to "{col_error.aggregator_column_name}"',
         }
@@ -179,7 +178,7 @@ def create_error_report(
     for row_error in row_errors_list.row_differences:
         case = {
             "column_name": row_error.column_name,
-            "error_type": "type",  # missing, type, semantic, extra
+            "error_type": "row_type_error",  # missing, type, semantic, extra
             "suggested_type": row_error.aggregator_column_type,
             "index": row_error.index,
             "value": row_error.value,

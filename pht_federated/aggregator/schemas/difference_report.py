@@ -5,7 +5,7 @@ from typing_extensions import Annotated
 
 
 class RowError(BaseModel):
-    error_type: Literal["type"]
+    error_type: Literal["row_type_error"]
     column_name: Optional[str]
     suggested_type: Optional[str]
     index: Optional[int]
@@ -14,7 +14,7 @@ class RowError(BaseModel):
 
 
 class ColumnError(BaseModel):
-    error_type: Literal["column_name"]
+    error_type: Literal["column_name_error"]
     column_name: Optional[str]
     suggested_name: Optional[str]
     hint: Optional[str]
