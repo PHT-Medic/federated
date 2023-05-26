@@ -118,7 +118,7 @@ def adjust_differences(
 
     error_report = create_error_report(row_errors_list, col_error_list, "test_dataset")
 
-    print("Error Report : {}".format(error_report))
+    return error_report
 
 
 def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: str):
@@ -396,7 +396,6 @@ def create_error_report(
 
         difference_report["errors"].append(RowError(**case))
 
-    print("Difference Report : {}".format(difference_report))
     difference_report = DifferenceReport(**difference_report)
 
     return difference_report

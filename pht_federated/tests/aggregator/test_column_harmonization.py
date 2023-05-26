@@ -9,7 +9,8 @@ from pht_federated.aggregator.services.discovery.adjust_tabular_dataset import *
 from pht_federated.aggregator.services.discovery.column_harmonization import *
 
 
-def get_example_objects():
+def test_difference_report():
+
     data_path = "data/train_data_titanic.csv"
     df = pd.read_csv(data_path)
     df_split = np.array_split(df, 4)
@@ -140,36 +141,19 @@ def get_example_objects():
     dataset_statistics_local2 = DatasetStatistics(**local_statistics2)
     dataset_statistics_aggregated2 = DatasetStatistics(**aggregated_statistics2)
 
-    return (
-        dataset_statistics_local,
-        dataset_statistics_aggregated,
-        dataset_statistics_local2,
-        dataset_statistics_aggregated2,
-        df,
-    )
-
-
-def test_difference_report():
-    (
-        dataset_local,
-        dataset_aggregated,
-        dataset_local2,
-        dataset_aggregated2,
-        dataframe,
-    ) = get_example_objects()
+    dataset_local = dataset_statistics_local
+    dataset_aggregated = dataset_statistics_aggregated
+    dataset_local2 = dataset_statistics_local2
+    dataset_aggregated2 = dataset_statistics_aggregated2
+    dataframe = df
 
     difference_report = compare_two_datasets(dataset_local, dataset_aggregated, "test")
     difference_report2 = compare_two_datasets(
         dataset_local2, dataset_aggregated2, "test2"
     )
 
-    print("Difference report : {}".format(difference_report))
-
     assert difference_report.status == "failed"
     assert difference_report2.status == "passed"
-
-    # [column.column_name for column in difference_report.errors]
-    # assert errors == ["race", "Cancer_Images", "gender", "MRI_images", "FSMIs"]
 
     # Add new column to dataframe for testing -> suggested type: categorical
     race_col_entries = ["human" for x in range(891)]
@@ -219,4 +203,23 @@ def test_difference_report():
 
     # adjusted_dataset_names = adjust_name_differences(dataset_local, difference_report)
 
-    adjust_differences(dataframe, dataset_local, difference_report)
+    error_report = adjust_differences(dataframe, dataset_local, difference_report)
+    print("Error report: {}".format(error_report))
+
+    assert error_report.errors[0].column_name == unstructured_col3["title"]
+    assert error_report.errors[0].suggested_name == unstructured_col4["title"]
+
+    assert error_report.errors[1].column_name == unstructured_col["title"]
+    assert error_report.errors[1].suggested_name == unstructured_col2["title"]
+
+    assert error_report.errors[2].column_name == equal_col["title"]
+    assert error_report.errors[2].suggested_type == categorical_col["type"]
+    assert error_report.errors[2].index == 889
+    assert error_report.errors[2].value == str(race_col_entries[889])
+
+    assert error_report.errors[4].error_type == "row_type_error"
+    assert error_report.errors[4].suggested_type == numerical_col2["type"]
+    assert error_report.errors[4].index == 560
+    assert error_report.errors[4].value == str(percentage_col_entries[560])
+
+
