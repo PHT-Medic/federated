@@ -40,9 +40,9 @@ class DifferenceReport(BaseModel):
         return [error for error in self.errors if error.error_type == "row_type_error"]
 
     def column_error(self) -> List[ColumnError]:
-        return [error for error in self.errors if error.error_type == "column_name_error"]
-
-
+        return [
+            error for error in self.errors if error.error_type == "column_name_error"
+        ]
 
 
 class ColumnHarmonizationError(BaseModel):
@@ -156,22 +156,14 @@ class DifferenceReportBackend(BaseModel):
     ]
 
     def name_errors(self) -> List[ColumnNameDifference]:
-        return [
-            error
-            for error in self.errors
-            if error.error_type == "added_name"
-        ]
+        return [error for error in self.errors if error.error_type == "added_name"]
 
     def type_errors(self) -> List[TypeDifference]:
-        return [
-            error
-            for error in self.errors
-            if error.error_type == "type"
-        ]
+        return [error for error in self.errors if error.error_type == "type"]
 
-    def value_errors(self) -> List[Union[DataframeValueDifference, AggregatorValueDifference]]:
+    def value_errors(
+        self,
+    ) -> List[Union[DataframeValueDifference, AggregatorValueDifference]]:
         return [
-            error
-            for error in self.errors
-            if error.error_type in ["added", "missing"]
+            error for error in self.errors if error.error_type in ["added", "missing"]
         ]

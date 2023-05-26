@@ -60,7 +60,9 @@ def list_to_object(
     return dataset_statistics_object
 
 
-def process_column(column_information: List[dict], object_list_int: List[int]) -> List[int]:
+def process_column(
+    column_information: List[dict], object_list_int: List[int]
+) -> List[int]:
     """
     Transforms a DatasetStatistics object to python list of integers that contain all numerical values of the object
     :param column_information: list of column information
@@ -83,7 +85,9 @@ def process_column(column_information: List[dict], object_list_int: List[int]) -
     return object_list_int
 
 
-def retrieve_column(column_information: List[dict], dataset_statistics_list: List[int]) -> List[dict]:
+def retrieve_column(
+    column_information: List[dict], dataset_statistics_list: List[int]
+) -> List[dict]:
     """
     Transforms a list of integers that contain all masked numerical values back to a DatasetStatistics object
     :param column_information: list of column information
@@ -165,7 +169,9 @@ def retrieve_numeric_column(
     return column, dataset_statistics_list
 
 
-def retrieve_unique_column(column: dict, dataset_statistics_list: List[int]) -> [dict, list]:
+def retrieve_unique_column(
+    column: dict, dataset_statistics_list: List[int]
+) -> [dict, list]:
     """
     Transforms a list of integers that contains respective values back to the unqiue column
     of a DatasetStatistics object
@@ -180,7 +186,9 @@ def retrieve_unique_column(column: dict, dataset_statistics_list: List[int]) -> 
     return column, dataset_statistics_list
 
 
-def retrieve_equal_column(column: dict, dataset_statistics_list: List[int]) -> [dict, list]:
+def retrieve_equal_column(
+    column: dict, dataset_statistics_list: List[int]
+) -> [dict, list]:
     """
     Transforms a list of integers that contains respective values back to the equal column
     of a DatasetStatistics object

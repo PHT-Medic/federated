@@ -131,7 +131,6 @@ def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: 
     :return: List[Tuple[error_index, error_value, column_name , column_type]]
     """
 
-
     if column_type == "categorical":
         row_errors = find_categorical_mismatch(local_dataset, column_name, column_type)
     if column_type == "numeric":
@@ -147,7 +146,8 @@ def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: 
 
 
 def find_categorical_mismatch(
-    local_dataset: pd.DataFrame, column_name: str, column_type: str):
+    local_dataset: pd.DataFrame, column_name: str, column_type: str
+):
     """
     Searches for a column in the local dataset that is supposed to be categorical but contains entries that are not
     :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
@@ -193,7 +193,6 @@ def find_numerical_mismatch(
             error_index = local_dataset.index[
                 local_dataset[column_name] == entry
             ].tolist()
-
 
             error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
             error_dict = {
