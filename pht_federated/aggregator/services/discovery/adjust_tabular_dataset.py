@@ -98,7 +98,7 @@ def adjust_differences(
                 "aggregator_column_name": error[1],
             }
             col_error_list.append(ColumnHarmonizationError(**case))
-
+    print("Difference report errors : {}".format(difference_report.errors))
     type_errors = [
         column.hint
         for column in difference_report.errors
@@ -107,11 +107,13 @@ def adjust_differences(
     type_diffs = [re.findall('"([^"]*)"', errors) for errors in type_errors]
 
     row_errors_list = []
+    index_list = []
 
+    print("Type Differences: {}".format(type_diffs))
     for differences in type_diffs:
-        row_errors_list.append(
-            find_row_errors(local_dataset, differences[0], differences[1])
-        )
+        row_error, error_index = find_row_errors(local_dataset, differences[0], differences[1], index_list)
+        row_errors_list.append(row_error)
+        index_list.append(error_index)
 
     row_errors_list = RowHarmonizationResult(**{"row_differences": row_errors_list})
     col_error_list = ColumnHarmonizationResult(**{"column_differences": col_error_list})
@@ -121,28 +123,217 @@ def adjust_differences(
     print("Error Report : {}".format(error_report))
 
 
-def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: str):
+def find_row_errors(local_dataset: pd.DataFrame, column_name: str, column_type: str, index_list: List[int]):
     """
     Checks the column of the local_dataset where the error was found and searches for specific entries that
     violate the desired/likely column type
     :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
     :param column_name: Name of the column where the type error occured
     :param column_type: Suggested correct column type
+    :param index_list: List of indices that were already checked for errors
     :return: List[Tuple[error_index, error_value, column_name , column_type]]
     """
 
-    if column_type == "categorical":
-        row_error = find_categorical_mismatch(local_dataset, column_name, column_type)
-    if column_type == "numeric":
-        row_error = find_numerical_mismatch(local_dataset, column_name, column_type)
-    if column_type == "equal":
-        row_error = find_equal_mismatch(local_dataset, column_name, column_type)
-    if column_type == "unique":
-        row_error = find_unique_mismatch(local_dataset, column_name, column_type)
-    if column_type == "unstructured":
-        row_error = find_unstructured_mismatch(local_dataset, column_name, column_type)
 
-    return row_error
+    if column_type == "categorical":
+        row_error, index = find_categorical_mismatch(local_dataset, column_name, column_type, index_list)
+    if column_type == "numeric":
+        row_error, index = find_numerical_mismatch(local_dataset, column_name, column_type, index_list)
+    if column_type == "equal":
+        row_error, index = find_equal_mismatch(local_dataset, column_name, column_type, index_list)
+    if column_type == "unique":
+        row_error, index = find_unique_mismatch(local_dataset, column_name, column_type, index_list)
+    if column_type == "unstructured":
+        row_error, index = find_unstructured_mismatch(local_dataset, column_name, column_type, index_list)
+
+    return row_error, index
+
+
+def find_categorical_mismatch(
+    local_dataset: pd.DataFrame, column_name: str, column_type: str, index_list: List[int]):
+    """
+    Searches for a column in the local dataset that is supposed to be categorical but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :param index_list: List of indices that were already checked for errors
+    :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
+    """
+
+    for entry in local_dataset[column_name]:
+        if not isinstance(entry, str | bool):
+            error_index = local_dataset.index[
+                local_dataset[column_name] == entry
+            ].tolist()
+
+            print("Error Index : {}".format(error_index))
+            print("Index List : {}".format(index_list))
+            print("Error Index[0] : {}".format(error_index[0]))
+
+
+            if error_index[0] not in index_list:
+
+                error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
+                error_dict = {
+                    "index": error_index[0],
+                    "value": error_value[0],
+                    "column_name": column_name,
+                    "aggregator_column_type": column_type,
+                }
+
+    return RowHarmonizationError(**error_dict), error_index[0]
+
+
+def find_numerical_mismatch(
+    local_dataset: pd.DataFrame, column_name: str, column_type: str, index_list: List[int]
+):
+    """
+    Searches for a column in the local dataset that is supposed to be numerical but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :param index_list: List of indices that were already checked for errors
+    :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
+    """
+
+    for entry in local_dataset[column_name]:
+        if not isinstance(entry, int | float | np.int64 | np.float64):
+            error_index = local_dataset.index[
+                local_dataset[column_name] == entry
+            ].tolist()
+
+            if error_index[0] not in index_list:
+                error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
+                error_dict = {
+                    "index": error_index[0],
+                    "value": error_value[0],
+                    "column_name": column_name,
+                    "aggregator_column_type": column_type,
+                }
+
+    return RowHarmonizationError(**error_dict), error_index[0]
+
+
+def find_equal_mismatch(
+    local_dataset: pd.DataFrame, column_name: str, column_type: str, index_list: List[int]
+):
+    """
+    Searches for a column in the local dataset that is supposed to be equal value but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :param index_list: List of indices that were already checked for errors
+    :return error_list: List of dicts that contain the index and value of the error, the column name, suggested type and
+                        most common element in the respective column
+    """
+
+    if not (local_dataset[column_name] == local_dataset[column_name][0]).all():
+        unequal_indices = check_same_value(local_dataset[column_name].tolist())
+
+        for index in unequal_indices:
+            error_value = local_dataset[column_name].loc[[index]].to_list()
+            most_frequent_element = max(
+                set(local_dataset[column_name].tolist()),
+                key=local_dataset[column_name].tolist().count,
+            )
+            if index not in index_list:
+                error_dict = {
+                    "index": index,
+                    "value": error_value[0],
+                    "column_name": column_name,
+                    "aggregator_column_type": column_type,
+                    "most_frequent_element": most_frequent_element,
+                }
+
+    return RowHarmonizationError(**error_dict), index
+
+
+def find_unique_mismatch(
+    local_dataset: pd.DataFrame, column_name: str, column_type: str, index_list: List[int]
+):
+    """
+    Searches for a column in the local dataset that is supposed to be unique value but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :param index_list: List of indices that were already checked for errors
+    :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
+    """
+
+    if len(local_dataset[column_name].tolist()) > len(
+        set(local_dataset[column_name].tolist())
+    ):
+        dupes = [
+            item
+            for item, count in collections.Counter(
+                local_dataset[column_name].tolist()
+            ).items()
+            if count > 1
+        ]
+        for val in dupes:
+            error_index = local_dataset.index[
+                local_dataset[column_name] == val
+            ].tolist()
+            error_index = [x for x in error_index if x != val]
+            if error_index[0] not in index_list:
+                error_dict = {
+                    "index": error_index[0],
+                    "value": val,
+                    "column_name": column_name,
+                    "aggregator_column_type": column_type,
+                }
+
+    return RowHarmonizationError(**error_dict), error_index[0]
+
+
+def find_unstructured_mismatch(
+    local_dataset: pd.DataFrame, column_name: str, column_type: str, index_list: List[int]
+):
+    """
+    Searches for a column in the local dataset that is supposed to be unstructured data but contains entries that are not
+    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
+    :param column_name: Name of the column where the type error occured
+    :param index_list: List of indices that were already checked for errors
+    :return error_list: List of dicts that contain the index and value of the error, the column name, suggested type and
+                        most common type in the respective column
+    """
+
+    for entry in local_dataset[column_name]:
+        if not type(entry) == bytes:
+            type(
+                max(
+                    set(local_dataset[column_name].tolist()),
+                    key=local_dataset[column_name].tolist().count,
+                )
+            )
+            error_index = local_dataset.index[
+                local_dataset[column_name] == entry
+            ].tolist()
+            if error_index[0] not in index_list:
+                error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
+                error_dict = {
+                    "index": error_index[0],
+                    "value": error_value[0],
+                    "column_name": column_name,
+                    "aggregator_column_type": column_type,
+                    # "most_frequent_type": most_frequent_type
+                    # TODO: Add most frequent type to error dict
+                }
+
+    return RowHarmonizationError(**error_dict), error_index[0]
+
+
+def check_same_value(lst):
+    """
+    Checks if all elements in a list are the same
+     :param lst: List of values
+    """
+    unequal_value = next((x for x in lst if x != lst[0]), None)
+    if unequal_value is None:
+        try:
+            unequal_value = next((x for x in lst if x != lst[1]), None)
+        except:
+            unequal_indices = []
+    if unequal_value is not None:
+        unequal_indices = [i for i in range(len(lst)) if lst[i] != lst[0]]
+
+    return unequal_indices
 
 
 def create_error_report(
@@ -209,173 +400,3 @@ def create_error_report(
     difference_report = DifferenceReport(**difference_report)
 
     return difference_report
-
-
-def find_categorical_mismatch(
-    local_dataset: pd.DataFrame, column_name: str, column_type: str
-):
-    """
-    Searches for a column in the local dataset that is supposed to be categorical but contains entries that are not
-    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
-    :param column_name: Name of the column where the type error occured
-    :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
-    """
-
-    for entry in local_dataset[column_name]:
-        if not isinstance(entry, str | bool):
-            error_index = local_dataset.index[
-                local_dataset[column_name] == entry
-            ].tolist()
-            error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
-            error_dict = {
-                "index": error_index[0],
-                "value": error_value[0],
-                "column_name": column_name,
-                "aggregator_column_type": column_type,
-            }
-
-    return RowHarmonizationError(**error_dict)
-
-
-def find_numerical_mismatch(
-    local_dataset: pd.DataFrame, column_name: str, column_type: str
-):
-    """
-    Searches for a column in the local dataset that is supposed to be numerical but contains entries that are not
-    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
-    :param column_name: Name of the column where the type error occured
-    :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
-    """
-
-    for entry in local_dataset[column_name]:
-        if not isinstance(entry, int | float | np.int64 | np.float64):
-            error_index = local_dataset.index[
-                local_dataset[column_name] == entry
-            ].tolist()
-            error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
-            error_dict = {
-                "index": error_index[0],
-                "value": error_value[0],
-                "column_name": column_name,
-                "aggregator_column_type": column_type,
-            }
-
-    return RowHarmonizationError(**error_dict)
-
-
-def find_equal_mismatch(
-    local_dataset: pd.DataFrame, column_name: str, column_type: str
-):
-    """
-    Searches for a column in the local dataset that is supposed to be equal value but contains entries that are not
-    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
-    :param column_name: Name of the column where the type error occured
-    :return error_list: List of dicts that contain the index and value of the error, the column name, suggested type and
-                        most common element in the respective column
-    """
-
-    if not (local_dataset[column_name] == local_dataset[column_name][0]).all():
-        unequal_indices = check_same_value(local_dataset[column_name].tolist())
-
-        for index in unequal_indices:
-            error_value = local_dataset[column_name].loc[[index]].to_list()
-            most_frequent_element = max(
-                set(local_dataset[column_name].tolist()),
-                key=local_dataset[column_name].tolist().count,
-            )
-            error_dict = {
-                "index": index,
-                "value": error_value[0],
-                "column_name": column_name,
-                "aggregator_column_type": column_type,
-                "most_frequent_element": most_frequent_element,
-            }
-
-    return RowHarmonizationError(**error_dict)
-
-
-def find_unique_mismatch(
-    local_dataset: pd.DataFrame, column_name: str, column_type: str
-):
-    """
-    Searches for a column in the local dataset that is supposed to be unique value but contains entries that are not
-    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
-    :param column_name: Name of the column where the type error occured
-    :return error_list: List of dicts that contain the index and value of the error, the column name and suggested type
-    """
-
-    if len(local_dataset[column_name].tolist()) > len(
-        set(local_dataset[column_name].tolist())
-    ):
-        dupes = [
-            item
-            for item, count in collections.Counter(
-                local_dataset[column_name].tolist()
-            ).items()
-            if count > 1
-        ]
-        for val in dupes:
-            error_index = local_dataset.index[
-                local_dataset[column_name] == val
-            ].tolist()
-            error_index = [x for x in error_index if x != val]
-            error_dict = {
-                "index": error_index[0],
-                "value": val,
-                "column_name": column_name,
-                "aggregator_column_type": column_type,
-            }
-
-    return RowHarmonizationError(**error_dict)
-
-
-def find_unstructured_mismatch(
-    local_dataset: pd.DataFrame, column_name: str, column_type: str
-):
-    """
-    Searches for a column in the local dataset that is supposed to be unstructured data but contains entries that are not
-    :param local_dataset: Local dataset of the user that starts a proposal request over multiple stations
-    :param column_name: Name of the column where the type error occured
-    :return error_list: List of dicts that contain the index and value of the error, the column name, suggested type and
-                        most common type in the respective column
-    """
-
-    for entry in local_dataset[column_name]:
-        if not type(entry) == bytes:
-            type(
-                max(
-                    set(local_dataset[column_name].tolist()),
-                    key=local_dataset[column_name].tolist().count,
-                )
-            )
-            error_index = local_dataset.index[
-                local_dataset[column_name] == entry
-            ].tolist()
-            error_value = local_dataset[column_name].loc[[error_index[0]]].to_list()
-            error_dict = {
-                "index": error_index[0],
-                "value": error_value[0],
-                "column_name": column_name,
-                "aggregator_column_type": column_type,
-                # "most_frequent_type": most_frequent_type
-                # TODO: Add most frequent type to error dict
-            }
-
-    return RowHarmonizationError(**error_dict)
-
-
-def check_same_value(lst):
-    """
-    Checks if all elements in a list are the same
-     :param lst: List of values
-    """
-    unequal_value = next((x for x in lst if x != lst[0]), None)
-    if unequal_value is None:
-        try:
-            unequal_value = next((x for x in lst if x != lst[1]), None)
-        except:
-            unequal_indices = []
-    if unequal_value is not None:
-        unequal_indices = [i for i in range(len(lst)) if lst[i] != lst[0]]
-
-    return unequal_indices

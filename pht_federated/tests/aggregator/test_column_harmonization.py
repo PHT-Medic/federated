@@ -163,6 +163,8 @@ def test_difference_report():
         dataset_local2, dataset_aggregated2, "test2"
     )
 
+    print("Difference report : {}".format(difference_report))
+
     assert difference_report.status == "failed"
     assert difference_report2.status == "passed"
 
