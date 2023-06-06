@@ -204,7 +204,6 @@ def test_difference_report():
     # adjusted_dataset_names = adjust_name_differences(dataset_local, difference_report)
 
     error_report = adjust_differences(dataframe, dataset_local, difference_report)
-    print("Error report: {}".format(error_report))
 
     assert error_report.errors[0].column_name == unstructured_col3["title"]
     assert error_report.errors[0].suggested_name == unstructured_col4["title"]

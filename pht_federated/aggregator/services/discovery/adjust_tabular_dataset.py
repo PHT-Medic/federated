@@ -312,7 +312,6 @@ def find_unstructured_mismatch(
                 "column_name": column_name,
                 "aggregator_column_type": column_type,
                 # "most_frequent_type": most_frequent_type
-                # TODO: Add most frequent type to error dict
             }
             row_errors.append(RowHarmonizationError(**error_dict))
 
