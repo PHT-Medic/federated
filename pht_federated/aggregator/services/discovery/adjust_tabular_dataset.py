@@ -158,7 +158,7 @@ def find_categorical_mismatch(
     row_errors = []
 
     for entry in local_dataset[column_name]:
-        if not isinstance(entry, str | bool):
+        if not isinstance(entry, str or bool):
             error_index = local_dataset.index[
                 local_dataset[column_name] == entry
             ].tolist()
@@ -189,7 +189,7 @@ def find_numerical_mismatch(
     row_errors = []
 
     for entry in local_dataset[column_name]:
-        if not isinstance(entry, int | float | np.int64 | np.float64):
+        if not isinstance(entry, int or float or np.int64 or np.float64):
             error_index = local_dataset.index[
                 local_dataset[column_name] == entry
             ].tolist()

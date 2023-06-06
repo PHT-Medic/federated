@@ -80,11 +80,7 @@ def create_difference_report(
 ) -> DifferenceReportBackend:
     """
     Transforms multiple types of mismatch errors between datasets into a summarized difference report
-    :param type_differences: Lists differences in type
-    :param value_differences_dataframe: Lists differences (Dataframe - Aggregator)
-    :param value_differences_aggregator: Lists differences (Aggregator - Dataframe)
-    :param name_differences: Lists differences in name only
-    :param dataset_name: String that defines the name of local dataset
+    :param difference_report_requirements: Requirements for the difference report
     :return: Dictionary which lists the differences between the two datasets
     """
 
